@@ -35,6 +35,7 @@ const birthDateInput = document.getElementById("birth-date");
 const planList = document.getElementById("plan-list");
 const addPlanButton = document.getElementById("add-plan-button");
 const assetForecast = document.getElementById("asset-forecast");
+const assetWithdrawForecast = document.getElementById("asset-withdraw-forecast");
 const recurringForm = document.getElementById("recurring-form");
 const recurringCategoryInput = document.getElementById("recurring-category");
 const recurringAmountInput = document.getElementById("recurring-amount");
@@ -84,6 +85,7 @@ const navToast = document.getElementById("nav-toast");
 const accordionSections = Array.from(document.querySelectorAll("[data-accordion-section]"));
 const dashboardSection = document.getElementById("section-home");
 const assetsSection = document.getElementById("section-assets");
+const assetMainTabs = Array.from(document.querySelectorAll("[data-asset-main-tab]"));
 const cashflowSettingsForm = document.getElementById("cashflow-settings-form");
 const cashflowSalaryGrowthRateBefore60Input = document.getElementById("cashflow-salary-growth-rate-before-60");
 const cashflowSalaryCorrectionRateAt60Input = document.getElementById("cashflow-salary-correction-rate-at-60");
@@ -107,6 +109,7 @@ let sharedYearMonthState = { year: "", month: "" };
 let historyViewState = { year: "", month: "" };
 let sharedAverageViewState = { averageMode: "month" };
 let dashboardAssetGrowthMetric = "assetFormationBalance";
+let activeAssetMainTab = "formation";
 
 const NAV_TARGETS = {
   basic: "section-profile",
@@ -3404,9 +3407,13 @@ function buildAssetOutlookAtAge({
 }
 
 function renderAssetForecast(settings) {
+  if (!assetForecast || !assetWithdrawForecast) return;
   assetForecast.innerHTML = "";
+  assetWithdrawForecast.innerHTML = "";
   if (!settings.birthDate || settings.plans.length === 0) {
-    assetForecast.innerHTML = '<p class="chart-empty">生年月日と積立設定を保存すると、現時点と65歳時点の資産試算が表示されます。</p>';
+    const emptyMessage = '<p class="chart-empty">生年月日と積立設定を保存すると、現時点と65歳時点の資産試算が表示されます。</p>';
+    assetForecast.innerHTML = emptyMessage;
+    assetWithdrawForecast.innerHTML = emptyMessage;
     return;
   }
 
@@ -3468,7 +3475,7 @@ function renderAssetForecast(settings) {
       .reduce((sum, plan) => sum + plan.projectedAmount, 0);
     return { type, amount };
   }).filter((item) => item.amount > 0);
-  const earlyWithdrawHtml = earlyWithdrawPlansForDisplay
+  const earlyWithdrawItemsHtml = earlyWithdrawPlansForDisplay
     .map((plan) => {
       const withdrawLabel = parseMonth(plan.withdrawMonth)
         ? formatWithdrawMonthLabelWithAge(plan.withdrawMonth, settings.birthDate)
@@ -3489,49 +3496,30 @@ function renderAssetForecast(settings) {
     .map((item) => `<li><span>${item.type} 合計</span><strong>${yen.format(item.amount)}</strong></li>`)
     .join("");
 
-  const outlookPanelId = "panel-assets-outlook";
-  const outlookTriggerId = "trigger-assets-outlook";
   const compositionPanelId = "panel-assets-composition";
   const compositionTriggerId = "trigger-assets-composition";
 
   assetForecast.innerHTML = `
-    <section class="child-accordion" data-child-accordion>
-      <button
-        type="button"
-        class="child-accordion-trigger"
-        aria-expanded="false"
-        aria-controls="${outlookPanelId}"
-        id="${outlookTriggerId}"
-      >
-        <h3>将来の資産見通し（${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}）</h3>
-        <span class="child-accordion-toggle" aria-hidden="true">+</span>
-      </button>
-      <div
-        class="child-accordion-panel"
-        id="${outlookPanelId}"
-        role="region"
-        aria-labelledby="${outlookTriggerId}"
-        aria-hidden="true"
-      >
-        <div class="child-accordion-panel-inner">
-          <section class="chart asset-outlook">
-            <p class="section-description">現在年齢: <strong>${currentAge}歳</strong> / ${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の一覧は、キャッシュフロー表の資産形成額と同じ計算条件で表示しています。</p>
-            <div class="asset-outlook-summary-grid">
-              <div class="asset-total asset-total-compact">${createAssetOutlookTotalLabel(TARGET_AGE_SECONDARY)}: <strong>${yen.format(totalAt65)}</strong></div>
-            </div>
-            <h4>${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の想定資産額（契約別）</h4>
-            ${rows ? `<ul class="asset-list">${rows}</ul>` : `<p class="chart-empty">${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の評価対象となる契約はありません。</p>`}
-            <h4>${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の想定資産額（種別別）</h4>
-            ${typeTotalsHtml ? `<ul class="asset-list">${typeTotalsHtml}</ul>` : `<p class="chart-empty">${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の評価対象となる契約はありません。</p>`}
-            <section class="asset-withdraw-card" aria-label="${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}">
-              <h4>${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}</h4>
-              ${earlyWithdrawHtml
-    ? `<ul class="asset-list asset-withdraw-list">${earlyWithdrawHtml}</ul>`
-    : `<p class="chart-empty">${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}の契約はありません。</p>`}
-            </section>
-          </section>
-        </div>
+    <section class="chart asset-outlook">
+      <p class="section-description">現在年齢: <strong>${currentAge}歳</strong> / ${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の一覧は、キャッシュフロー表の資産形成額と同じ計算条件で表示しています。</p>
+      <div class="asset-outlook-summary-grid">
+        <div class="asset-total asset-total-compact">${createAssetOutlookTotalLabel(TARGET_AGE_SECONDARY)}: <strong>${yen.format(totalAt65)}</strong></div>
       </div>
+      <h4>${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の想定資産額（契約別）</h4>
+      ${rows ? `<ul class="asset-list">${rows}</ul>` : `<p class="chart-empty">${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の評価対象となる契約はありません。</p>`}
+      <h4>${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の想定資産額（種別別）</h4>
+      ${typeTotalsHtml ? `<ul class="asset-list">${typeTotalsHtml}</ul>` : `<p class="chart-empty">${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の評価対象となる契約はありません。</p>`}
+    </section>
+  `;
+  assetWithdrawForecast.innerHTML = `
+    <section class="chart asset-outlook">
+      <p class="section-description">取崩し予定を設定した契約のみ表示します。取崩年月の変更は「基本情報・資産形成設定」で行えます。</p>
+      <section class="asset-withdraw-card" aria-label="${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}">
+        <h4>${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}</h4>
+        ${earlyWithdrawItemsHtml
+    ? `<ul class="asset-list asset-withdraw-list">${earlyWithdrawItemsHtml}</ul>`
+    : `<p class="chart-empty">${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}の契約はありません。</p>`}
+      </section>
     </section>
   `;
 
@@ -3595,6 +3583,38 @@ function renderAssetForecast(settings) {
 
   assetForecast.appendChild(compositionAccordion);
   setupChildAccordions(assetForecast);
+}
+
+function setAssetMainTab(tabName = "formation") {
+  if (assetMainTabs.length === 0) return;
+  const requestedTab = tabName || "formation";
+  const hasRequestedTab = assetMainTabs.some((button) => button.dataset.assetMainTab === requestedTab);
+  const nextTab = hasRequestedTab ? requestedTab : "formation";
+  activeAssetMainTab = nextTab;
+
+  assetMainTabs.forEach((button) => {
+    const isActive = button.dataset.assetMainTab === nextTab;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    button.tabIndex = isActive ? 0 : -1;
+
+    const panelId = button.getAttribute("aria-controls");
+    if (!panelId) return;
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+    panel.hidden = !isActive;
+    panel.classList.toggle("is-active", isActive);
+  });
+}
+
+function setupAssetMainTabs() {
+  if (assetMainTabs.length === 0) return;
+  assetMainTabs.forEach((button) => {
+    button.addEventListener("click", () => {
+      setAssetMainTab(button.dataset.assetMainTab || "formation");
+    });
+  });
+  setAssetMainTab(activeAssetMainTab);
 }
 
 function createHistoryRow({ type, month = "", amount = "" } = {}) {
@@ -3901,11 +3921,7 @@ function render() {
   );
   renderCashflowTable({ settings, transactions, recurringExpenses, lifeEvents, assumptions });
   markAssetForecastDirty(settings);
-  if (isAssetsSectionExpanded()) {
-    queueAssetForecastRender();
-  } else {
-    clearAssetForecastDOM();
-  }
+  queueAssetForecastRender();
 }
 
 function addTransaction(event) {
@@ -4035,7 +4051,7 @@ function showNavToast(message) {
 }
 
 function isAssetsSectionExpanded() {
-  return assetsSection?.classList.contains("is-expanded");
+  return Boolean(assetsSection);
 }
 
 function markAssetForecastDirty(settings) {
@@ -4047,6 +4063,9 @@ function clearAssetForecastDOM() {
   assetForecastRenderRafId = 0;
   if (assetForecast?.childNodes.length) {
     assetForecast.replaceChildren();
+  }
+  if (assetWithdrawForecast?.childNodes.length) {
+    assetWithdrawForecast.replaceChildren();
   }
 }
 
@@ -4389,9 +4408,12 @@ function scrollToDashboardHeading() {
   });
 }
 
-function scrollToSection(sectionId, { actionToken, toggleIfExpanded = false } = {}) {
+function scrollToSection(sectionId, { actionToken, toggleIfExpanded = false, assetMainTab } = {}) {
   const targetSection = sectionId ? document.getElementById(sectionId) : null;
   if (!targetSection) return;
+  if (sectionId === "section-assets" && assetMainTab) {
+    setAssetMainTab(assetMainTab);
+  }
 
   if (targetSection.dataset.accordionSection === undefined) {
     targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -4482,7 +4504,10 @@ function setupDashboardCardNavigation() {
   const handleDashboardCardAction = (card) => {
     const sectionId = card?.dataset?.dashboardJumpSection;
     if (!sectionId) return;
-    scrollToSection(sectionId, { toggleIfExpanded: false });
+    scrollToSection(sectionId, {
+      toggleIfExpanded: false,
+      assetMainTab: card.dataset.dashboardJumpAssetTab,
+    });
   };
 
   dashboardJumpCards.forEach((card) => {
@@ -4624,6 +4649,7 @@ function init() {
     render();
   });
   cashflowDownloadPdfButton?.addEventListener("click", downloadCashflowPdf);
+  setupAssetMainTabs();
   setupSectionAccordions();
   setupChildAccordions();
   setupBottomNavigation();
