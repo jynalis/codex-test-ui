@@ -386,7 +386,7 @@ header p {
 
 .income-main-tabs {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   gap: 8px;
   padding: 4px;
   border-radius: 14px;
@@ -511,6 +511,98 @@ header p {
 
 .input-main-panel[hidden] {
   display: none !important;
+}
+
+.input-sub-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 4px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fff7ef 0%, #ffefd8 100%);
+  border: 1px solid #f0cc9b;
+  margin-bottom: 12px;
+}
+
+.input-sub-tab {
+  appearance: none;
+  border: 1px solid #e9bf87;
+  background: #fffaf2;
+  color: #6b4b21;
+  border-radius: 9px;
+  min-height: 34px;
+  min-width: 86px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+}
+
+.input-sub-tab.is-active {
+  background: linear-gradient(180deg, #bf7f19 0%, #9e6510 100%);
+  border-color: #9d640e;
+  color: #fff;
+}
+
+.input-sub-panel {
+  display: none;
+}
+
+.input-sub-panel.is-active {
+  display: block;
+}
+
+.input-sub-panel[hidden] {
+  display: none !important;
+}
+
+.registered-summary-card {
+  border: 1px solid #b7cbe5;
+  background: linear-gradient(180deg, #f9fcff 0%, #eef5ff 100%);
+  border-radius: 14px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.registered-summary-card h3 {
+  font-size: 1rem;
+  color: #1d3f66;
+}
+
+.registered-summary-card dl {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.registered-summary-card dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px dashed #c2d4eb;
+  padding-bottom: 6px;
+}
+
+.registered-summary-card dt {
+  color: #395370;
+  font-weight: 700;
+}
+
+.registered-summary-card dd {
+  margin: 0;
+  font-weight: 800;
+  color: #183455;
+}
+
+.registered-summary-note {
+  font-size: 0.8rem;
+  color: #4e6480;
+}
+
+.monthly-history-card {
+  margin: 0;
 }
 
 .section-heading {

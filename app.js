@@ -34,6 +34,7 @@ const entryStartMonthInput = document.getElementById("entry-start-month");
 const birthDateInput = document.getElementById("birth-date");
 const planList = document.getElementById("plan-list");
 const addPlanButton = document.getElementById("add-plan-button");
+const basicRegisteredSummary = document.getElementById("basic-registered-summary");
 const assetForecast = document.getElementById("asset-forecast");
 const assetCurrentForecast = document.getElementById("asset-current-forecast");
 const assetWithdrawForecast = document.getElementById("asset-withdraw-forecast");
@@ -49,7 +50,6 @@ const recurringSubmitButton = document.getElementById("recurring-submit-button")
 const recurringCancelButton = document.getElementById("recurring-cancel-button");
 const recurringEditStatus = document.getElementById("recurring-edit-status");
 const recurringSection = document.getElementById("trigger-recurring")?.closest("[data-accordion-section]");
-const recurringFormAccordion = document.getElementById("trigger-recurring-form")?.closest("[data-child-accordion]");
 const inputSection = document.getElementById("section-input");
 
 const lifeEventForm = document.getElementById("life-event-form");
@@ -65,7 +65,6 @@ const lifeEventCancelButton = document.getElementById("life-event-cancel-button"
 const lifeEventEditStatus = document.getElementById("life-event-edit-status");
 const lifeEventError = document.getElementById("life-event-error");
 const lifeEventsSection = document.getElementById("section-life-events");
-const lifeEventFormAccordion = document.getElementById("trigger-life-event-form")?.closest("[data-child-accordion]");
 
 const list = document.getElementById("transaction-list");
 const plannedList = document.getElementById("planned-transaction-list");
@@ -94,6 +93,7 @@ const inputMainTabs = Array.from(document.querySelectorAll("[data-input-main-tab
 const inputMainPanels = Array.from(document.querySelectorAll("[data-input-main-panel]"));
 const primaryMainTabs = Array.from(document.querySelectorAll("[data-primary-main-tab]"));
 const primaryMainPanels = Array.from(document.querySelectorAll("[data-primary-main-panel]"));
+const inputSubSwitches = Array.from(document.querySelectorAll("[data-input-sub-switch]"));
 const cashflowSettingsForm = document.getElementById("cashflow-settings-form");
 const cashflowSalaryGrowthRateBefore60Input = document.getElementById("cashflow-salary-growth-rate-before-60");
 const cashflowSalaryCorrectionRateAt60Input = document.getElementById("cashflow-salary-correction-rate-at-60");
@@ -121,24 +121,48 @@ let activeAssetMainTab = "formation";
 let activeIncomeMainTab = "expense-balance";
 let activeInputMainTab = "basic";
 let activePrimaryMainTab = "dashboard";
+const activeInputSubTabs = {
+  basic: "register",
+  recurring: "register",
+  life: "register",
+  monthly: "register",
+};
 
 const PRIMARY_MAIN_SECTION_IDS = {
   dashboard: ["section-step-guide", "section-home"],
   assets: ["section-assets"],
   income: ["section-income-main"],
-  input: ["section-input-main"],
+  input: ["section-input-main", "section-profile", "section-recurring", "section-life-events", "section-input", "section-history"],
 };
 
 const INCOME_MAIN_SECTION_IDS = {
   "expense-balance": ["section-expense"],
-  history: ["section-history"],
 };
 
 const INPUT_MAIN_SECTION_IDS = {
   basic: ["section-profile"],
   recurring: ["section-recurring"],
   life: ["section-life-events"],
-  monthly: ["section-input"],
+  monthly: ["section-input", "section-history"],
+};
+
+const INPUT_SUB_SECTION_IDS = {
+  basic: {
+    register: ["profile-form"],
+    registered: ["basic-registered-summary"],
+  },
+  recurring: {
+    register: ["recurring-form"],
+    registered: ["recurring-list"],
+  },
+  life: {
+    register: ["life-event-form"],
+    registered: ["life-event-list"],
+  },
+  monthly: {
+    register: ["transaction-form"],
+    history: ["section-history"],
+  },
 };
 
 const NAV_TARGETS = {
@@ -761,6 +785,9 @@ function startTransactionEdit(id) {
   amountInput.value = numberWithComma.format(transaction.amount);
   memoInput.value = transaction.memo || "";
   setTransactionFormMode(true, transaction.type);
+  setPrimaryMainTab("input");
+  setInputMainTab("monthly");
+  setInputSubTab("monthly", "register");
 
   if (inputSection) {
     setAccordionExpanded(inputSection, true);
@@ -778,9 +805,9 @@ function startRecurringExpenseEdit(id) {
   if (recurringSection) {
     setAccordionExpanded(recurringSection, true);
   }
-  if (recurringFormAccordion) {
-    setChildAccordionExpanded(recurringFormAccordion, true);
-  }
+  setPrimaryMainTab("input");
+  setInputMainTab("recurring");
+  setInputSubTab("recurring", "register");
 
   recurringEditingId = recurringExpense.id;
   recurringCategoryInput.value = recurringExpense.category;
@@ -963,9 +990,9 @@ function startLifeEventEdit(id) {
   if (lifeEventsSection) {
     setAccordionExpanded(lifeEventsSection, true);
   }
-  if (lifeEventFormAccordion) {
-    setChildAccordionExpanded(lifeEventFormAccordion, true);
-  }
+  setPrimaryMainTab("input");
+  setInputMainTab("life");
+  setInputSubTab("life", "register");
   lifeEventEditingId = lifeEvent.id;
   lifeEventMonthInput.value = lifeEvent.month;
   lifeEventTypeInput.value = lifeEvent.type;
@@ -3645,6 +3672,17 @@ function resolvePrimaryMainTabBySectionId(sectionId = "") {
   return entry?.[0] || "";
 }
 
+function resolveInputSubTabBySectionId(sectionId = "") {
+  if (!sectionId) return { group: "", tab: "" };
+  const entry = Object.entries(INPUT_SUB_SECTION_IDS).find(([, tabConfig]) =>
+    Object.values(tabConfig).some((sectionIds) => sectionIds.includes(sectionId))
+  );
+  if (!entry) return { group: "", tab: "" };
+  const [groupName, tabConfig] = entry;
+  const tabEntry = Object.entries(tabConfig).find(([, sectionIds]) => sectionIds.includes(sectionId));
+  return { group: groupName, tab: tabEntry?.[0] || "" };
+}
+
 function setPrimaryMainTab(tabName = "dashboard") {
   if (primaryMainTabs.length === 0 || primaryMainPanels.length === 0) return;
   const requestedTab = tabName || "dashboard";
@@ -3694,6 +3732,46 @@ function setInputMainTab(tabName = "basic") {
     const isActive = panel.dataset.inputMainPanel === nextTab;
     panel.hidden = !isActive;
     panel.classList.toggle("is-active", isActive);
+  });
+}
+
+function setInputSubTab(groupName, tabName = "register") {
+  if (!groupName) return;
+  const switchRoot = document.querySelector(`[data-input-sub-switch="${groupName}"]`);
+  if (!switchRoot) return;
+  const tabs = Array.from(switchRoot.querySelectorAll("[data-input-sub-tab]"));
+  if (tabs.length === 0) return;
+  const requestedTab = tabName || "register";
+  const hasRequestedTab = tabs.some((button) => button.dataset.inputSubTab === requestedTab);
+  const nextTab = hasRequestedTab ? requestedTab : tabs[0].dataset.inputSubTab;
+  activeInputSubTabs[groupName] = nextTab;
+  tabs.forEach((button) => {
+    const isActive = button.dataset.inputSubTab === nextTab;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    button.tabIndex = isActive ? 0 : -1;
+  });
+
+  const panels = Array.from(document.querySelectorAll(`[data-input-sub-content="${groupName}"] [data-input-sub-panel]`));
+  panels.forEach((panel) => {
+    const isActive = panel.dataset.inputSubPanel === nextTab;
+    panel.hidden = !isActive;
+    panel.classList.toggle("is-active", isActive);
+  });
+}
+
+function setupInputSubTabs() {
+  if (inputSubSwitches.length === 0) return;
+  inputSubSwitches.forEach((switchRoot) => {
+    const groupName = switchRoot.dataset.inputSubSwitch;
+    if (!groupName) return;
+    const buttons = Array.from(switchRoot.querySelectorAll("[data-input-sub-tab]"));
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        setInputSubTab(groupName, button.dataset.inputSubTab || "register");
+      });
+    });
+    setInputSubTab(groupName, activeInputSubTabs[groupName] || "register");
   });
 }
 
@@ -3962,6 +4040,24 @@ function renderPlans(settings) {
   });
 }
 
+function renderBasicRegisteredSummary(settings) {
+  if (!basicRegisteredSummary) return;
+  const birthLabel = settings?.birthDate || "未設定";
+  const entryStartMonthLabel = settings?.entryStartMonth || "未設定";
+  const planCount = Array.isArray(settings?.plans) ? settings.plans.length : 0;
+  basicRegisteredSummary.innerHTML = `
+    <section class="registered-summary-card">
+      <h3>基本情報の登録状況</h3>
+      <dl>
+        <div><dt>記入開始月</dt><dd>${entryStartMonthLabel}</dd></div>
+        <div><dt>生年月日</dt><dd>${birthLabel}</dd></div>
+        <div><dt>資産形成プラン</dt><dd>${planCount}件</dd></div>
+      </dl>
+      <p class="registered-summary-note">修正するときは「登録」へ切り替えて編集してください。</p>
+    </section>
+  `;
+}
+
 function saveProfile(event) {
   event.preventDefault();
   const settings = {
@@ -3974,6 +4070,7 @@ function saveProfile(event) {
 
   saveSettings(settings);
   render();
+  setInputSubTab("basic", "registered");
 }
 
 function render() {
@@ -4027,6 +4124,7 @@ function render() {
   }
   renderRecurringExpenses(recurringExpenses);
   renderLifeEvents(lifeEvents);
+  renderBasicRegisteredSummary(settings);
 
   entryStartMonthInput.value = resolveEntryStartMonth(settings, transactions);
   birthDateInput.value = settings.birthDate || "";
@@ -4595,6 +4693,7 @@ function scrollToSection(
   const primaryMainTab = resolvePrimaryMainTabBySectionId(sectionId);
   const incomeMainTab = resolveIncomeMainTabBySectionId(sectionId);
   const inputMainTab = syncInputMainTabFromSection ? resolveInputMainTabBySectionId(sectionId) : "";
+  const inputSubTab = resolveInputSubTabBySectionId(sectionId);
   if (primaryMainTab) {
     setPrimaryMainTab(primaryMainTab);
   }
@@ -4603,6 +4702,9 @@ function scrollToSection(
   }
   if (inputMainTab) {
     setInputMainTab(inputMainTab);
+  }
+  if (inputSubTab.group && inputSubTab.tab) {
+    setInputSubTab(inputSubTab.group, inputSubTab.tab);
   }
 
   const proceedScroll = () => {
@@ -4858,6 +4960,7 @@ function init() {
   setupAssetMainTabs();
   setupIncomeMainTabs();
   setupInputMainTabs();
+  setupInputSubTabs();
   setupSectionAccordions();
   setupChildAccordions();
   setupBottomNavigation();
