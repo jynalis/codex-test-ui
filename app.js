@@ -34,7 +34,6 @@ const entryStartMonthInput = document.getElementById("entry-start-month");
 const birthDateInput = document.getElementById("birth-date");
 const planList = document.getElementById("plan-list");
 const planEditorList = document.getElementById("plan-editor-list");
-const addPlanButton = document.getElementById("add-plan-button");
 const basicRegisteredSummary = document.getElementById("basic-registered-summary");
 const basicRegisteredPlanCount = document.getElementById("basic-registered-plan-count");
 const assetForecast = document.getElementById("asset-forecast");
@@ -3885,29 +3884,14 @@ function createPlanBlock(plan = {}) {
   wrap.className = "plan-item";
 
   const typeOptions = PLAN_TYPES.map((type) => `<option value="${type}" ${normalizedPlan.type === type ? "selected" : ""}>${type}</option>`).join("");
-  const planPanelId = `plan-detail-${normalizedPlan.id}`;
-  const planTriggerId = `plan-trigger-${normalizedPlan.id}`;
 
   wrap.innerHTML = `
     <input type="hidden" class="plan-id" value="${normalizedPlan.id}" />
-    <div class="plan-card-heading">
-      <button
-        type="button"
-        class="plan-card-trigger"
-        aria-expanded="false"
-        aria-controls="${planPanelId}"
-        id="${planTriggerId}"
-      >
-        <div class="plan-card-header">
-          <p class="plan-card-title">${normalizedPlan.type}｜${normalizedPlan.name || "識別名未設定"}</p>
-          <span class="plan-card-tag">${normalizedPlan.type}</span>
-        </div>
-      </button>
-      <button type="button" class="plan-card-toggle-button" aria-expanded="false" aria-controls="${planPanelId}" aria-label="資産枠の開閉">
-        <span class="plan-card-toggle-icon" aria-hidden="true">+</span>
-      </button>
+    <div class="plan-card-header">
+      <p class="plan-card-title">${normalizedPlan.type}｜${normalizedPlan.name || "識別名未設定"}</p>
+      <span class="plan-card-tag">${normalizedPlan.type}</span>
     </div>
-    <div class="plan-card-panel" id="${planPanelId}" role="region" aria-labelledby="${planTriggerId}" aria-hidden="true">
+    <div class="plan-card-panel" aria-hidden="false">
       <div class="plan-card-panel-inner">
         <div class="plan-grid">
           <label>種類<select class="plan-type">${typeOptions}</select></label>
@@ -3941,8 +3925,6 @@ function createPlanBlock(plan = {}) {
   const planNameField = wrap.querySelector(".plan-name");
   const title = wrap.querySelector(".plan-card-title");
   const tag = wrap.querySelector(".plan-card-tag");
-  const cardTrigger = wrap.querySelector(".plan-card-trigger");
-  const cardToggleButton = wrap.querySelector(".plan-card-toggle-button");
 
   normalizedPlan.lumpSums.forEach((history) => lumpList.appendChild(createHistoryRow({ type: "lump", month: history.month, amount: history.amount })));
   normalizedPlan.monthlyContributions.forEach((history) =>
@@ -3960,21 +3942,8 @@ function createPlanBlock(plan = {}) {
 
   planTypeField.addEventListener("change", refreshPlanVisual);
   planNameField.addEventListener("input", refreshPlanVisual);
-
-  const setPlanExpanded = (expanded) => {
-    setPlanCardExpanded(wrap, expanded);
-  };
-
-  setPlanExpanded(false);
-  const togglePlanExpanded = () => {
-    const expanded = wrap.dataset.planExpanded === "true";
-    setPlanExpanded(!expanded);
-  };
-  cardTrigger.addEventListener("click", togglePlanExpanded);
-  cardToggleButton.addEventListener("click", (event) => {
-    event.stopPropagation();
-    togglePlanExpanded();
-  });
+  wrap.dataset.planExpanded = "true";
+  wrap.classList.add("is-expanded");
   refreshPlanVisual();
 
   wrap.querySelector(".add-lump").addEventListener("click", () => {
@@ -4005,7 +3974,6 @@ function startPlanEdit(planId) {
   setInputMainTab("basic");
   setInputSubTab("basic", "register");
   setAccordionExpanded(document.getElementById("section-profile"), true);
-  setPlanCardExpanded(targetBlock, true);
   targetBlock.scrollIntoView({ behavior: "smooth", block: "center" });
   targetBlock.querySelector(".plan-name")?.focus();
 }
@@ -4078,15 +4046,6 @@ function renderRegisteredPlans(settings) {
   });
 }
 
-function addPlanBlockFromProfileButton() {
-  if (!planEditorList) return;
-  setInputSubTab("basic", "register");
-  const newBlock = createPlanBlock();
-  planEditorList.appendChild(newBlock);
-  setPlanCardExpanded(newBlock, true);
-  newBlock.scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
 function collectPlansFromForm() {
   if (!planEditorList) return [];
   return Array.from(planEditorList.querySelectorAll(".plan-item"))
@@ -4124,7 +4083,8 @@ function collectPlansFromForm() {
 
 function renderPlans(settings) {
   if (!planEditorList) return;
-  planEditorList.innerHTML = "";
+  if (planEditorList.querySelector(".plan-item")) return;
+  planEditorList.replaceChildren(createPlanBlock());
 }
 
 function renderBasicRegisteredSummary(settings) {
@@ -5031,7 +4991,6 @@ function init() {
   setupFormattedAmountInput(lifeEventAmountInput);
 
   profileForm.addEventListener("submit", saveProfile);
-  addPlanButton?.addEventListener("click", addPlanBlockFromProfileButton);
   recurringForm.addEventListener("submit", addRecurringExpense);
   recurringCancelButton?.addEventListener("click", cancelRecurringExpenseEdit);
   lifeEventForm?.addEventListener("submit", addLifeEvent);
