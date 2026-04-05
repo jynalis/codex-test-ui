@@ -4000,8 +4000,12 @@ function formatPlanAnnualReturn(value) {
 
 function startPlanEdit(planId) {
   if (!planId || !planEditorList) return;
-  const targetBlock = planEditorList.querySelector(`.plan-item .plan-id[value="${CSS.escape(planId)}"]`)?.closest(".plan-item");
-  if (!targetBlock) return;
+  const settings = loadSettings();
+  const targetPlan = Array.isArray(settings?.plans) ? settings.plans.find((plan) => plan.id === planId) : null;
+  if (!targetPlan) return;
+  planEditorList.innerHTML = "";
+  const targetBlock = createPlanBlock(targetPlan);
+  planEditorList.appendChild(targetBlock);
   setPrimaryMainTab("input");
   setInputMainTab("basic");
   setInputSubTab("basic", "register");
@@ -4126,9 +4130,6 @@ function collectPlansFromForm() {
 function renderPlans(settings) {
   if (!planEditorList) return;
   planEditorList.innerHTML = "";
-  settings.plans.forEach((plan) => {
-    planEditorList.appendChild(createPlanBlock(plan));
-  });
 }
 
 function renderBasicRegisteredSummary(settings) {
@@ -4153,10 +4154,15 @@ function renderBasicRegisteredSummary(settings) {
 
 function saveProfile(event) {
   event.preventDefault();
+  const existingSettings = loadSettings();
+  const existingPlans = Array.isArray(existingSettings?.plans) ? existingSettings.plans : [];
+  const editedPlans = collectPlansFromForm();
+  const editedPlanIds = new Set(editedPlans.map((plan) => plan.id));
+  const untouchedPlans = existingPlans.filter((plan) => !editedPlanIds.has(plan.id));
   const settings = {
     birthDate: birthDateInput.value,
     entryStartMonth: entryStartMonthInput.value,
-    plans: collectPlansFromForm(),
+    plans: [...untouchedPlans, ...editedPlans],
   };
 
   if (!settings.birthDate || !settings.entryStartMonth) return;
