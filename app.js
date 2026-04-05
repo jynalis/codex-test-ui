@@ -33,6 +33,7 @@ const profileForm = document.getElementById("profile-form");
 const entryStartMonthInput = document.getElementById("entry-start-month");
 const birthDateInput = document.getElementById("birth-date");
 const planList = document.getElementById("plan-list");
+const planEditorList = document.getElementById("plan-editor-list");
 const addPlanButton = document.getElementById("add-plan-button");
 const basicRegisteredSummary = document.getElementById("basic-registered-summary");
 const basicRegisteredPlanCount = document.getElementById("basic-registered-plan-count");
@@ -3992,17 +3993,104 @@ function createPlanBlock(plan = {}) {
   return wrap;
 }
 
-function addPlanBlockFromProfileButton() {
+function formatPlanAnnualReturn(value) {
+  const normalized = parseRateInput(value, 0);
+  return `${normalized.toFixed(2)}%`;
+}
+
+function startPlanEdit(planId) {
+  if (!planId || !planEditorList) return;
+  const targetBlock = planEditorList.querySelector(`.plan-item .plan-id[value="${CSS.escape(planId)}"]`)?.closest(".plan-item");
+  if (!targetBlock) return;
+  setPrimaryMainTab("input");
+  setInputMainTab("basic");
+  setInputSubTab("basic", "register");
+  setAccordionExpanded(document.getElementById("section-profile"), true);
+  setPlanCardExpanded(targetBlock, true);
+  targetBlock.scrollIntoView({ behavior: "smooth", block: "center" });
+  targetBlock.querySelector(".plan-name")?.focus();
+}
+
+function deletePlanById(planId) {
+  if (!planId) return;
+  const settings = loadSettings();
+  const nextSettings = {
+    ...settings,
+    plans: (settings.plans || []).filter((plan) => plan.id !== planId),
+  };
+  saveSettings(nextSettings);
+  render();
+}
+
+function renderRegisteredPlans(settings) {
   if (!planList) return;
-  setInputSubTab("basic", "registered");
+  planList.innerHTML = "";
+  const plans = Array.isArray(settings?.plans) ? settings.plans : [];
+
+  if (plans.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "chart-empty";
+    empty.textContent = "登録済みの資産形成プランはありません。";
+    planList.appendChild(empty);
+    return;
+  }
+
+  plans.forEach((plan) => {
+    const normalizedPlan = normalizePlan(plan);
+    const monthlyContribution = findActiveMonthlyContribution(normalizedPlan, todayISO().slice(0, 7));
+    const lumpTotal = normalizedPlan.lumpSums.reduce((sum, history) => sum + (Number(history.amount) || 0), 0);
+    const card = document.createElement("article");
+    card.className = "plan-registered-card";
+    card.innerHTML = `
+      <div class="plan-registered-card-header">
+        <h4>${normalizedPlan.type}${normalizedPlan.name ? ` / ${normalizedPlan.name}` : ""}</h4>
+      </div>
+      <ul class="plan-registered-meta-list">
+        <li><span>種類</span><strong>${normalizedPlan.type}</strong></li>
+        <li><span>識別名</span><strong>${normalizedPlan.name || "未設定"}</strong></li>
+        <li><span>想定利回り</span><strong>${formatPlanAnnualReturn(normalizedPlan.expectedReturn)}</strong></li>
+        <li><span>取崩年月</span><strong>${normalizedPlan.withdrawMonth ? formatWithdrawMonthLabelWithAge(normalizedPlan.withdrawMonth, settings?.birthDate) : "未設定"}</strong></li>
+        <li><span>積立額（月額）</span><strong>${monthlyContribution > 0 ? yen.format(monthlyContribution) : "未設定"}</strong></li>
+        <li><span>一括入金（累計）</span><strong>${lumpTotal > 0 ? yen.format(lumpTotal) : "なし"}</strong></li>
+      </ul>
+    `;
+
+    const actions = document.createElement("div");
+    actions.className = "plan-registered-actions";
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.className = "small";
+    editButton.textContent = "修正";
+    editButton.addEventListener("click", () => startPlanEdit(normalizedPlan.id));
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "small danger";
+    deleteButton.textContent = "削除";
+    deleteButton.addEventListener("click", () => {
+      if (!window.confirm("この資産形成プランを削除しますか？")) return;
+      deletePlanById(normalizedPlan.id);
+    });
+
+    actions.append(editButton, deleteButton);
+    card.appendChild(actions);
+    planList.appendChild(card);
+  });
+}
+
+function addPlanBlockFromProfileButton() {
+  if (!planEditorList) return;
+  setInputSubTab("basic", "register");
   const newBlock = createPlanBlock();
-  planList.appendChild(newBlock);
+  planEditorList.appendChild(newBlock);
   setPlanCardExpanded(newBlock, true);
   newBlock.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function collectPlansFromForm() {
-  return Array.from(planList.querySelectorAll(".plan-item"))
+  if (!planEditorList) return [];
+  return Array.from(planEditorList.querySelectorAll(".plan-item"))
     .map((block) => {
       const lumpSums = Array.from(block.querySelectorAll(".lump-list .history-row"))
         .map((row) => ({
@@ -4036,9 +4124,10 @@ function collectPlansFromForm() {
 }
 
 function renderPlans(settings) {
-  planList.innerHTML = "";
+  if (!planEditorList) return;
+  planEditorList.innerHTML = "";
   settings.plans.forEach((plan) => {
-    planList.appendChild(createPlanBlock(plan));
+    planEditorList.appendChild(createPlanBlock(plan));
   });
 }
 
@@ -4128,6 +4217,8 @@ function render() {
   }
   renderRecurringExpenses(recurringExpenses);
   renderLifeEvents(lifeEvents);
+  renderPlans(settings);
+  renderRegisteredPlans(settings);
   renderBasicRegisteredSummary(settings);
 
   entryStartMonthInput.value = resolveEntryStartMonth(settings, transactions);
