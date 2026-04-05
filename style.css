@@ -450,6 +450,69 @@ header p {
   min-width: 0;
 }
 
+.input-main-section {
+  display: grid;
+  gap: 14px;
+}
+
+.input-main-tabbar {
+  width: 100%;
+}
+
+.input-main-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 4px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fff7ed 0%, #ffefdc 100%);
+  border: 1px solid #f1c691;
+}
+
+.input-main-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  border: 1px solid #e8b06c;
+  background: #fffcf6;
+  color: #6f4a1b;
+  border-radius: 10px;
+  padding: 9px 4px;
+  min-height: 46px;
+  font-size: 0.78rem;
+  line-height: 1.25;
+  text-align: center;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.input-main-tab.is-active {
+  background: linear-gradient(180deg, #bf7f19 0%, #9e6510 100%);
+  color: #fff;
+  border-color: #9d640e;
+  box-shadow: 0 10px 18px rgb(159 101 16 / 28%);
+}
+
+.input-main-content {
+  min-width: 0;
+}
+
+.input-main-panel {
+  display: none;
+  min-width: 0;
+}
+
+.input-main-panel.is-active {
+  display: block;
+}
+
+.input-main-panel[hidden] {
+  display: none !important;
+}
+
 .section-heading {
   display: grid;
   gap: 4px;
@@ -2539,6 +2602,18 @@ button.ghost {
     min-height: 44px;
     font-size: 0.75rem;
     line-height: 1.28;
+  }
+
+  .input-main-tabs {
+    gap: 6px;
+    padding: 4px;
+  }
+
+  .input-main-tab {
+    padding: 8px 2px;
+    min-height: 44px;
+    font-size: 0.7rem;
+    line-height: 1.22;
   }
 
   .diagnosis-card {

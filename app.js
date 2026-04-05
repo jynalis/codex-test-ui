@@ -90,6 +90,8 @@ const assetMainTabs = Array.from(document.querySelectorAll("[data-asset-main-tab
 const assetMainPanels = Array.from(document.querySelectorAll("[data-asset-main-panel]"));
 const incomeMainTabs = Array.from(document.querySelectorAll("[data-income-main-tab]"));
 const incomeMainPanels = Array.from(document.querySelectorAll("[data-income-main-panel]"));
+const inputMainTabs = Array.from(document.querySelectorAll("[data-input-main-tab]"));
+const inputMainPanels = Array.from(document.querySelectorAll("[data-input-main-panel]"));
 const primaryMainTabs = Array.from(document.querySelectorAll("[data-primary-main-tab]"));
 const primaryMainPanels = Array.from(document.querySelectorAll("[data-primary-main-panel]"));
 const cashflowSettingsForm = document.getElementById("cashflow-settings-form");
@@ -117,18 +119,26 @@ let sharedAverageViewState = { averageMode: "month" };
 let dashboardAssetGrowthMetric = "assetFormationBalance";
 let activeAssetMainTab = "formation";
 let activeIncomeMainTab = "expense-balance";
+let activeInputMainTab = "basic";
 let activePrimaryMainTab = "dashboard";
 
 const PRIMARY_MAIN_SECTION_IDS = {
   dashboard: ["section-step-guide", "section-home"],
   assets: ["section-assets"],
   income: ["section-income-main"],
-  input: ["section-profile", "section-recurring", "section-input", "section-life-events"],
+  input: ["section-input-main"],
 };
 
 const INCOME_MAIN_SECTION_IDS = {
   "expense-balance": ["section-expense"],
   history: ["section-history"],
+};
+
+const INPUT_MAIN_SECTION_IDS = {
+  basic: ["section-profile"],
+  recurring: ["section-recurring"],
+  life: ["section-life-events"],
+  monthly: ["section-input"],
 };
 
 const NAV_TARGETS = {
@@ -3624,6 +3634,12 @@ function resolveIncomeMainTabBySectionId(sectionId = "") {
   return entry?.[0] || "";
 }
 
+function resolveInputMainTabBySectionId(sectionId = "") {
+  if (!sectionId) return "";
+  const entry = Object.entries(INPUT_MAIN_SECTION_IDS).find(([, sectionIds]) => sectionIds.includes(sectionId));
+  return entry?.[0] || "";
+}
+
 function resolvePrimaryMainTabBySectionId(sectionId = "") {
   if (!sectionId) return "";
   const entry = Object.entries(PRIMARY_MAIN_SECTION_IDS).find(([, sectionIds]) => sectionIds.includes(sectionId));
@@ -3655,6 +3671,27 @@ function setPrimaryMainTab(tabName = "dashboard") {
   }
 }
 
+function setInputMainTab(tabName = "basic") {
+  if (inputMainTabs.length === 0 || inputMainPanels.length === 0) return;
+  const requestedTab = tabName || "basic";
+  const hasRequestedTab = inputMainTabs.some((button) => button.dataset.inputMainTab === requestedTab);
+  const nextTab = hasRequestedTab ? requestedTab : "basic";
+  activeInputMainTab = nextTab;
+
+  inputMainTabs.forEach((button) => {
+    const isActive = button.dataset.inputMainTab === nextTab;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    button.tabIndex = isActive ? 0 : -1;
+  });
+
+  inputMainPanels.forEach((panel) => {
+    const isActive = panel.dataset.inputMainPanel === nextTab;
+    panel.hidden = !isActive;
+    panel.classList.toggle("is-active", isActive);
+  });
+}
+
 function setupPrimaryMainTabs() {
   if (primaryMainTabs.length === 0) return;
   primaryMainTabs.forEach((button) => {
@@ -3669,6 +3706,19 @@ function buildPrimaryMainPanels() {
   if (primaryMainPanels.length === 0) return;
   Object.entries(PRIMARY_MAIN_SECTION_IDS).forEach(([tabName, sectionIds]) => {
     const panel = document.querySelector(`[data-primary-main-panel="${tabName}"]`);
+    if (!panel) return;
+    sectionIds.forEach((sectionId) => {
+      const section = document.getElementById(sectionId);
+      if (!section) return;
+      panel.appendChild(section);
+    });
+  });
+}
+
+function buildInputMainPanels() {
+  if (inputMainPanels.length === 0) return;
+  Object.entries(INPUT_MAIN_SECTION_IDS).forEach(([tabName, sectionIds]) => {
+    const panel = document.querySelector(`[data-input-main-panel="${tabName}"]`);
     if (!panel) return;
     sectionIds.forEach((sectionId) => {
       const section = document.getElementById(sectionId);
@@ -3709,6 +3759,16 @@ function setupIncomeMainTabs() {
     });
   });
   setIncomeMainTab(activeIncomeMainTab);
+}
+
+function setupInputMainTabs() {
+  if (inputMainTabs.length === 0) return;
+  inputMainTabs.forEach((button) => {
+    button.addEventListener("click", () => {
+      setInputMainTab(button.dataset.inputMainTab || "basic");
+    });
+  });
+  setInputMainTab(activeInputMainTab);
 }
 
 function createHistoryRow({ type, month = "", amount = "" } = {}) {
@@ -4510,11 +4570,15 @@ function scrollToSection(sectionId, { actionToken, toggleIfExpanded = false, ass
   if (!targetSection) return;
   const primaryMainTab = resolvePrimaryMainTabBySectionId(sectionId);
   const incomeMainTab = resolveIncomeMainTabBySectionId(sectionId);
+  const inputMainTab = resolveInputMainTabBySectionId(sectionId);
   if (primaryMainTab) {
     setPrimaryMainTab(primaryMainTab);
   }
   if (incomeMainTab) {
     setIncomeMainTab(incomeMainTab);
+  }
+  if (inputMainTab) {
+    setInputMainTab(inputMainTab);
   }
 
   const proceedScroll = () => {
@@ -4553,7 +4617,7 @@ function scrollToSection(sectionId, { actionToken, toggleIfExpanded = false, ass
     });
   };
 
-  if (primaryMainTab) {
+  if (primaryMainTab || inputMainTab) {
     window.requestAnimationFrame(proceedScroll);
   } else {
     proceedScroll();
@@ -4764,10 +4828,12 @@ function init() {
   });
   cashflowDownloadPdfButton?.addEventListener("click", downloadCashflowPdf);
   buildPrimaryMainPanels();
+  buildInputMainPanels();
   buildIncomeMainPanels();
   setupPrimaryMainTabs();
   setupAssetMainTabs();
   setupIncomeMainTabs();
+  setupInputMainTabs();
   setupSectionAccordions();
   setupChildAccordions();
   setupBottomNavigation();
