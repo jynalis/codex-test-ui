@@ -3993,6 +3993,7 @@ function createPlanBlock(plan = {}) {
 
 function addPlanBlockFromProfileButton() {
   if (!planList) return;
+  setInputSubTab("basic", "registered");
   const planChildAccordion = document.getElementById("trigger-profile-plan-assets")?.closest("[data-child-accordion]");
   if (planChildAccordion) {
     setChildAccordionExpanded(planChildAccordion, true);
@@ -4057,7 +4058,7 @@ function renderBasicRegisteredSummary(settings) {
         <div><dt>生年月日</dt><dd>${birthLabel}</dd></div>
         <div><dt>資産形成プラン</dt><dd>${planCount}件</dd></div>
       </dl>
-      <p class="registered-summary-note">修正するときは「登録」へ切り替えて編集してください。</p>
+      <p class="registered-summary-note">登録済データの確認・修正・削除は、この「登録済」画面で行えます。</p>
     </section>
   `;
 }
