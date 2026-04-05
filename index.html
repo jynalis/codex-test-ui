@@ -381,6 +381,7 @@
             <div class="input-sub-switch" role="tablist" aria-label="毎月収支タブの切り替え" data-input-sub-switch="monthly">
               <button type="button" id="input-sub-tab-monthly-register" class="input-sub-tab is-active" role="tab" aria-selected="true" aria-controls="input-sub-panel-monthly-register" data-input-sub-tab="register">登録</button>
               <button type="button" id="input-sub-tab-monthly-history" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-monthly-history" data-input-sub-tab="history" tabindex="-1">取引履歴</button>
+              <button type="button" id="input-sub-tab-monthly-expense-balance" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-monthly-expense-balance" data-input-sub-tab="expense-balance" tabindex="-1">支出バランス分析</button>
             </div>
             <div class="input-sub-content" data-input-sub-content="monthly">
               <section id="input-sub-panel-monthly-register" class="input-sub-panel is-active" role="tabpanel" aria-labelledby="input-sub-tab-monthly-register" data-input-sub-panel="register">
@@ -463,6 +464,30 @@
                         </div>
                       </section>
                     </section>
+                  </div>
+                </section>
+              </section>
+              <section id="input-sub-panel-monthly-expense-balance" class="input-sub-panel" role="tabpanel" aria-labelledby="input-sub-tab-monthly-expense-balance" data-input-sub-panel="expense-balance" hidden>
+                <section id="section-expense" class="card section-tone-chart income-main-card" data-nav-section="expense">
+                  <div class="income-main-card-header">
+                    <div class="section-heading">
+                      <p class="section-role-badge">支出の偏りを確認</p>
+                      <h2>支出バランス分析</h2>
+                      <p class="section-description">
+                        どの項目に支出が偏っているかを視覚的に確認できます。
+                      </p>
+                    </div>
+                  </div>
+                  <div class="income-main-card-body">
+                    <div class="filters shared-view-filters" data-shared-view-filter="expense">
+                      <select id="expense-view-mode" aria-label="支出バランス分析表示モード">
+                        <option value="month">年月</option>
+                        <option value="average">平均</option>
+                      </select>
+                      <select id="expense-year-filter" aria-label="支出バランス分析表示年"></select>
+                      <select id="expense-month-filter" aria-label="支出バランス分析表示月"></select>
+                    </div>
+                    <div id="expense-chart" class="chart"></div>
                   </div>
                 </section>
               </section>
@@ -594,39 +619,6 @@
         </div>
       </section>
 
-      <section id="section-income-main" class="income-main-section" aria-label="収支表示切替">
-        <div class="income-main-tabbar">
-          <div class="income-main-tabs" role="tablist" aria-label="収支タブの表示切替">
-            <button type="button" id="income-main-tab-expense-balance" class="income-main-tab is-active" role="tab" aria-selected="true" aria-controls="income-main-panel-expense-balance" data-income-main-tab="expense-balance">支出バランス分析</button>
-          </div>
-        </div>
-        <div class="income-main-content">
-          <div id="income-main-panel-expense-balance" class="income-main-panel is-active" role="tabpanel" aria-labelledby="income-main-tab-expense-balance" data-income-main-panel="expense-balance">
-            <section id="section-expense" class="card section-tone-chart income-main-card" data-nav-section="expense">
-              <div class="income-main-card-header">
-                <div class="section-heading">
-                  <p class="section-role-badge">支出の偏りを確認</p>
-                  <h2>支出バランス分析</h2>
-                  <p class="section-description">
-                    どの項目に支出が偏っているかを視覚的に確認できます。
-                  </p>
-                </div>
-              </div>
-              <div class="income-main-card-body">
-                <div class="filters shared-view-filters" data-shared-view-filter="expense">
-                  <select id="expense-view-mode" aria-label="支出バランス分析表示モード">
-                    <option value="month">年月</option>
-                    <option value="average">平均</option>
-                  </select>
-                  <select id="expense-year-filter" aria-label="支出バランス分析表示年"></select>
-                  <select id="expense-month-filter" aria-label="支出バランス分析表示月"></select>
-                </div>
-                <div id="expense-chart" class="chart"></div>
-              </div>
-            </section>
-          </div>
-        </div>
-      </section>
     </main>
 
     <nav class="bottom-nav" aria-label="下部ナビゲーション">
