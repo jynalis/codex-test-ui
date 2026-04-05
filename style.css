@@ -557,6 +557,11 @@ header p {
   display: none !important;
 }
 
+.basic-sub-panel-body {
+  display: grid;
+  gap: 14px;
+}
+
 .registered-summary-card {
   border: 1px solid #b7cbe5;
   background: linear-gradient(180deg, #f9fcff 0%, #eef5ff 100%);
