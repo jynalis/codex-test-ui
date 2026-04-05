@@ -88,6 +88,8 @@ const dashboardSection = document.getElementById("section-home");
 const assetsSection = document.getElementById("section-assets");
 const assetMainTabs = Array.from(document.querySelectorAll("[data-asset-main-tab]"));
 const assetMainPanels = Array.from(document.querySelectorAll("[data-asset-main-panel]"));
+const primaryMainTabs = Array.from(document.querySelectorAll("[data-primary-main-tab]"));
+const primaryMainPanels = Array.from(document.querySelectorAll("[data-primary-main-panel]"));
 const cashflowSettingsForm = document.getElementById("cashflow-settings-form");
 const cashflowSalaryGrowthRateBefore60Input = document.getElementById("cashflow-salary-growth-rate-before-60");
 const cashflowSalaryCorrectionRateAt60Input = document.getElementById("cashflow-salary-correction-rate-at-60");
@@ -112,6 +114,14 @@ let historyViewState = { year: "", month: "" };
 let sharedAverageViewState = { averageMode: "month" };
 let dashboardAssetGrowthMetric = "assetFormationBalance";
 let activeAssetMainTab = "formation";
+let activePrimaryMainTab = "dashboard";
+
+const PRIMARY_MAIN_SECTION_IDS = {
+  dashboard: ["section-step-guide", "section-home"],
+  assets: ["section-assets"],
+  income: ["section-expense", "section-history"],
+  input: ["section-profile", "section-recurring", "section-input", "section-life-events"],
+};
 
 const NAV_TARGETS = {
   basic: "section-profile",
@@ -3579,6 +3589,60 @@ function setAssetMainTab(tabName = "formation") {
   });
 }
 
+function resolvePrimaryMainTabBySectionId(sectionId = "") {
+  if (!sectionId) return "";
+  const entry = Object.entries(PRIMARY_MAIN_SECTION_IDS).find(([, sectionIds]) => sectionIds.includes(sectionId));
+  return entry?.[0] || "";
+}
+
+function setPrimaryMainTab(tabName = "dashboard") {
+  if (primaryMainTabs.length === 0 || primaryMainPanels.length === 0) return;
+  const requestedTab = tabName || "dashboard";
+  const hasRequestedTab = primaryMainTabs.some((button) => button.dataset.primaryMainTab === requestedTab);
+  const nextTab = hasRequestedTab ? requestedTab : "dashboard";
+  activePrimaryMainTab = nextTab;
+
+  primaryMainTabs.forEach((button) => {
+    const isActive = button.dataset.primaryMainTab === nextTab;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    button.tabIndex = isActive ? 0 : -1;
+  });
+
+  primaryMainPanels.forEach((panel) => {
+    const isActive = panel.dataset.primaryMainPanel === nextTab;
+    panel.hidden = !isActive;
+    panel.classList.toggle("is-active", isActive);
+  });
+
+  if (nextTab === "assets") {
+    queueAssetForecastRender(true);
+  }
+}
+
+function setupPrimaryMainTabs() {
+  if (primaryMainTabs.length === 0) return;
+  primaryMainTabs.forEach((button) => {
+    button.addEventListener("click", () => {
+      setPrimaryMainTab(button.dataset.primaryMainTab || "dashboard");
+    });
+  });
+  setPrimaryMainTab(activePrimaryMainTab);
+}
+
+function buildPrimaryMainPanels() {
+  if (primaryMainPanels.length === 0) return;
+  Object.entries(PRIMARY_MAIN_SECTION_IDS).forEach(([tabName, sectionIds]) => {
+    const panel = document.querySelector(`[data-primary-main-panel="${tabName}"]`);
+    if (!panel) return;
+    sectionIds.forEach((sectionId) => {
+      const section = document.getElementById(sectionId);
+      if (!section) return;
+      panel.appendChild(section);
+    });
+  });
+}
+
 function setupAssetMainTabs() {
   if (assetMainTabs.length === 0) return;
   assetMainTabs.forEach((button) => {
@@ -4023,7 +4087,10 @@ function showNavToast(message) {
 }
 
 function isAssetsSectionExpanded() {
-  return Boolean(assetsSection);
+  if (!assetsSection) return false;
+  const parentPanel = assetsSection.closest("[data-primary-main-panel]");
+  if (!parentPanel) return true;
+  return !parentPanel.hidden;
 }
 
 function markAssetForecastDirty(settings) {
@@ -4383,39 +4450,52 @@ function scrollToDashboardHeading() {
 function scrollToSection(sectionId, { actionToken, toggleIfExpanded = false, assetMainTab } = {}) {
   const targetSection = sectionId ? document.getElementById(sectionId) : null;
   if (!targetSection) return;
-  if (sectionId === "section-assets" && assetMainTab) {
-    setAssetMainTab(assetMainTab);
+  const primaryMainTab = resolvePrimaryMainTabBySectionId(sectionId);
+  if (primaryMainTab) {
+    setPrimaryMainTab(primaryMainTab);
   }
 
-  if (targetSection.dataset.accordionSection === undefined) {
-    targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
-    return;
-  }
+  const proceedScroll = () => {
+    if (sectionId === "section-assets" && assetMainTab) {
+      setAssetMainTab(assetMainTab);
+    }
 
-  const expanded = isAccordionSectionExpanded(targetSection);
-  if (expanded) {
-    if (toggleIfExpanded) {
-      setAccordionExpanded(targetSection, false).then(() => {
-        if (actionToken && actionToken !== navActionToken) return;
-        ensureSectionHeadingVisible(targetSection);
+    if (targetSection.dataset.accordionSection === undefined) {
+      targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    const expanded = isAccordionSectionExpanded(targetSection);
+    if (expanded) {
+      if (toggleIfExpanded) {
+        setAccordionExpanded(targetSection, false).then(() => {
+          if (actionToken && actionToken !== navActionToken) return;
+          ensureSectionHeadingVisible(targetSection);
+        });
+        return;
+      }
+      const distance = Math.abs(window.scrollY - getSectionHeadingTargetY(targetSection));
+      ensureSectionHeadingVisible(targetSection, {
+        behavior: distanceBasedScrollBehavior(distance),
       });
       return;
     }
-    const distance = Math.abs(window.scrollY - getSectionHeadingTargetY(targetSection));
-    ensureSectionHeadingVisible(targetSection, {
-      behavior: distanceBasedScrollBehavior(distance),
-    });
-    return;
-  }
 
-  setAccordionExpanded(targetSection, true).then(() => {
-    window.requestAnimationFrame(() => {
+    setAccordionExpanded(targetSection, true).then(() => {
       window.requestAnimationFrame(() => {
-        if (actionToken && actionToken !== navActionToken) return;
-        ensureSectionHeadingVisible(targetSection);
+        window.requestAnimationFrame(() => {
+          if (actionToken && actionToken !== navActionToken) return;
+          ensureSectionHeadingVisible(targetSection);
+        });
       });
     });
-  });
+  };
+
+  if (primaryMainTab) {
+    window.requestAnimationFrame(proceedScroll);
+  } else {
+    proceedScroll();
+  }
 }
 
 function setupBottomNavigation() {
@@ -4621,6 +4701,8 @@ function init() {
     render();
   });
   cashflowDownloadPdfButton?.addEventListener("click", downloadCashflowPdf);
+  buildPrimaryMainPanels();
+  setupPrimaryMainTabs();
   setupAssetMainTabs();
   setupSectionAccordions();
   setupChildAccordions();
