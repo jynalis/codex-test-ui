@@ -953,6 +953,20 @@ button.danger {
   font-size: 0.86rem;
 }
 
+.basic-registered-plan-list-block {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.basic-registered-plan-count {
+  margin: 0;
+  color: #0d2947;
+  font-size: clamp(1.03rem, 2vw, 1.15rem);
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+
 .split-title h3 {
   background: linear-gradient(90deg, #ffffff 0%, #f3f8ff 100%);
   border: 1px solid #9dbad9;
@@ -1006,7 +1020,6 @@ button.danger {
   padding: 0 12px 12px;
 }
 
-#panel-profile-plan-assets > .child-accordion-panel-inner,
 #panel-recurring-list > .child-accordion-panel-inner,
 #panel-life-event-list > .child-accordion-panel-inner {
   padding-top: 8px;
