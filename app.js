@@ -122,7 +122,7 @@ let activePrimaryMainTab = "dashboard";
 const PRIMARY_MAIN_SECTION_IDS = {
   dashboard: ["section-step-guide", "section-home"],
   assets: ["section-assets"],
-  income: ["section-income-main", "section-expense", "section-history"],
+  income: ["section-income-main"],
   input: ["section-profile", "section-recurring", "section-input", "section-life-events"],
 };
 

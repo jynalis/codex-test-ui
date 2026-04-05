@@ -603,79 +603,79 @@
           </div>
         </div>
         <div class="income-main-content">
-          <div id="income-main-panel-expense-balance" class="income-main-panel is-active" role="tabpanel" aria-labelledby="income-main-tab-expense-balance" data-income-main-panel="expense-balance"></div>
-          <div id="income-main-panel-history" class="income-main-panel" role="tabpanel" aria-labelledby="income-main-tab-history" data-income-main-panel="history" hidden></div>
-        </div>
-      </section>
-
-      <section id="section-expense" class="card section-tone-chart income-main-card" data-nav-section="expense">
-        <div class="income-main-card-header">
-          <div class="section-heading">
-            <p class="section-role-badge">支出の偏りを確認</p>
-            <h2>支出バランス分析</h2>
-            <p class="section-description">
-              どの項目に支出が偏っているかを視覚的に確認できます。
-            </p>
-          </div>
-        </div>
-        <div class="income-main-card-body">
-          <div class="filters shared-view-filters" data-shared-view-filter="expense">
-            <select id="expense-view-mode" aria-label="支出バランス分析表示モード">
-              <option value="month">年月</option>
-              <option value="average">平均</option>
-            </select>
-            <select id="expense-year-filter" aria-label="支出バランス分析表示年"></select>
-            <select id="expense-month-filter" aria-label="支出バランス分析表示月"></select>
-          </div>
-          <div id="expense-chart" class="chart"></div>
-        </div>
-      </section>
-
-      <section id="section-history" class="card section-tone-history income-main-card" data-nav-section="transactions">
-        <div class="income-main-card-header">
-          <div class="section-heading">
-            <p class="section-role-badge">入力内容を確認・修正</p>
-            <h2>取引履歴</h2>
-            <p class="section-description">
-              入力済みの取引内容を時系列で確認・削除できます。
-            </p>
-          </div>
-        </div>
-        <div class="income-main-card-body">
-          <div class="filters history-filters shared-view-filters" data-shared-view-filter="history">
-            <select id="history-year-filter" aria-label="取引履歴表示年"></select>
-            <select id="history-month-filter" aria-label="取引履歴表示月"></select>
-          </div>
-          <section class="history-block">
-            <h3 class="history-block-title">実績の取引履歴</h3>
-            <ul id="transaction-list" class="list transaction-list"></ul>
-          </section>
-          <section id="planned-history-block" class="history-block">
-            <section class="child-accordion history-planned-accordion" data-child-accordion>
-              <button
-                type="button"
-                class="child-accordion-trigger history-planned-trigger"
-                aria-expanded="false"
-                aria-controls="panel-history-planned"
-                id="trigger-history-planned"
-              >
-                <h3 id="planned-history-title">予定の取引履歴</h3>
-                <span class="child-accordion-toggle" aria-hidden="true">＋</span>
-              </button>
-              <div
-                class="child-accordion-panel history-planned-panel"
-                id="panel-history-planned"
-                role="region"
-                aria-labelledby="trigger-history-planned"
-                aria-hidden="true"
-                hidden
-              >
-                <div class="child-accordion-panel-inner history-planned-panel-inner">
-                  <div id="planned-transaction-list" class="planned-transaction-list"></div>
+          <div id="income-main-panel-expense-balance" class="income-main-panel is-active" role="tabpanel" aria-labelledby="income-main-tab-expense-balance" data-income-main-panel="expense-balance">
+            <section id="section-expense" class="card section-tone-chart income-main-card" data-nav-section="expense">
+              <div class="income-main-card-header">
+                <div class="section-heading">
+                  <p class="section-role-badge">支出の偏りを確認</p>
+                  <h2>支出バランス分析</h2>
+                  <p class="section-description">
+                    どの項目に支出が偏っているかを視覚的に確認できます。
+                  </p>
                 </div>
               </div>
+              <div class="income-main-card-body">
+                <div class="filters shared-view-filters" data-shared-view-filter="expense">
+                  <select id="expense-view-mode" aria-label="支出バランス分析表示モード">
+                    <option value="month">年月</option>
+                    <option value="average">平均</option>
+                  </select>
+                  <select id="expense-year-filter" aria-label="支出バランス分析表示年"></select>
+                  <select id="expense-month-filter" aria-label="支出バランス分析表示月"></select>
+                </div>
+                <div id="expense-chart" class="chart"></div>
+              </div>
             </section>
-          </section>
+          </div>
+          <div id="income-main-panel-history" class="income-main-panel" role="tabpanel" aria-labelledby="income-main-tab-history" data-income-main-panel="history" hidden>
+            <section id="section-history" class="card section-tone-history income-main-card" data-nav-section="transactions">
+              <div class="income-main-card-header">
+                <div class="section-heading">
+                  <p class="section-role-badge">入力内容を確認・修正</p>
+                  <h2>取引履歴</h2>
+                  <p class="section-description">
+                    入力済みの取引内容を時系列で確認・削除できます。
+                  </p>
+                </div>
+              </div>
+              <div class="income-main-card-body">
+                <div class="filters history-filters shared-view-filters" data-shared-view-filter="history">
+                  <select id="history-year-filter" aria-label="取引履歴表示年"></select>
+                  <select id="history-month-filter" aria-label="取引履歴表示月"></select>
+                </div>
+                <section class="history-block">
+                  <h3 class="history-block-title">実績の取引履歴</h3>
+                  <ul id="transaction-list" class="list transaction-list"></ul>
+                </section>
+                <section id="planned-history-block" class="history-block">
+                  <section class="child-accordion history-planned-accordion" data-child-accordion>
+                    <button
+                      type="button"
+                      class="child-accordion-trigger history-planned-trigger"
+                      aria-expanded="false"
+                      aria-controls="panel-history-planned"
+                      id="trigger-history-planned"
+                    >
+                      <h3 id="planned-history-title">予定の取引履歴</h3>
+                      <span class="child-accordion-toggle" aria-hidden="true">＋</span>
+                    </button>
+                    <div
+                      class="child-accordion-panel history-planned-panel"
+                      id="panel-history-planned"
+                      role="region"
+                      aria-labelledby="trigger-history-planned"
+                      aria-hidden="true"
+                      hidden
+                    >
+                      <div class="child-accordion-panel-inner history-planned-panel-inner">
+                        <div id="planned-transaction-list" class="planned-transaction-list"></div>
+                      </div>
+                    </div>
+                  </section>
+                </section>
+              </div>
+            </section>
+          </div>
         </div>
       </section>
     </main>
