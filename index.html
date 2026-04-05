@@ -51,6 +51,18 @@
           <div class="primary-main-tabs" role="tablist" aria-label="主表示タブ切替">
             <button
               type="button"
+              id="primary-main-tab-intro"
+              class="primary-main-tab"
+              role="tab"
+              aria-selected="false"
+              aria-controls="primary-main-panel-intro"
+              data-primary-main-tab="intro"
+              tabindex="-1"
+            >
+              初めに
+            </button>
+            <button
+              type="button"
               id="primary-main-tab-dashboard"
               class="primary-main-tab is-active"
               role="tab"
@@ -87,6 +99,14 @@
           </div>
         </div>
         <div class="primary-main-panels">
+          <section
+            id="primary-main-panel-intro"
+            class="primary-main-panel"
+            role="tabpanel"
+            aria-labelledby="primary-main-tab-intro"
+            data-primary-main-panel="intro"
+            hidden
+          ></section>
           <section
             id="primary-main-panel-dashboard"
             class="primary-main-panel is-active"
