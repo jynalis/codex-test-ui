@@ -288,29 +288,10 @@
               <section id="input-sub-panel-basic-registered" class="input-sub-panel" role="tabpanel" aria-labelledby="input-sub-tab-basic-registered" data-input-sub-panel="registered" hidden>
                 <div class="basic-sub-panel-body">
                   <div id="basic-registered-summary" class="input-registered-summary" aria-live="polite"></div>
-                  <div class="child-accordion" data-child-accordion>
-                    <button
-                      type="button"
-                      class="child-accordion-trigger"
-                      aria-expanded="false"
-                      aria-controls="panel-profile-plan-assets"
-                      id="trigger-profile-plan-assets"
-                    >
-                      <h3>積立・保有資産（NISA / iDeCo / 貯蓄性保険 / 貯金）</h3>
-                      <span class="child-accordion-toggle" aria-hidden="true">+</span>
-                    </button>
-                    <div
-                      class="child-accordion-panel"
-                      id="panel-profile-plan-assets"
-                      role="region"
-                      aria-labelledby="trigger-profile-plan-assets"
-                      aria-hidden="true"
-                    >
-                      <div class="child-accordion-panel-inner">
-                        <p class="profile-plan-note">※同じ内容をライフイベントと資産形成の両方へ重複入力しないでください。</p>
-                        <div id="plan-list" class="full plan-list"></div>
-                      </div>
-                    </div>
+                  <div class="basic-registered-plan-list-block">
+                    <h3 id="basic-registered-plan-count" class="basic-registered-plan-count">資産形成プラン 0件</h3>
+                    <p class="profile-plan-note">※同じ内容をライフイベントと資産形成の両方へ重複入力しないでください。</p>
+                    <div id="plan-list" class="full plan-list"></div>
                   </div>
                 </div>
               </section>
