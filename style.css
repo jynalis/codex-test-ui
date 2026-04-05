@@ -1410,6 +1410,15 @@ button.plan-card-trigger {
   font-size: 1rem;
 }
 
+.profile-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.profile-form-actions button {
+  flex: 1;
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -1418,7 +1427,7 @@ button.plan-card-trigger {
   flex-wrap: wrap;
 }
 
-#profile-form > button[type="submit"] {
+#profile-form button[type="submit"] {
   color: #fff;
 }
 

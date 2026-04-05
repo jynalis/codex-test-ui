@@ -32,6 +32,8 @@ const expenseViewFilterControls = {
 const profileForm = document.getElementById("profile-form");
 const entryStartMonthInput = document.getElementById("entry-start-month");
 const birthDateInput = document.getElementById("birth-date");
+const profileSubmitButton = document.getElementById("profile-submit-button") || profileForm?.querySelector('button[type="submit"]');
+const profileCancelButton = document.getElementById("profile-cancel-button");
 const planList = document.getElementById("plan-list");
 const planEditorList = document.getElementById("plan-editor-list");
 const basicRegisteredSummary = document.getElementById("basic-registered-summary");
@@ -114,6 +116,7 @@ let assetForecastRenderRafId = 0;
 let recurringEditingId = null;
 let transactionEditingId = null;
 let lifeEventEditingId = null;
+let basicEditingPlanId = null;
 let sharedYearMonthState = { year: "", month: "" };
 let historyViewState = { year: "", month: "" };
 let sharedAverageViewState = { averageMode: "month" };
@@ -961,6 +964,30 @@ function setLifeEventFormMode(isEditing) {
   if (lifeEventEditStatus) {
     lifeEventEditStatus.hidden = !isEditing;
   }
+}
+
+function setProfileFormMode(isEditing) {
+  if (profileSubmitButton) {
+    profileSubmitButton.textContent = isEditing ? "更新" : "設定を保存";
+  }
+  if (profileCancelButton) {
+    profileCancelButton.hidden = !isEditing;
+  }
+}
+
+function resetProfileFormFields() {
+  const settings = loadSettings();
+  basicEditingPlanId = null;
+  if (profileForm) {
+    profileForm.reset();
+  }
+  entryStartMonthInput.value = resolveEntryStartMonth(settings, loadTransactions());
+  birthDateInput.value = settings?.birthDate || "";
+  if (planEditorList) {
+    planEditorList.innerHTML = "";
+  }
+  renderPlans(settings);
+  setProfileFormMode(false);
 }
 
 function setLifeEventError(message = "") {
@@ -3967,9 +3994,11 @@ function startPlanEdit(planId) {
   const settings = loadSettings();
   const targetPlan = Array.isArray(settings?.plans) ? settings.plans.find((plan) => plan.id === planId) : null;
   if (!targetPlan) return;
+  basicEditingPlanId = targetPlan.id;
   planEditorList.innerHTML = "";
   const targetBlock = createPlanBlock(targetPlan);
   planEditorList.appendChild(targetBlock);
+  setProfileFormMode(true);
   setPrimaryMainTab("input");
   setInputMainTab("basic");
   setInputSubTab("basic", "register");
@@ -4123,6 +4152,8 @@ function saveProfile(event) {
   if (!settings.birthDate || !settings.entryStartMonth) return;
 
   saveSettings(settings);
+  basicEditingPlanId = null;
+  setProfileFormMode(false);
   render();
   setInputSubTab("basic", "registered");
 }
@@ -4141,6 +4172,12 @@ function render() {
   const transactions = syncRecurringAutoTransactions(rawTransactions, recurringExpenses, syncTargetMonth);
   const lifeEvents = loadLifeEvents();
   const settings = loadSettings();
+  if (basicEditingPlanId) {
+    const hasEditingPlan = Array.isArray(settings?.plans) && settings.plans.some((plan) => plan.id === basicEditingPlanId);
+    if (!hasEditingPlan) {
+      resetProfileFormFields();
+    }
+  }
   const assumptions = loadCashflowAssumptions();
   const dataMonths = getMonthsWithData(transactions);
   syncViewFilterOptions(historyViewFilterControls, historyViewState, dataMonths);
@@ -4184,6 +4221,7 @@ function render() {
 
   entryStartMonthInput.value = resolveEntryStartMonth(settings, transactions);
   birthDateInput.value = settings.birthDate || "";
+  setProfileFormMode(Boolean(basicEditingPlanId));
   updateCashflowAssumptionInputs(assumptions);
 
   const historyItems = buildTransactionHistoryItems(transactions, autoTransactions, currentHistoryMonth);
@@ -4991,6 +5029,7 @@ function init() {
   setupFormattedAmountInput(lifeEventAmountInput);
 
   profileForm.addEventListener("submit", saveProfile);
+  profileCancelButton?.addEventListener("click", resetProfileFormFields);
   recurringForm.addEventListener("submit", addRecurringExpense);
   recurringCancelButton?.addEventListener("click", cancelRecurringExpenseEdit);
   lifeEventForm?.addEventListener("submit", addLifeEvent);
