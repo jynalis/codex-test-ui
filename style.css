@@ -229,7 +229,7 @@ header p {
 
 .asset-main-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   padding: 4px;
   border-radius: 14px;
@@ -238,13 +238,19 @@ header p {
 }
 
 .asset-main-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   appearance: none;
   border: 1px solid #a7b2f1;
   background: #f7f8ff;
   color: #31476a;
   border-radius: 10px;
-  padding: 10px 8px;
-  font-size: 0.87rem;
+  padding: 9px 6px;
+  min-height: 46px;
+  font-size: 0.82rem;
+  line-height: 1.32;
+  text-align: center;
   font-weight: 800;
   letter-spacing: 0.01em;
   cursor: pointer;
@@ -699,10 +705,6 @@ button.danger {
   padding: 0 12px 12px;
 }
 
-#panel-assets-composition.child-accordion-panel {
-  padding-inline: 2px;
-}
-
 #panel-profile-plan-assets > .child-accordion-panel-inner,
 #panel-recurring-list > .child-accordion-panel-inner,
 #panel-life-event-list > .child-accordion-panel-inner {
@@ -723,8 +725,8 @@ button.danger {
 #panel-chart .asset-list,
 #panel-chart .pie-legend,
 #panel-chart .pie-legend-item,
-#panel-assets-composition .pie-legend,
-#panel-assets-composition .pie-legend-item {
+#asset-main-panel-current-assets .pie-legend,
+#asset-main-panel-current-assets .pie-legend-item {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -737,23 +739,23 @@ button.danger {
 
 #panel-chart .pie-legend-item > *,
 #panel-chart .asset-list li > span,
-#panel-assets-composition .pie-legend-item > * {
+#asset-main-panel-current-assets .pie-legend-item > * {
   min-width: 0;
 }
 
 #panel-chart .pie-legend-item .category,
 #panel-chart .asset-list li > span,
-#panel-assets-composition .pie-legend-item .category {
+#asset-main-panel-current-assets .pie-legend-item .category {
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
-#panel-assets-composition .pie-legend-item .category {
+#asset-main-panel-current-assets .pie-legend-item .category {
   display: grid;
   gap: 2px;
 }
 
-#panel-assets-composition .pie-legend-item .category-note {
+#asset-main-panel-current-assets .pie-legend-item .category-note {
   white-space: nowrap;
 }
 
@@ -2374,8 +2376,10 @@ button.ghost {
   }
 
   .asset-main-tab {
-    padding: 11px 4px;
-    font-size: 0.8rem;
+    padding: 8px 2px;
+    min-height: 44px;
+    font-size: 0.75rem;
+    line-height: 1.28;
   }
 
   .diagnosis-card {
@@ -2466,12 +2470,12 @@ button.ghost {
   }
 
   #panel-chart .pie-legend,
-  #panel-assets-composition .pie-legend {
+  #asset-main-panel-current-assets .pie-legend {
     gap: 6px;
   }
 
   #panel-chart .pie-legend-item,
-  #panel-assets-composition .pie-legend-item {
+  #asset-main-panel-current-assets .pie-legend-item {
     grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-rows: auto auto;
     column-gap: 6px;
@@ -2481,19 +2485,19 @@ button.ghost {
   }
 
   #panel-chart .pie-legend-item .dot,
-  #panel-assets-composition .pie-legend-item .dot {
+  #asset-main-panel-current-assets .pie-legend-item .dot {
     margin-top: 1px;
   }
 
   #panel-chart .pie-legend-item .category,
-  #panel-assets-composition .pie-legend-item .category {
+  #asset-main-panel-current-assets .pie-legend-item .category {
     grid-column: 2;
     grid-row: 1;
     line-height: 1.3;
   }
 
   #panel-chart .pie-legend-item .value,
-  #panel-assets-composition .pie-legend-item .value {
+  #asset-main-panel-current-assets .pie-legend-item .value {
     grid-column: 2;
     grid-row: 2;
     line-height: 1.25;
@@ -2501,7 +2505,7 @@ button.ghost {
   }
 
   #panel-chart .pie-legend-item .ratio,
-  #panel-assets-composition .pie-legend-item .ratio {
+  #asset-main-panel-current-assets .pie-legend-item .ratio {
     grid-column: 3;
     grid-row: 2;
     align-self: end;

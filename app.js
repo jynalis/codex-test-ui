@@ -35,6 +35,7 @@ const birthDateInput = document.getElementById("birth-date");
 const planList = document.getElementById("plan-list");
 const addPlanButton = document.getElementById("add-plan-button");
 const assetForecast = document.getElementById("asset-forecast");
+const assetCurrentForecast = document.getElementById("asset-current-forecast");
 const assetWithdrawForecast = document.getElementById("asset-withdraw-forecast");
 const recurringForm = document.getElementById("recurring-form");
 const recurringCategoryInput = document.getElementById("recurring-category");
@@ -3408,12 +3409,14 @@ function buildAssetOutlookAtAge({
 }
 
 function renderAssetForecast(settings) {
-  if (!assetForecast || !assetWithdrawForecast) return;
+  if (!assetForecast || !assetCurrentForecast || !assetWithdrawForecast) return;
   assetForecast.innerHTML = "";
+  assetCurrentForecast.innerHTML = "";
   assetWithdrawForecast.innerHTML = "";
   if (!settings.birthDate || settings.plans.length === 0) {
     const emptyMessage = '<p class="chart-empty">生年月日と積立設定を保存すると、現時点と65歳時点の資産試算が表示されます。</p>';
     assetForecast.innerHTML = emptyMessage;
+    assetCurrentForecast.innerHTML = emptyMessage;
     assetWithdrawForecast.innerHTML = emptyMessage;
     return;
   }
@@ -3497,9 +3500,6 @@ function renderAssetForecast(settings) {
     .map((item) => `<li><span>${item.type} 合計</span><strong>${yen.format(item.amount)}</strong></li>`)
     .join("");
 
-  const compositionPanelId = "panel-assets-composition";
-  const compositionTriggerId = "trigger-assets-composition";
-
   assetForecast.innerHTML = `
     <section class="chart asset-outlook">
       <p class="section-description">現在年齢: <strong>${currentAge}歳</strong> / ${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の一覧は、キャッシュフロー表の資産形成額と同じ計算条件で表示しています。</p>
@@ -3510,6 +3510,13 @@ function renderAssetForecast(settings) {
       ${rows ? `<ul class="asset-list">${rows}</ul>` : `<p class="chart-empty">${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の評価対象となる契約はありません。</p>`}
       <h4>${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の想定資産額（種別別）</h4>
       ${typeTotalsHtml ? `<ul class="asset-list">${typeTotalsHtml}</ul>` : `<p class="chart-empty">${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の評価対象となる契約はありません。</p>`}
+    </section>
+  `;
+
+  assetCurrentForecast.innerHTML = `
+    <section class="chart asset-composition">
+      <h4>現状資産の構成比</h4>
+      <p class="section-description">現在入力されている資産形成の契約（積立・一括入金）の実績をもとに算出しています（基準日: ${currentAssetBaseDate}）。</p>
     </section>
   `;
   assetWithdrawForecast.innerHTML = `
@@ -3524,39 +3531,8 @@ function renderAssetForecast(settings) {
     </section>
   `;
 
-  const compositionAccordion = document.createElement("section");
-  compositionAccordion.className = "child-accordion";
-  compositionAccordion.dataset.childAccordion = "";
-  compositionAccordion.innerHTML = `
-    <button
-      type="button"
-      class="child-accordion-trigger"
-      aria-expanded="false"
-      aria-controls="${compositionPanelId}"
-      id="${compositionTriggerId}"
-    >
-      <h3>現在資産形成の構成比</h3>
-      <span class="child-accordion-toggle" aria-hidden="true">+</span>
-    </button>
-    <div
-      class="child-accordion-panel"
-      id="${compositionPanelId}"
-      role="region"
-      aria-labelledby="${compositionTriggerId}"
-      aria-hidden="true"
-    >
-      <div class="child-accordion-panel-inner">
-        <section class="chart asset-composition">
-          <p class="section-description">現在入力されている資産形成の契約（積立・一括入金）の実績をもとに算出しています（基準日: ${currentAssetBaseDate}）。</p>
-        </section>
-      </div>
-    </div>
-  `;
-
-  const chartSection = compositionAccordion.querySelector(".asset-composition");
+  const chartSection = assetCurrentForecast.querySelector(".asset-composition");
   if (!chartSection) {
-    assetForecast.appendChild(compositionAccordion);
-    setupChildAccordions(assetForecast);
     return;
   }
 
@@ -3566,8 +3542,6 @@ function renderAssetForecast(settings) {
     empty.className = "chart-empty";
     empty.textContent = "データがありません";
     chartSection.appendChild(empty);
-    assetForecast.appendChild(compositionAccordion);
-    setupChildAccordions(assetForecast);
     return;
   }
 
@@ -3581,9 +3555,6 @@ function renderAssetForecast(settings) {
   });
   chartSection.appendChild(pieWrap);
   chartSection.appendChild(legend);
-
-  assetForecast.appendChild(compositionAccordion);
-  setupChildAccordions(assetForecast);
 }
 
 function setAssetMainTab(tabName = "formation") {
