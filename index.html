@@ -228,142 +228,102 @@
         </div>
       </section>
 
-      <section id="section-profile" class="card section-tone-profile accordion-section" data-nav-section="home" data-accordion-section>
-        <button type="button" class="accordion-trigger" aria-expanded="false" aria-controls="panel-profile" id="trigger-profile">
-          <div class="section-heading">
-            <p class="section-role-badge">最初に設定</p>
-            <h2>基本情報・資産形成設定</h2>
-            <p class="section-description">
-              家計簿の開始時期や生年月日、積立・保有資産の前提を設定します。
-            </p>
-          </div>
-          <span class="accordion-toggle-icon" aria-hidden="true">＋</span>
-        </button>
-        <div class="accordion-panel" id="panel-profile" role="region" aria-labelledby="trigger-profile">
-          <div class="accordion-panel-inner">
-            <div class="input-sub-switch" role="tablist" aria-label="基本タブの切り替え" data-input-sub-switch="basic">
-              <button type="button" id="input-sub-tab-basic-register" class="input-sub-tab is-active" role="tab" aria-selected="true" aria-controls="input-sub-panel-basic-register" data-input-sub-tab="register">登録</button>
-              <button type="button" id="input-sub-tab-basic-registered" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-basic-registered" data-input-sub-tab="registered" tabindex="-1">登録済</button>
-            </div>
-            <div class="input-sub-content" data-input-sub-content="basic">
-              <section id="input-sub-panel-basic-register" class="input-sub-panel is-active" role="tabpanel" aria-labelledby="input-sub-tab-basic-register" data-input-sub-panel="register">
-                <div class="basic-sub-panel-body">
-                  <form id="profile-form" class="grid">
-                    <label>
-                      記入開始月
-                      <input type="month" id="entry-start-month" required />
-                    </label>
-                    <label>
-                      生年月日
-                      <input type="date" id="birth-date" required />
-                    </label>
-                    <section class="full profile-plan-register-section" aria-labelledby="profile-plan-register-heading">
-                      <h3 id="profile-plan-register-heading" class="profile-plan-register-heading">資産形成を登録</h3>
-                    </section>
-                    <div id="plan-editor-list" class="full plan-editor-list"></div>
-                    <div class="full profile-form-actions">
-                      <button type="submit" id="profile-submit-button" class="profile-save-settings-button">設定を保存</button>
-                      <button type="button" id="profile-cancel-button" class="ghost" hidden>キャンセル</button>
-                    </div>
-                  </form>
+      <section id="section-profile" class="card section-tone-profile" data-nav-section="home">
+        <div class="input-sub-switch" role="tablist" aria-label="基本タブの切り替え" data-input-sub-switch="basic">
+          <button type="button" id="input-sub-tab-basic-register" class="input-sub-tab is-active" role="tab" aria-selected="true" aria-controls="input-sub-panel-basic-register" data-input-sub-tab="register">登録</button>
+          <button type="button" id="input-sub-tab-basic-registered" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-basic-registered" data-input-sub-tab="registered" tabindex="-1">登録済</button>
+        </div>
+        <div class="input-sub-content" data-input-sub-content="basic">
+          <section id="input-sub-panel-basic-register" class="input-sub-panel is-active" role="tabpanel" aria-labelledby="input-sub-tab-basic-register" data-input-sub-panel="register">
+            <div class="basic-sub-panel-body">
+              <form id="profile-form" class="grid">
+                <label>
+                  記入開始月
+                  <input type="month" id="entry-start-month" required />
+                </label>
+                <label>
+                  生年月日
+                  <input type="date" id="birth-date" required />
+                </label>
+                <section class="full profile-plan-register-section" aria-labelledby="profile-plan-register-heading">
+                  <h3 id="profile-plan-register-heading" class="profile-plan-register-heading">資産形成を登録</h3>
+                </section>
+                <div id="plan-editor-list" class="full plan-editor-list"></div>
+                <div class="full profile-form-actions">
+                  <button type="submit" id="profile-submit-button" class="profile-save-settings-button">設定を保存</button>
+                  <button type="button" id="profile-cancel-button" class="ghost" hidden>キャンセル</button>
                 </div>
-              </section>
-              <section id="input-sub-panel-basic-registered" class="input-sub-panel" role="tabpanel" aria-labelledby="input-sub-tab-basic-registered" data-input-sub-panel="registered" hidden>
-                <div class="basic-sub-panel-body">
-                  <div id="basic-registered-summary" class="input-registered-summary" aria-live="polite"></div>
-                  <div class="basic-registered-plan-list-block">
-                    <h3 id="basic-registered-plan-count" class="basic-registered-plan-count">資産形成プラン 0件</h3>
-                    <p class="profile-plan-note">※同じ内容をライフイベントと資産形成の両方へ重複入力しないでください。</p>
-                    <div id="plan-list" class="full plan-list"></div>
-                  </div>
-                </div>
-              </section>
+              </form>
             </div>
-          </div>
+          </section>
+          <section id="input-sub-panel-basic-registered" class="input-sub-panel" role="tabpanel" aria-labelledby="input-sub-tab-basic-registered" data-input-sub-panel="registered" hidden>
+            <div class="basic-sub-panel-body">
+              <div id="basic-registered-summary" class="input-registered-summary" aria-live="polite"></div>
+              <div class="basic-registered-plan-list-block">
+                <h3 id="basic-registered-plan-count" class="basic-registered-plan-count">資産形成プラン 0件</h3>
+                <p class="profile-plan-note">※同じ内容をライフイベントと資産形成の両方へ重複入力しないでください。</p>
+                <div id="plan-list" class="full plan-list"></div>
+              </div>
+            </div>
+          </section>
         </div>
       </section>
 
 
-      <section id="section-recurring" class="card section-tone-recurring accordion-section" data-accordion-section>
-        <button type="button" class="accordion-trigger" aria-expanded="false" aria-controls="panel-recurring" id="trigger-recurring">
-          <div class="section-heading">
-            <p class="section-role-badge">毎月の固定費を登録</p>
-            <h2>定期支出入力</h2>
-            <p class="section-description">
-              毎月の固定支出を登録すると、該当月の取引履歴へ自動反映します。
-            </p>
-          </div>
-          <span class="accordion-toggle-icon" aria-hidden="true">＋</span>
-        </button>
-        <div class="accordion-panel" id="panel-recurring" role="region" aria-labelledby="trigger-recurring">
-          <div class="accordion-panel-inner">
-            <div class="input-sub-switch" role="tablist" aria-label="定期支出タブの切り替え" data-input-sub-switch="recurring">
-              <button type="button" id="input-sub-tab-recurring-register" class="input-sub-tab is-active" role="tab" aria-selected="true" aria-controls="input-sub-panel-recurring-register" data-input-sub-tab="register">登録</button>
-              <button type="button" id="input-sub-tab-recurring-registered" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-recurring-registered" data-input-sub-tab="registered" tabindex="-1">登録済</button>
-            </div>
-            <div class="input-sub-content" data-input-sub-content="recurring">
-              <section id="input-sub-panel-recurring-register" class="input-sub-panel is-active" role="tabpanel" aria-labelledby="input-sub-tab-recurring-register" data-input-sub-panel="register">
-                <form id="recurring-form" class="grid recurring-form" autocomplete="off">
-                  <p id="recurring-edit-status" class="recurring-edit-status" aria-live="polite" hidden>
-                    定期支出を編集中
-                  </p>
-                  <label>
-                    支出項目名
-                    <select id="recurring-category" required></select>
-                  </label>
-                  <label>
-                    金額 (円)
-                    <input id="recurring-amount" type="text" inputmode="numeric" placeholder="例: 68,000" required />
-                  </label>
-                  <label>
-                    引落日
-                    <select id="recurring-day" required></select>
-                  </label>
-                  <label>
-                    開始月
-                    <input id="recurring-start-month" type="month" required />
-                  </label>
-                  <label>
-                    終了月（任意）
-                    <input id="recurring-end-month" type="month" />
-                  </label>
-                  <label class="full">
-                    メモ（任意）
-                    <input id="recurring-memo" type="text" maxlength="60" placeholder="任意" />
-                  </label>
-                  <div class="full recurring-form-actions">
-                    <button type="submit" id="recurring-submit-button">追加</button>
-                    <button type="button" id="recurring-cancel-button" class="ghost" hidden>キャンセル</button>
-                  </div>
-                </form>
-              </section>
-              <section id="input-sub-panel-recurring-registered" class="input-sub-panel" role="tabpanel" aria-labelledby="input-sub-tab-recurring-registered" data-input-sub-panel="registered" hidden>
-                <div id="recurring-list" class="recurring-list"></div>
-              </section>
-            </div>
-          </div>
+      <section id="section-recurring" class="card section-tone-recurring">
+        <div class="input-sub-switch" role="tablist" aria-label="定期支出タブの切り替え" data-input-sub-switch="recurring">
+          <button type="button" id="input-sub-tab-recurring-register" class="input-sub-tab is-active" role="tab" aria-selected="true" aria-controls="input-sub-panel-recurring-register" data-input-sub-tab="register">登録</button>
+          <button type="button" id="input-sub-tab-recurring-registered" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-recurring-registered" data-input-sub-tab="registered" tabindex="-1">登録済</button>
+        </div>
+        <div class="input-sub-content" data-input-sub-content="recurring">
+          <section id="input-sub-panel-recurring-register" class="input-sub-panel is-active" role="tabpanel" aria-labelledby="input-sub-tab-recurring-register" data-input-sub-panel="register">
+            <form id="recurring-form" class="grid recurring-form" autocomplete="off">
+              <p id="recurring-edit-status" class="recurring-edit-status" aria-live="polite" hidden>
+                定期支出を編集中
+              </p>
+              <label>
+                支出項目名
+                <select id="recurring-category" required></select>
+              </label>
+              <label>
+                金額 (円)
+                <input id="recurring-amount" type="text" inputmode="numeric" placeholder="例: 68,000" required />
+              </label>
+              <label>
+                引落日
+                <select id="recurring-day" required></select>
+              </label>
+              <label>
+                開始月
+                <input id="recurring-start-month" type="month" required />
+              </label>
+              <label>
+                終了月（任意）
+                <input id="recurring-end-month" type="month" />
+              </label>
+              <label class="full">
+                メモ（任意）
+                <input id="recurring-memo" type="text" maxlength="60" placeholder="任意" />
+              </label>
+              <div class="full recurring-form-actions">
+                <button type="submit" id="recurring-submit-button">追加</button>
+                <button type="button" id="recurring-cancel-button" class="ghost" hidden>キャンセル</button>
+              </div>
+            </form>
+          </section>
+          <section id="input-sub-panel-recurring-registered" class="input-sub-panel" role="tabpanel" aria-labelledby="input-sub-tab-recurring-registered" data-input-sub-panel="registered" hidden>
+            <div id="recurring-list" class="recurring-list"></div>
+          </section>
         </div>
       </section>
 
-      <section id="section-input" class="card section-tone-input accordion-section" data-nav-section="input" data-accordion-section>
-        <button type="button" class="accordion-trigger" aria-expanded="false" aria-controls="panel-input" id="trigger-input">
-          <div class="section-heading">
-            <p class="section-role-badge">日々の家計を記録</p>
-            <h2>収支を入力</h2>
-            <p class="section-description">
-              日々の収入・支出を追加して、今月の家計を記録します。
-            </p>
-          </div>
-          <span class="accordion-toggle-icon" aria-hidden="true">＋</span>
-        </button>
-        <div class="accordion-panel" id="panel-input" role="region" aria-labelledby="trigger-input">
-          <div class="accordion-panel-inner">
-            <div class="input-sub-switch" role="tablist" aria-label="毎月収支タブの切り替え" data-input-sub-switch="monthly">
-              <button type="button" id="input-sub-tab-monthly-register" class="input-sub-tab is-active" role="tab" aria-selected="true" aria-controls="input-sub-panel-monthly-register" data-input-sub-tab="register">登録</button>
-              <button type="button" id="input-sub-tab-monthly-history" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-monthly-history" data-input-sub-tab="history" tabindex="-1">取引履歴</button>
-              <button type="button" id="input-sub-tab-monthly-expense-balance" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-monthly-expense-balance" data-input-sub-tab="expense-balance" tabindex="-1">支出バランス分析</button>
-            </div>
-            <div class="input-sub-content" data-input-sub-content="monthly">
+      <section id="section-input" class="card section-tone-input" data-nav-section="input">
+        <div class="input-sub-switch" role="tablist" aria-label="毎月収支タブの切り替え" data-input-sub-switch="monthly">
+          <button type="button" id="input-sub-tab-monthly-register" class="input-sub-tab is-active" role="tab" aria-selected="true" aria-controls="input-sub-panel-monthly-register" data-input-sub-tab="register">登録</button>
+          <button type="button" id="input-sub-tab-monthly-history" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-monthly-history" data-input-sub-tab="history" tabindex="-1">取引履歴</button>
+          <button type="button" id="input-sub-tab-monthly-expense-balance" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-monthly-expense-balance" data-input-sub-tab="expense-balance" tabindex="-1">支出バランス分析</button>
+        </div>
+        <div class="input-sub-content" data-input-sub-content="monthly">
               <section id="input-sub-panel-monthly-register" class="input-sub-panel is-active" role="tabpanel" aria-labelledby="input-sub-tab-monthly-register" data-input-sub-panel="register">
                 <form id="transaction-form" class="grid">
                   <p id="transaction-edit-status" class="transaction-edit-status full" aria-live="polite" hidden>
@@ -470,29 +430,15 @@
                   </div>
                 </section>
               </section>
-            </div>
-          </div>
         </div>
       </section>
 
-      <section id="section-life-events" class="card section-tone-life-events accordion-section" data-accordion-section>
-        <button type="button" class="accordion-trigger" aria-expanded="false" aria-controls="panel-life-events" id="trigger-life-events">
-          <div class="section-heading">
-            <p class="section-role-badge">将来の臨時収支を登録</p>
-            <h2>ライフイベント入力</h2>
-            <p class="section-description">
-              60歳までの臨時収入・臨時支出を登録して、将来のイベントを整理します。
-            </p>
-          </div>
-          <span class="accordion-toggle-icon" aria-hidden="true">＋</span>
-        </button>
-        <div class="accordion-panel" id="panel-life-events" role="region" aria-labelledby="trigger-life-events">
-          <div class="accordion-panel-inner">
-            <div class="input-sub-switch" role="tablist" aria-label="ライフタブの切り替え" data-input-sub-switch="life">
-              <button type="button" id="input-sub-tab-life-register" class="input-sub-tab is-active" role="tab" aria-selected="true" aria-controls="input-sub-panel-life-register" data-input-sub-tab="register">登録</button>
-              <button type="button" id="input-sub-tab-life-registered" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-life-registered" data-input-sub-tab="registered" tabindex="-1">登録済</button>
-            </div>
-            <div class="input-sub-content" data-input-sub-content="life">
+      <section id="section-life-events" class="card section-tone-life-events">
+        <div class="input-sub-switch" role="tablist" aria-label="ライフタブの切り替え" data-input-sub-switch="life">
+          <button type="button" id="input-sub-tab-life-register" class="input-sub-tab is-active" role="tab" aria-selected="true" aria-controls="input-sub-panel-life-register" data-input-sub-tab="register">登録</button>
+          <button type="button" id="input-sub-tab-life-registered" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-life-registered" data-input-sub-tab="registered" tabindex="-1">登録済</button>
+        </div>
+        <div class="input-sub-content" data-input-sub-content="life">
               <section id="input-sub-panel-life-register" class="input-sub-panel is-active" role="tabpanel" aria-labelledby="input-sub-tab-life-register" data-input-sub-panel="register">
                 <form id="life-event-form" class="grid life-event-form" autocomplete="off">
                   <p id="life-event-edit-status" class="life-event-edit-status full" aria-live="polite" hidden>
@@ -533,8 +479,6 @@
               <section id="input-sub-panel-life-registered" class="input-sub-panel" role="tabpanel" aria-labelledby="input-sub-tab-life-registered" data-input-sub-panel="registered" hidden>
                 <div id="life-event-list" class="life-event-list"></div>
               </section>
-            </div>
-          </div>
         </div>
       </section>
 
