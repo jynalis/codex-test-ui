@@ -142,11 +142,10 @@ const INPUT_MAIN_SECTION_IDS = {
 };
 
 const NAV_TARGETS = {
-  basic: "section-profile",
-  recurring: "section-recurring",
-  "income-expense": "section-input",
-  life: "section-life-events",
+  top: "section-home",
 };
+
+const INPUT_SHORTCUT_NAV_TARGETS = new Set(["basic", "recurring", "income-expense", "life"]);
 
 const DEFAULT_CASHFLOW_ASSUMPTIONS = {
   salaryGrowthRateBefore60: 1,
@@ -3669,6 +3668,12 @@ function setPrimaryMainTab(tabName = "dashboard") {
   if (nextTab === "assets") {
     queueAssetForecastRender(true);
   }
+
+  if (nextTab === "dashboard") {
+    setBottomNavActive("top");
+  } else {
+    setBottomNavActive("__none__");
+  }
 }
 
 function setInputMainTab(tabName = "basic") {
@@ -4540,10 +4545,21 @@ function scrollToNavSection(target) {
     return;
   }
 
+  if (INPUT_SHORTCUT_NAV_TARGETS.has(target)) {
+    setPrimaryMainTab("input");
+    window.requestAnimationFrame(() => {
+      if (actionToken !== navActionToken) return;
+      const inputMainSection = document.getElementById("section-input-main");
+      if (!inputMainSection) return;
+      ensureSectionHeadingVisible(inputMainSection, { behavior: "smooth" });
+    });
+    return;
+  }
+
   const sectionId = NAV_TARGETS[target];
   if (!sectionId) return;
   setBottomNavActive(target);
-  scrollToSection(sectionId, { actionToken, toggleIfExpanded: true });
+  scrollToSection(sectionId, { actionToken, toggleIfExpanded: true, syncInputMainTabFromSection: false });
 }
 
 function closeNonDashboardAccordions() {
@@ -4565,12 +4581,20 @@ function scrollToDashboardHeading() {
   });
 }
 
-function scrollToSection(sectionId, { actionToken, toggleIfExpanded = false, assetMainTab } = {}) {
+function scrollToSection(
+  sectionId,
+  {
+    actionToken,
+    toggleIfExpanded = false,
+    assetMainTab,
+    syncInputMainTabFromSection = true,
+  } = {}
+) {
   const targetSection = sectionId ? document.getElementById(sectionId) : null;
   if (!targetSection) return;
   const primaryMainTab = resolvePrimaryMainTabBySectionId(sectionId);
   const incomeMainTab = resolveIncomeMainTabBySectionId(sectionId);
-  const inputMainTab = resolveInputMainTabBySectionId(sectionId);
+  const inputMainTab = syncInputMainTabFromSection ? resolveInputMainTabBySectionId(sectionId) : "";
   if (primaryMainTab) {
     setPrimaryMainTab(primaryMainTab);
   }
