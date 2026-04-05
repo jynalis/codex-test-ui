@@ -135,7 +135,6 @@ const activeInputSubTabs = {
 const PRIMARY_MAIN_SECTION_IDS = {
   dashboard: ["section-step-guide", "section-home"],
   assets: ["section-assets"],
-  income: [],
   input: ["section-input-main", "section-profile", "section-recurring", "section-life-events", "section-input"],
 };
 
