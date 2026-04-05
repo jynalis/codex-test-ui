@@ -52,7 +52,7 @@ const recurringList = document.getElementById("recurring-list");
 const recurringSubmitButton = document.getElementById("recurring-submit-button") || recurringForm?.querySelector('button[type="submit"]');
 const recurringCancelButton = document.getElementById("recurring-cancel-button");
 const recurringEditStatus = document.getElementById("recurring-edit-status");
-const recurringSection = document.getElementById("trigger-recurring")?.closest("[data-accordion-section]");
+const recurringSection = document.getElementById("section-recurring");
 const inputSection = document.getElementById("section-input");
 
 const lifeEventForm = document.getElementById("life-event-form");
@@ -792,7 +792,6 @@ function startTransactionEdit(id) {
   setInputSubTab("monthly", "register");
 
   if (inputSection) {
-    setAccordionExpanded(inputSection, true);
     inputSection.scrollIntoView({ behavior: "smooth", block: "start" });
   } else {
     form.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -804,9 +803,6 @@ function startRecurringExpenseEdit(id) {
   const recurringExpense = loadRecurringExpenses().find((item) => item.id === id);
   if (!recurringExpense) return;
 
-  if (recurringSection) {
-    setAccordionExpanded(recurringSection, true);
-  }
   setPrimaryMainTab("input");
   setInputMainTab("recurring");
   setInputSubTab("recurring", "register");
@@ -1013,9 +1009,6 @@ function resetLifeEventFormFields() {
 function startLifeEventEdit(id) {
   const lifeEvent = loadLifeEvents().find((item) => item.id === id);
   if (!lifeEvent) return;
-  if (lifeEventsSection) {
-    setAccordionExpanded(lifeEventsSection, true);
-  }
   setPrimaryMainTab("input");
   setInputMainTab("life");
   setInputSubTab("life", "register");
@@ -3870,7 +3863,6 @@ function startPlanEdit(planId) {
   setPrimaryMainTab("input");
   setInputMainTab("basic");
   setInputSubTab("basic", "register");
-  setAccordionExpanded(document.getElementById("section-profile"), true);
   targetBlock.scrollIntoView({ behavior: "smooth", block: "center" });
   targetBlock.querySelector(".plan-name")?.focus();
 }
