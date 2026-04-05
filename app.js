@@ -145,7 +145,7 @@ const INPUT_MAIN_SECTION_IDS = {
   basic: ["section-profile"],
   recurring: ["section-recurring"],
   life: ["section-life-events"],
-  monthly: ["section-input", "section-expense"],
+  monthly: ["section-input"],
 };
 
 const INPUT_SUB_SECTION_IDS = {
