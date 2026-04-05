@@ -132,7 +132,7 @@ const PRIMARY_MAIN_SECTION_IDS = {
   dashboard: ["section-step-guide", "section-home"],
   assets: ["section-assets"],
   income: ["section-income-main"],
-  input: ["section-input-main", "section-profile", "section-recurring", "section-life-events", "section-input", "section-history"],
+  input: ["section-input-main", "section-profile", "section-recurring", "section-life-events", "section-input"],
 };
 
 const INCOME_MAIN_SECTION_IDS = {
@@ -143,7 +143,7 @@ const INPUT_MAIN_SECTION_IDS = {
   basic: ["section-profile"],
   recurring: ["section-recurring"],
   life: ["section-life-events"],
-  monthly: ["section-input", "section-history"],
+  monthly: ["section-input"],
 };
 
 const INPUT_SUB_SECTION_IDS = {
@@ -3663,13 +3663,17 @@ function resolveIncomeMainTabBySectionId(sectionId = "") {
 function resolveInputMainTabBySectionId(sectionId = "") {
   if (!sectionId) return "";
   const entry = Object.entries(INPUT_MAIN_SECTION_IDS).find(([, sectionIds]) => sectionIds.includes(sectionId));
-  return entry?.[0] || "";
+  if (entry?.[0]) return entry[0];
+  const inputSubTab = resolveInputSubTabBySectionId(sectionId);
+  return inputSubTab.group || "";
 }
 
 function resolvePrimaryMainTabBySectionId(sectionId = "") {
   if (!sectionId) return "";
   const entry = Object.entries(PRIMARY_MAIN_SECTION_IDS).find(([, sectionIds]) => sectionIds.includes(sectionId));
-  return entry?.[0] || "";
+  if (entry?.[0]) return entry[0];
+  const inputSubTab = resolveInputSubTabBySectionId(sectionId);
+  return inputSubTab.group ? "input" : "";
 }
 
 function resolveInputSubTabBySectionId(sectionId = "") {
