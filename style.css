@@ -524,6 +524,10 @@ header p {
   margin-bottom: 12px;
 }
 
+.input-sub-switch[data-input-sub-switch="monthly"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .input-sub-tab {
   appearance: none;
   border: 1px solid #e9bf87;

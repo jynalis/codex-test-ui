@@ -135,19 +135,17 @@ const activeInputSubTabs = {
 const PRIMARY_MAIN_SECTION_IDS = {
   dashboard: ["section-step-guide", "section-home"],
   assets: ["section-assets"],
-  income: ["section-income-main"],
+  income: [],
   input: ["section-input-main", "section-profile", "section-recurring", "section-life-events", "section-input"],
 };
 
-const INCOME_MAIN_SECTION_IDS = {
-  "expense-balance": ["section-expense"],
-};
+const INCOME_MAIN_SECTION_IDS = {};
 
 const INPUT_MAIN_SECTION_IDS = {
   basic: ["section-profile"],
   recurring: ["section-recurring"],
   life: ["section-life-events"],
-  monthly: ["section-input"],
+  monthly: ["section-input", "section-expense"],
 };
 
 const INPUT_SUB_SECTION_IDS = {
@@ -166,6 +164,7 @@ const INPUT_SUB_SECTION_IDS = {
   monthly: {
     register: ["transaction-form"],
     history: ["section-history"],
+    "expense-balance": ["section-expense"],
   },
 };
 
