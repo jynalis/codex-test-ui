@@ -1443,14 +1443,8 @@ button.plan-card-trigger {
   flex-wrap: wrap;
 }
 
-#profile-form > button[type="submit"],
-.remove-plan {
+#profile-form > button[type="submit"] {
   color: #fff;
-}
-
-.remove-plan {
-  min-height: 46px;
-  margin-top: 8px;
 }
 
 .dashboard-section {

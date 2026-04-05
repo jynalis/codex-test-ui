@@ -3931,7 +3931,6 @@ function createPlanBlock(plan = {}) {
           </div>
           <div class="monthly-list"></div>
         </div>
-        <button type="button" class="danger remove-plan">この枠を削除</button>
       </div>
     </div>
   `;
@@ -3984,10 +3983,6 @@ function createPlanBlock(plan = {}) {
 
   wrap.querySelector(".add-monthly").addEventListener("click", () => {
     monthlyList.appendChild(createHistoryRow({ type: "monthly" }));
-  });
-
-  wrap.querySelector(".remove-plan").addEventListener("click", () => {
-    wrap.remove();
   });
 
   return wrap;
