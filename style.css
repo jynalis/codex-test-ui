@@ -375,6 +375,81 @@ header p {
   border-top: 5px solid #37649c;
 }
 
+.income-main-section {
+  display: grid;
+  gap: 14px;
+}
+
+.income-main-tabbar {
+  width: 100%;
+}
+
+.income-main-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 4px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fff1f8 0%, #fee8f3 100%);
+  border: 1px solid #f2b6d3;
+}
+
+.income-main-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  border: 1px solid #e9a4c6;
+  background: #fff9fc;
+  color: #5a3d52;
+  border-radius: 10px;
+  padding: 9px 8px;
+  min-height: 46px;
+  font-size: 0.82rem;
+  line-height: 1.32;
+  text-align: center;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.income-main-tab.is-active {
+  background: linear-gradient(180deg, #c04984 0%, #a43c70 100%);
+  color: #fff;
+  border-color: #a43c70;
+  box-shadow: 0 10px 18px rgb(160 53 108 / 25%);
+}
+
+.income-main-content {
+  min-width: 0;
+}
+
+.income-main-panel {
+  display: none;
+  min-width: 0;
+}
+
+.income-main-panel.is-active {
+  display: block;
+}
+
+.income-main-panel[hidden] {
+  display: none !important;
+}
+
+.income-main-card {
+  padding: 14px;
+}
+
+.income-main-card-header {
+  margin-bottom: 12px;
+}
+
+.income-main-card-body {
+  min-width: 0;
+}
+
 .section-heading {
   display: grid;
   gap: 4px;

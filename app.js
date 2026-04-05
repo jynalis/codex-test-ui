@@ -88,6 +88,8 @@ const dashboardSection = document.getElementById("section-home");
 const assetsSection = document.getElementById("section-assets");
 const assetMainTabs = Array.from(document.querySelectorAll("[data-asset-main-tab]"));
 const assetMainPanels = Array.from(document.querySelectorAll("[data-asset-main-panel]"));
+const incomeMainTabs = Array.from(document.querySelectorAll("[data-income-main-tab]"));
+const incomeMainPanels = Array.from(document.querySelectorAll("[data-income-main-panel]"));
 const primaryMainTabs = Array.from(document.querySelectorAll("[data-primary-main-tab]"));
 const primaryMainPanels = Array.from(document.querySelectorAll("[data-primary-main-panel]"));
 const cashflowSettingsForm = document.getElementById("cashflow-settings-form");
@@ -114,13 +116,19 @@ let historyViewState = { year: "", month: "" };
 let sharedAverageViewState = { averageMode: "month" };
 let dashboardAssetGrowthMetric = "assetFormationBalance";
 let activeAssetMainTab = "formation";
+let activeIncomeMainTab = "expense-balance";
 let activePrimaryMainTab = "dashboard";
 
 const PRIMARY_MAIN_SECTION_IDS = {
   dashboard: ["section-step-guide", "section-home"],
   assets: ["section-assets"],
-  income: ["section-expense", "section-history"],
+  income: ["section-income-main", "section-expense", "section-history"],
   input: ["section-profile", "section-recurring", "section-input", "section-life-events"],
+};
+
+const INCOME_MAIN_SECTION_IDS = {
+  "expense-balance": ["section-expense"],
+  history: ["section-history"],
 };
 
 const NAV_TARGETS = {
@@ -3589,6 +3597,33 @@ function setAssetMainTab(tabName = "formation") {
   });
 }
 
+function setIncomeMainTab(tabName = "expense-balance") {
+  if (incomeMainTabs.length === 0 || incomeMainPanels.length === 0) return;
+  const requestedTab = tabName || "expense-balance";
+  const hasRequestedTab = incomeMainTabs.some((button) => button.dataset.incomeMainTab === requestedTab);
+  const nextTab = hasRequestedTab ? requestedTab : "expense-balance";
+  activeIncomeMainTab = nextTab;
+
+  incomeMainTabs.forEach((button) => {
+    const isActive = button.dataset.incomeMainTab === nextTab;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    button.tabIndex = isActive ? 0 : -1;
+  });
+
+  incomeMainPanels.forEach((panel) => {
+    const isActive = panel.dataset.incomeMainPanel === nextTab;
+    panel.hidden = !isActive;
+    panel.classList.toggle("is-active", isActive);
+  });
+}
+
+function resolveIncomeMainTabBySectionId(sectionId = "") {
+  if (!sectionId) return "";
+  const entry = Object.entries(INCOME_MAIN_SECTION_IDS).find(([, sectionIds]) => sectionIds.includes(sectionId));
+  return entry?.[0] || "";
+}
+
 function resolvePrimaryMainTabBySectionId(sectionId = "") {
   if (!sectionId) return "";
   const entry = Object.entries(PRIMARY_MAIN_SECTION_IDS).find(([, sectionIds]) => sectionIds.includes(sectionId));
@@ -3643,6 +3678,19 @@ function buildPrimaryMainPanels() {
   });
 }
 
+function buildIncomeMainPanels() {
+  if (incomeMainPanels.length === 0) return;
+  Object.entries(INCOME_MAIN_SECTION_IDS).forEach(([tabName, sectionIds]) => {
+    const panel = document.querySelector(`[data-income-main-panel="${tabName}"]`);
+    if (!panel) return;
+    sectionIds.forEach((sectionId) => {
+      const section = document.getElementById(sectionId);
+      if (!section) return;
+      panel.appendChild(section);
+    });
+  });
+}
+
 function setupAssetMainTabs() {
   if (assetMainTabs.length === 0) return;
   assetMainTabs.forEach((button) => {
@@ -3651,6 +3699,16 @@ function setupAssetMainTabs() {
     });
   });
   setAssetMainTab(activeAssetMainTab);
+}
+
+function setupIncomeMainTabs() {
+  if (incomeMainTabs.length === 0) return;
+  incomeMainTabs.forEach((button) => {
+    button.addEventListener("click", () => {
+      setIncomeMainTab(button.dataset.incomeMainTab || "expense-balance");
+    });
+  });
+  setIncomeMainTab(activeIncomeMainTab);
 }
 
 function createHistoryRow({ type, month = "", amount = "" } = {}) {
@@ -4451,8 +4509,12 @@ function scrollToSection(sectionId, { actionToken, toggleIfExpanded = false, ass
   const targetSection = sectionId ? document.getElementById(sectionId) : null;
   if (!targetSection) return;
   const primaryMainTab = resolvePrimaryMainTabBySectionId(sectionId);
+  const incomeMainTab = resolveIncomeMainTabBySectionId(sectionId);
   if (primaryMainTab) {
     setPrimaryMainTab(primaryMainTab);
+  }
+  if (incomeMainTab) {
+    setIncomeMainTab(incomeMainTab);
   }
 
   const proceedScroll = () => {
@@ -4702,8 +4764,10 @@ function init() {
   });
   cashflowDownloadPdfButton?.addEventListener("click", downloadCashflowPdf);
   buildPrimaryMainPanels();
+  buildIncomeMainPanels();
   setupPrimaryMainTabs();
   setupAssetMainTabs();
+  setupIncomeMainTabs();
   setupSectionAccordions();
   setupChildAccordions();
   setupBottomNavigation();
