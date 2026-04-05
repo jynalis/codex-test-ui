@@ -86,6 +86,7 @@ const accordionSections = Array.from(document.querySelectorAll("[data-accordion-
 const dashboardSection = document.getElementById("section-home");
 const assetsSection = document.getElementById("section-assets");
 const assetMainTabs = Array.from(document.querySelectorAll("[data-asset-main-tab]"));
+const assetMainPanels = Array.from(document.querySelectorAll("[data-asset-main-panel]"));
 const cashflowSettingsForm = document.getElementById("cashflow-settings-form");
 const cashflowSalaryGrowthRateBefore60Input = document.getElementById("cashflow-salary-growth-rate-before-60");
 const cashflowSalaryCorrectionRateAt60Input = document.getElementById("cashflow-salary-correction-rate-at-60");
@@ -3586,7 +3587,7 @@ function renderAssetForecast(settings) {
 }
 
 function setAssetMainTab(tabName = "formation") {
-  if (assetMainTabs.length === 0) return;
+  if (assetMainTabs.length === 0 || assetMainPanels.length === 0) return;
   const requestedTab = tabName || "formation";
   const hasRequestedTab = assetMainTabs.some((button) => button.dataset.assetMainTab === requestedTab);
   const nextTab = hasRequestedTab ? requestedTab : "formation";
@@ -3598,10 +3599,10 @@ function setAssetMainTab(tabName = "formation") {
     button.setAttribute("aria-selected", String(isActive));
     button.tabIndex = isActive ? 0 : -1;
 
-    const panelId = button.getAttribute("aria-controls");
-    if (!panelId) return;
-    const panel = document.getElementById(panelId);
-    if (!panel) return;
+  });
+
+  assetMainPanels.forEach((panel) => {
+    const isActive = panel.dataset.assetMainPanel === nextTab;
     panel.hidden = !isActive;
     panel.classList.toggle("is-active", isActive);
   });

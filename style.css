@@ -223,6 +223,10 @@ header p {
   gap: 14px;
 }
 
+.asset-main-tabbar {
+  width: 100%;
+}
+
 .asset-main-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -256,10 +260,23 @@ header p {
 
 .asset-main-panel {
   display: none;
+  min-width: 0;
+}
+
+.asset-main-content {
+  min-width: 0;
+}
+
+.asset-main-panel-body {
+  min-width: 0;
 }
 
 .asset-main-panel.is-active {
   display: block;
+}
+
+.asset-main-panel[hidden] {
+  display: none !important;
 }
 
 .section-tone-cashflow {
@@ -2571,6 +2588,7 @@ button.ghost {
   flex: 1 1 auto;
   min-width: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
 }
