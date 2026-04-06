@@ -79,7 +79,7 @@ header p {
 }
 
 .page-header.card {
-  padding: 16px 26px 12px;
+  padding: 13px 24px 10px;
   border-radius: 24px;
   border: 1px solid #d7d5cc;
   border-top: 6px solid #c9c4b2;
@@ -90,26 +90,29 @@ header p {
     linear-gradient(148deg, #fffdf8 0%, #f8f4e9 55%, #fffcf4 100%);
 }
 
-.hero-topline {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 8px;
-  order: 2;
-  margin-top: 0;
-  padding-right: 0;
+.hero-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  column-gap: 12px;
 }
 
-.hero-copy {
-  margin-top: 0;
+.hero-copy-main {
+  min-width: 0;
   display: grid;
-  gap: 6px;
-  order: 1;
+  gap: 4px;
+}
+
+.hero-tag-stack {
+  display: grid;
+  justify-items: end;
+  align-content: end;
+  gap: 3px;
+  padding-bottom: 1px;
 }
 
 .eyebrow {
   width: fit-content;
-  max-width: 130px;
   border: 1px solid #d8d2c3;
   background: linear-gradient(145deg, #fffdf6 0%, #f5efdd 100%);
   color: #354760;
@@ -118,14 +121,21 @@ header p {
   letter-spacing: 0.015em;
   text-transform: uppercase;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1;
   padding: 4px 8px;
   box-shadow: 0 3px 9px rgb(25 31 39 / 8%);
   text-align: center;
-  display: grid;
-  grid-auto-flow: row;
-  justify-items: center;
-  gap: 1px;
+  white-space: nowrap;
+}
+
+.eyebrow-small {
+  font-size: 0.58rem;
+  padding: 3px 7px;
+}
+
+.eyebrow-wide {
+  font-size: 0.64rem;
+  padding: 3px 10px;
 }
 
 .page-header.card h1 {
@@ -2701,29 +2711,40 @@ button.ghost {
   }
 
   .page-header.card {
-    padding: 13px 13px 10px;
+    padding: 11px 12px 9px;
     border-radius: 18px;
     border-top-width: 5px;
   }
 
-  .hero-topline {
-    gap: 6px;
-    margin-top: 0;
-    padding-right: 0;
+  .hero-copy {
+    align-items: center;
+    column-gap: 8px;
+  }
+
+  .hero-copy-main {
+    gap: 3px;
   }
 
   .eyebrow {
-    max-width: 118px;
-    font-size: 0.62rem;
     letter-spacing: 0.01em;
     line-height: 1.12;
-    padding: 3px 7px;
-    gap: 0;
+    padding: 2px 6px;
     box-shadow: 0 4px 10px rgb(25 31 39 / 10%);
   }
 
-  .hero-copy {
-    gap: 4px;
+  .hero-tag-stack {
+    gap: 2px;
+    padding-bottom: 0;
+  }
+
+  .eyebrow-small {
+    font-size: 0.5rem;
+    padding: 2px 6px;
+  }
+
+  .eyebrow-wide {
+    font-size: 0.58rem;
+    padding: 2px 8px;
   }
 
   .page-header.card h1 {
