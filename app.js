@@ -4577,6 +4577,43 @@ function getPrimaryTopAnchorOffset() {
   return Math.max(viewportOffset + tabbarRect.height + 10, 0);
 }
 
+function resolvePrimaryHeadingFrame(topAnchor) {
+  if (!topAnchor) return null;
+  if (topAnchor.matches?.("h1, h2, h3")) return topAnchor;
+  return topAnchor.querySelector(".dashboard-header h2, .section-heading h2, .section-header h2");
+}
+
+function getPrimaryTitlePeekHeight(headingFrame, topOffset) {
+  if (!headingFrame) return 0;
+  const headingRect = headingFrame.getBoundingClientRect();
+  const headingHeight = Math.max(headingRect.height, 0);
+  if (headingHeight <= 0) return 0;
+
+  const tabbarHeight = Math.max(primaryMainTabbar?.getBoundingClientRect().height || 0, 0);
+  const headingBasedPeek = headingHeight * 0.22;
+  const chromeBasedPeek = Math.max(topOffset, tabbarHeight) * 0.12;
+  const minReasonablePeek = headingHeight * 0.14;
+  const maxReasonablePeek = headingHeight * 0.38;
+
+  return Math.min(maxReasonablePeek, Math.max(headingBasedPeek, chromeBasedPeek, minReasonablePeek));
+}
+
+function getPrimaryTopButtonTargetY(topAnchor) {
+  if (!topAnchor) return 0;
+  const topOffset = getPrimaryTopAnchorOffset();
+  const headingFrame = resolvePrimaryHeadingFrame(topAnchor);
+  if (!headingFrame) {
+    return Math.max(0, window.scrollY + topAnchor.getBoundingClientRect().top - topOffset);
+  }
+
+  const headingRect = headingFrame.getBoundingClientRect();
+  const headingHeight = Math.max(headingRect.height, 0);
+  const peekHeight = getPrimaryTitlePeekHeight(headingFrame, topOffset);
+  const headingTopAbsolute = window.scrollY + headingRect.top;
+  const headingViewportTop = topOffset - headingHeight + peekHeight;
+  return Math.max(0, headingTopAbsolute - headingViewportTop);
+}
+
 function scrollToElementWithOffset(targetElement, { behavior = "smooth" } = {}) {
   if (!targetElement) return;
   const topOffset = getPrimaryTopAnchorOffset();
@@ -4594,7 +4631,12 @@ function scrollCurrentPrimaryPanelToTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
     return;
   }
-  scrollToElementWithOffset(topAnchor, { behavior: "smooth" });
+  const targetY = getPrimaryTopButtonTargetY(topAnchor);
+  const distance = Math.abs(window.scrollY - targetY);
+  window.scrollTo({
+    top: targetY,
+    behavior: distanceBasedScrollBehavior(distance),
+  });
 }
 
 function setupFloatingTopButton() {
