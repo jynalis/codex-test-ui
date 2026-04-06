@@ -3398,17 +3398,10 @@ function renderAssetForecast(settings) {
 
   const totalAt65 = secondaryAssetOutlook.totalAtAge;
   const planBalancesAt65 = secondaryAssetOutlook.planBalancesAtAge;
-
-  const rows = planBalancesAt65
-    .map(
-      (plan) => `
-      <li>
-        <span>${plan.type}${plan.name ? `（${plan.name}）` : ""}</span>
-        <strong>${yen.format(plan.projectedAmount)}</strong>
-      </li>
-    `
-    )
-    .join("");
+  const contractEntriesAt65 = planBalancesAt65
+    .filter((plan) => plan.projectedAmount > 0)
+    .map((plan) => [`${plan.type}${plan.name ? `（${plan.name}）` : ""}`, plan.projectedAmount]);
+  const contractTotalAt65 = contractEntriesAt65.reduce((sum, [, amount]) => sum + amount, 0);
 
   const typeTotals = PLAN_TYPES.map((type) => {
     const amount = planBalancesAt65
@@ -3438,14 +3431,13 @@ function renderAssetForecast(settings) {
     .join("");
 
   assetForecast.innerHTML = `
-    <section class="chart asset-outlook">
+    <section class="chart asset-composition asset-outlook">
       <p class="section-description">現在年齢: <strong>${currentAge}歳</strong> / ${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の一覧は、キャッシュフロー表の資産形成額と同じ計算条件で表示しています。</p>
       <div class="asset-outlook-summary-grid">
-        <div class="asset-total asset-total-compact">${createAssetOutlookTotalLabel(TARGET_AGE_SECONDARY)}: <strong>${yen.format(totalAt65)}</strong></div>
+        <div class="asset-total asset-total-compact">${createAssetOutlookTotalLabel(TARGET_AGE_SECONDARY)}: <strong>${yen.format(contractTotalAt65 || totalAt65)}</strong></div>
       </div>
       <h4>${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の想定資産額（契約別）</h4>
-      ${rows ? `<ul class="asset-list">${rows}</ul>` : `<p class="chart-empty">${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の評価対象となる契約はありません。</p>`}
-      <h4>${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の想定資産額（種別別）</h4>
+      <h4 class="asset-type-breakdown-heading">${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の想定資産額（種別別）</h4>
       ${typeTotalsHtml ? `<ul class="asset-list">${typeTotalsHtml}</ul>` : `<p class="chart-empty">${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の評価対象となる契約はありません。</p>`}
     </section>
   `;
@@ -3472,6 +3464,7 @@ function renderAssetForecast(settings) {
   if (!chartSection) {
     return;
   }
+  const formationChartSection = assetForecast.querySelector(".asset-composition");
 
   const currentTotal = currentRows.reduce((sum, plan) => sum + plan.currentAmount, 0);
   if (currentRows.length === 0 || currentTotal === 0) {
@@ -3492,6 +3485,33 @@ function renderAssetForecast(settings) {
   });
   chartSection.appendChild(pieWrap);
   chartSection.appendChild(legend);
+
+  if (!formationChartSection) {
+    return;
+  }
+
+  if (contractEntriesAt65.length === 0 || contractTotalAt65 === 0) {
+    const empty = document.createElement("p");
+    empty.className = "chart-empty";
+    empty.textContent = `${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の評価対象となる契約はありません。`;
+    const typeHeading = formationChartSection.querySelector(".asset-type-breakdown-heading");
+    typeHeading?.insertAdjacentElement("beforebegin", empty);
+    return;
+  }
+
+  const { pieWrap: formationPieWrap, legend: formationLegend } = createPieChartElements(contractEntriesAt65, contractTotalAt65, {
+    centerLabel: "65歳時点総額",
+    colors: ASSET_PIE_COLORS,
+    formatCategoryLabel: formatAssetCompositionCategoryLabel,
+  });
+  const typeHeading = formationChartSection.querySelector(".asset-type-breakdown-heading");
+  if (typeHeading) {
+    typeHeading.insertAdjacentElement("beforebegin", formationLegend);
+    typeHeading.insertAdjacentElement("beforebegin", formationPieWrap);
+  } else {
+    formationChartSection.appendChild(formationPieWrap);
+    formationChartSection.appendChild(formationLegend);
+  }
 }
 
 function setAssetMainTab(tabName = "formation") {
