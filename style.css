@@ -707,6 +707,7 @@ header p {
 .monthly-expense-card {
   margin: 0;
   border-radius: 12px;
+  background: transparent;
 }
 
 .monthly-expense-card .chart {
@@ -2319,6 +2320,19 @@ button.ghost {
   padding-inline: 8px;
 }
 
+#expense-chart {
+  padding: 4px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  gap: 14px;
+}
+
+#expense-chart.has-data {
+  background: transparent;
+}
+
 #expense-chart .pie-chart {
   width: min(272px, 72vw);
   max-width: 100%;
@@ -2976,13 +2990,13 @@ button.ghost {
   }
 
   #expense-chart {
-    gap: 17px;
-    padding: 16px 9px 18px;
+    gap: 14px;
+    padding: 2px 0 4px;
   }
 
   #expense-chart .pie-wrap {
     padding-inline: 0;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
   }
 
   #expense-chart .pie-legend {
