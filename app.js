@@ -3449,14 +3449,12 @@ function renderAssetForecast(settings) {
     </section>
   `;
   assetWithdrawForecast.innerHTML = `
-    <section class="chart asset-outlook">
+    <section class="asset-withdraw-layout asset-outlook">
       <p class="section-description">取崩し予定を設定した契約のみ表示します。取崩年月の変更は「基本情報・資産形成設定」で行えます。</p>
-      <section class="asset-withdraw-card" aria-label="${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}">
-        <h4>${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}</h4>
-        ${earlyWithdrawItemsHtml
-    ? `<ul class="asset-list asset-withdraw-list">${earlyWithdrawItemsHtml}</ul>`
+      <h4 class="asset-withdraw-heading">${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}</h4>
+      ${earlyWithdrawItemsHtml
+    ? `<ul class="asset-list asset-withdraw-list" aria-label="${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}">${earlyWithdrawItemsHtml}</ul>`
     : `<p class="chart-empty">${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}の契約はありません。</p>`}
-      </section>
     </section>
   `;
 
