@@ -79,7 +79,7 @@ header p {
 }
 
 .page-header.card {
-  padding: 21px 28px 16px;
+  padding: 16px 26px 12px;
   border-radius: 24px;
   border: 1px solid #d7d5cc;
   border-top: 6px solid #c9c4b2;
@@ -96,32 +96,36 @@ header p {
   align-items: center;
   gap: 8px;
   order: 2;
-  margin-top: 2px;
+  margin-top: 0;
   padding-right: 0;
 }
 
 .hero-copy {
   margin-top: 0;
   display: grid;
-  gap: 8px;
+  gap: 6px;
   order: 1;
 }
 
 .eyebrow {
   width: fit-content;
-  max-width: 170px;
+  max-width: 130px;
   border: 1px solid #d8d2c3;
   background: linear-gradient(145deg, #fffdf6 0%, #f5efdd 100%);
   color: #354760;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  letter-spacing: 0.03em;
+  border-radius: 14px;
+  font-size: 0.66rem;
+  letter-spacing: 0.015em;
   text-transform: uppercase;
   font-weight: 700;
-  line-height: 1.2;
-  padding: 5px 10px;
+  line-height: 1.15;
+  padding: 4px 8px;
   box-shadow: 0 3px 9px rgb(25 31 39 / 8%);
   text-align: center;
+  display: grid;
+  grid-auto-flow: row;
+  justify-items: center;
+  gap: 1px;
 }
 
 .page-header.card h1 {
@@ -2661,26 +2665,29 @@ button.ghost {
   }
 
   .page-header.card {
-    padding: 16px 14px 14px;
+    padding: 13px 13px 10px;
     border-radius: 18px;
     border-top-width: 5px;
   }
 
   .hero-topline {
-    gap: 8px;
-    margin-top: 2px;
-    padding-right: 1px;
+    gap: 6px;
+    margin-top: 0;
+    padding-right: 0;
   }
 
   .eyebrow {
-    font-size: 0.72rem;
-    letter-spacing: 0.04em;
-    padding: 5px 11px;
+    max-width: 118px;
+    font-size: 0.62rem;
+    letter-spacing: 0.01em;
+    line-height: 1.12;
+    padding: 3px 7px;
+    gap: 0;
     box-shadow: 0 4px 10px rgb(25 31 39 / 10%);
   }
 
   .hero-copy {
-    gap: 6px;
+    gap: 4px;
   }
 
   .page-header.card h1 {
