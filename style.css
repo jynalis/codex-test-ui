@@ -79,7 +79,7 @@ header p {
 }
 
 .page-header.card {
-  padding: 32px 30px;
+  padding: 24px 30px 20px;
   border-radius: 24px;
   border: 1px solid #d7d5cc;
   border-top: 6px solid #c9c4b2;
@@ -92,15 +92,19 @@ header p {
 
 .hero-topline {
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;
   align-items: center;
   gap: 12px;
+  order: 2;
+  margin-top: 4px;
+  padding-right: 2px;
 }
 
 .hero-copy {
-  margin-top: 10px;
+  margin-top: 0;
   display: grid;
-  gap: 10px;
+  gap: 8px;
+  order: 1;
 }
 
 .eyebrow {
@@ -121,7 +125,7 @@ header p {
   color: #0d2442;
   font-size: clamp(2.15rem, 4.8vw, 3rem);
   font-weight: 950;
-  line-height: 1.05;
+  line-height: 1.04;
   letter-spacing: 0.02em;
   text-shadow: none;
 }
@@ -130,7 +134,7 @@ header p {
   color: #425369;
   font-size: clamp(1.02rem, 2vw, 1.2rem);
   font-weight: 600;
-  line-height: 1.58;
+  line-height: 1.5;
   max-width: 760px;
 }
 
@@ -2604,25 +2608,26 @@ button.ghost {
   }
 
   .page-header.card {
-    padding: 20px 16px;
+    padding: 16px 14px 14px;
     border-radius: 18px;
     border-top-width: 5px;
   }
 
   .hero-topline {
     gap: 8px;
+    margin-top: 2px;
+    padding-right: 1px;
   }
 
   .eyebrow {
     font-size: 0.72rem;
     letter-spacing: 0.04em;
-    padding: 6px 12px;
+    padding: 5px 11px;
     box-shadow: 0 4px 10px rgb(25 31 39 / 10%);
   }
 
   .hero-copy {
-    margin-top: 6px;
-    gap: 7px;
+    gap: 6px;
   }
 
   .page-header.card h1 {
@@ -2632,7 +2637,7 @@ button.ghost {
 
   .hero-subtitle {
     font-size: 0.88rem;
-    line-height: 1.46;
+    line-height: 1.4;
     max-width: 100%;
   }
 
