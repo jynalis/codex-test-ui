@@ -616,17 +616,25 @@ header p {
   margin-bottom: 10px;
 }
 
-.monthly-subpanel-shell .income-main-card-body {
+.monthly-subpanel-body {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .monthly-subpanel-shell .history-filters {
-  margin-bottom: 2px;
+  margin-bottom: 0;
 }
 
 .monthly-subpanel-shell .chart {
-  margin-top: 2px;
+  margin-top: 0;
+}
+
+.monthly-subpanel-body .list {
+  margin-top: 0;
+}
+
+.monthly-subpanel-body .history-block + .history-block {
+  margin-top: 0;
 }
 
 .monthly-subpanel-shell.section-tone-history {
