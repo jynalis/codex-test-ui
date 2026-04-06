@@ -255,18 +255,23 @@
           <section id="input-sub-panel-basic-register" class="input-sub-panel is-active" role="tabpanel" aria-labelledby="input-sub-tab-basic-register" data-input-sub-panel="register">
             <div class="basic-sub-panel-body">
               <form id="profile-form" class="grid">
-                <label>
-                  記入開始月
-                  <input type="month" id="entry-start-month" required />
-                </label>
-                <label>
-                  生年月日
-                  <input type="date" id="birth-date" required />
-                </label>
-                <section class="full profile-plan-register-section" aria-labelledby="profile-plan-register-heading">
-                  <h3 id="profile-plan-register-heading" class="profile-plan-register-heading">資産形成を登録</h3>
+                <section class="full profile-form-section profile-basic-settings-section" aria-labelledby="profile-basic-settings-heading">
+                  <h3 id="profile-basic-settings-heading" class="profile-form-section-heading">基本設定</h3>
+                  <div class="profile-basic-settings-grid">
+                    <label>
+                      記入開始月
+                      <input type="month" id="entry-start-month" required />
+                    </label>
+                    <label>
+                      生年月日
+                      <input type="date" id="birth-date" required />
+                    </label>
+                  </div>
                 </section>
-                <div id="plan-editor-list" class="full plan-editor-list"></div>
+                <section class="full profile-form-section profile-plan-register-section" aria-labelledby="profile-plan-register-heading">
+                  <h3 id="profile-plan-register-heading" class="profile-form-section-heading">資産形成を登録</h3>
+                  <div id="plan-editor-list" class="plan-editor-list"></div>
+                </section>
                 <div class="full profile-form-actions">
                   <button type="submit" id="profile-submit-button" class="profile-save-settings-button">設定を保存</button>
                   <button type="button" id="profile-cancel-button" class="ghost" hidden>キャンセル</button>
