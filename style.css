@@ -1147,6 +1147,8 @@ button.danger {
 #panel-chart .asset-list,
 #panel-chart .pie-legend,
 #panel-chart .pie-legend-item,
+#asset-main-panel-formation .pie-legend,
+#asset-main-panel-formation .pie-legend-item,
 #asset-main-panel-current-assets .pie-legend,
 #asset-main-panel-current-assets .pie-legend-item {
   width: 100%;
@@ -1161,22 +1163,26 @@ button.danger {
 
 #panel-chart .pie-legend-item > *,
 #panel-chart .asset-list li > span,
+#asset-main-panel-formation .pie-legend-item > *,
 #asset-main-panel-current-assets .pie-legend-item > * {
   min-width: 0;
 }
 
 #panel-chart .pie-legend-item .category,
 #panel-chart .asset-list li > span,
+#asset-main-panel-formation .pie-legend-item .category,
 #asset-main-panel-current-assets .pie-legend-item .category {
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
+#asset-main-panel-formation .pie-legend-item .category,
 #asset-main-panel-current-assets .pie-legend-item .category {
   display: grid;
   gap: 2px;
 }
 
+#asset-main-panel-formation .pie-legend-item .category-note,
 #asset-main-panel-current-assets .pie-legend-item .category-note {
   white-space: nowrap;
 }
@@ -2928,11 +2934,13 @@ button.ghost {
   }
 
   #panel-chart .pie-legend,
+  #asset-main-panel-formation .pie-legend,
   #asset-main-panel-current-assets .pie-legend {
     gap: 6px;
   }
 
   #panel-chart .pie-legend-item,
+  #asset-main-panel-formation .pie-legend-item,
   #asset-main-panel-current-assets .pie-legend-item {
     grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-rows: auto auto;
@@ -2943,11 +2951,13 @@ button.ghost {
   }
 
   #panel-chart .pie-legend-item .dot,
+  #asset-main-panel-formation .pie-legend-item .dot,
   #asset-main-panel-current-assets .pie-legend-item .dot {
     margin-top: 1px;
   }
 
   #panel-chart .pie-legend-item .category,
+  #asset-main-panel-formation .pie-legend-item .category,
   #asset-main-panel-current-assets .pie-legend-item .category {
     grid-column: 2;
     grid-row: 1;
@@ -2955,6 +2965,7 @@ button.ghost {
   }
 
   #panel-chart .pie-legend-item .value,
+  #asset-main-panel-formation .pie-legend-item .value,
   #asset-main-panel-current-assets .pie-legend-item .value {
     grid-column: 2;
     grid-row: 2;
@@ -2963,6 +2974,7 @@ button.ghost {
   }
 
   #panel-chart .pie-legend-item .ratio,
+  #asset-main-panel-formation .pie-legend-item .ratio,
   #asset-main-panel-current-assets .pie-legend-item .ratio {
     grid-column: 3;
     grid-row: 2;
