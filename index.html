@@ -208,7 +208,7 @@
                 role="button"
                 tabindex="0"
                 data-dashboard-jump-section="section-expense"
-                aria-label="支出バランス分析へ移動"
+                aria-label="支出分析へ移動"
               >
                 <span>当月支出</span>
                 <strong id="dashboard-expense-total">¥0</strong>
@@ -339,45 +339,47 @@
         <div class="input-sub-switch" role="tablist" aria-label="毎月収支タブの切り替え" data-input-sub-switch="monthly">
           <button type="button" id="input-sub-tab-monthly-register" class="input-sub-tab is-active" role="tab" aria-selected="true" aria-controls="input-sub-panel-monthly-register" data-input-sub-tab="register">登録</button>
           <button type="button" id="input-sub-tab-monthly-history" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-monthly-history" data-input-sub-tab="history" tabindex="-1">取引履歴</button>
-          <button type="button" id="input-sub-tab-monthly-expense-balance" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-monthly-expense-balance" data-input-sub-tab="expense-balance" tabindex="-1">支出バランス分析</button>
+          <button type="button" id="input-sub-tab-monthly-expense-balance" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-monthly-expense-balance" data-input-sub-tab="expense-balance" tabindex="-1">支出分析</button>
         </div>
         <div class="input-sub-content" data-input-sub-content="monthly">
               <section id="input-sub-panel-monthly-register" class="input-sub-panel is-active" role="tabpanel" aria-labelledby="input-sub-tab-monthly-register" data-input-sub-panel="register">
-                <form id="transaction-form" class="grid">
-                  <p id="transaction-edit-status" class="transaction-edit-status full" aria-live="polite" hidden>
-                    日ごとの支出を編集中
-                  </p>
-                  <label>
-                    日付
-                    <input type="date" id="date" required />
-                  </label>
-                  <label>
-                    種類
-                    <select id="type" required>
-                      <option value="expense">支出</option>
-                      <option value="income">収入</option>
-                    </select>
-                  </label>
-                  <label>
-                    カテゴリ
-                    <select id="category" required></select>
-                  </label>
-                  <label>
-                    金額 (円)
-                    <input id="amount" type="text" inputmode="numeric" autocomplete="off" placeholder="例: 50,000" required />
-                  </label>
-                  <label class="full">
-                    メモ
-                    <input id="memo" type="text" placeholder="任意" maxlength="50" />
-                  </label>
-                  <div class="full transaction-form-actions">
-                    <button type="submit" id="transaction-submit-button">追加する</button>
-                    <button type="button" id="transaction-cancel-button" class="ghost" hidden>キャンセル</button>
-                  </div>
-                </form>
+                <div class="monthly-subpanel-shell monthly-subpanel-shell-register">
+                  <form id="transaction-form" class="grid">
+                    <p id="transaction-edit-status" class="transaction-edit-status full" aria-live="polite" hidden>
+                      日ごとの支出を編集中
+                    </p>
+                    <label>
+                      日付
+                      <input type="date" id="date" required />
+                    </label>
+                    <label>
+                      種類
+                      <select id="type" required>
+                        <option value="expense">支出</option>
+                        <option value="income">収入</option>
+                      </select>
+                    </label>
+                    <label>
+                      カテゴリ
+                      <select id="category" required></select>
+                    </label>
+                    <label>
+                      金額 (円)
+                      <input id="amount" type="text" inputmode="numeric" autocomplete="off" placeholder="例: 50,000" required />
+                    </label>
+                    <label class="full">
+                      メモ
+                      <input id="memo" type="text" placeholder="任意" maxlength="50" />
+                    </label>
+                    <div class="full transaction-form-actions">
+                      <button type="submit" id="transaction-submit-button">追加する</button>
+                      <button type="button" id="transaction-cancel-button" class="ghost" hidden>キャンセル</button>
+                    </div>
+                  </form>
+                </div>
               </section>
               <section id="input-sub-panel-monthly-history" class="input-sub-panel" role="tabpanel" aria-labelledby="input-sub-tab-monthly-history" data-input-sub-panel="history" hidden>
-                <section id="section-history" class="card section-tone-history monthly-history-card" data-nav-section="transactions">
+                <section id="section-history" class="monthly-subpanel-shell section-tone-history monthly-history-card" data-nav-section="transactions">
                   <div class="income-main-card-header">
                     <div class="section-heading">
                       <p class="section-role-badge">入力内容を確認・修正</p>
@@ -425,11 +427,11 @@
                 </section>
               </section>
               <section id="input-sub-panel-monthly-expense-balance" class="input-sub-panel" role="tabpanel" aria-labelledby="input-sub-tab-monthly-expense-balance" data-input-sub-panel="expense-balance" hidden>
-                <section id="section-expense" class="card section-tone-chart income-main-card" data-nav-section="expense">
+                <section id="section-expense" class="monthly-subpanel-shell section-tone-chart monthly-expense-card" data-nav-section="expense">
                   <div class="income-main-card-header">
                     <div class="section-heading">
                       <p class="section-role-badge">支出の偏りを確認</p>
-                      <h2>支出バランス分析</h2>
+                      <h2>支出分析</h2>
                       <p class="section-description">
                         どの項目に支出が偏っているかを視覚的に確認できます。
                       </p>
@@ -437,12 +439,12 @@
                   </div>
                   <div class="income-main-card-body">
                     <div class="filters shared-view-filters" data-shared-view-filter="expense">
-                      <select id="expense-view-mode" aria-label="支出バランス分析表示モード">
+                      <select id="expense-view-mode" aria-label="支出分析表示モード">
                         <option value="month">年月</option>
                         <option value="average">平均</option>
                       </select>
-                      <select id="expense-year-filter" aria-label="支出バランス分析表示年"></select>
-                      <select id="expense-month-filter" aria-label="支出バランス分析表示月"></select>
+                      <select id="expense-year-filter" aria-label="支出分析表示年"></select>
+                      <select id="expense-month-filter" aria-label="支出分析表示月"></select>
                     </div>
                     <div id="expense-chart" class="chart"></div>
                   </div>

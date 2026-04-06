@@ -545,30 +545,42 @@ header p {
 .input-sub-switch {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-  padding: 4px;
-  border-radius: 12px;
+  gap: 7px;
+  padding: 5px;
+  border-radius: 13px;
   background: linear-gradient(180deg, #fff7ef 0%, #ffefd8 100%);
   border: 1px solid #f0cc9b;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .input-sub-switch[data-input-sub-switch="monthly"] {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px;
+  border-radius: 14px;
 }
 
 .input-sub-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   appearance: none;
   border: 1px solid #e9bf87;
   background: #fffaf2;
   color: #6b4b21;
-  border-radius: 9px;
-  min-height: 34px;
-  min-width: 86px;
-  padding: 6px 10px;
+  border-radius: 10px;
+  min-height: 36px;
+  min-width: 0;
+  padding: 7px 8px;
   font-size: 0.75rem;
   font-weight: 800;
+  line-height: 1.2;
   letter-spacing: 0.01em;
+  text-align: center;
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
   cursor: pointer;
 }
 
@@ -588,6 +600,43 @@ header p {
 
 .input-sub-panel[hidden] {
   display: none !important;
+}
+
+.monthly-subpanel-shell {
+  margin: 0;
+  border: 1px solid #ecc991;
+  border-top: 4px solid #bf7f19;
+  border-radius: 14px;
+  padding: 14px;
+  background: linear-gradient(180deg, #fffef8 0%, #fff8eb 100%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 55%);
+}
+
+.monthly-subpanel-shell .income-main-card-header {
+  margin-bottom: 10px;
+}
+
+.monthly-subpanel-shell .income-main-card-body {
+  display: grid;
+  gap: 10px;
+}
+
+.monthly-subpanel-shell .history-filters {
+  margin-bottom: 2px;
+}
+
+.monthly-subpanel-shell .chart {
+  margin-top: 2px;
+}
+
+.monthly-subpanel-shell.section-tone-history {
+  border-color: #a8c2e3;
+  border-top-color: #37649c;
+}
+
+.monthly-subpanel-shell.section-tone-chart {
+  border-color: #ef9ec2;
+  border-top-color: #c04984;
 }
 
 .basic-sub-panel-body {
@@ -2712,6 +2761,45 @@ button.ghost {
     min-height: 44px;
     font-size: 0.7rem;
     line-height: 1.22;
+  }
+
+  .input-sub-switch[data-input-sub-switch="monthly"] {
+    gap: 5px;
+    padding: 5px;
+  }
+
+  .input-sub-switch[data-input-sub-switch="monthly"] .input-sub-tab {
+    min-height: 38px;
+    padding: 6px 2px;
+    font-size: 0.72rem;
+    letter-spacing: 0;
+  }
+
+  .monthly-subpanel-shell {
+    border-radius: 13px;
+    padding: 12px 10px;
+  }
+
+  .monthly-subpanel-shell .section-heading h2 {
+    font-size: 1.02rem;
+  }
+
+  .monthly-subpanel-shell .shared-view-filters {
+    gap: 6px;
+  }
+
+  .monthly-subpanel-shell .shared-view-filters select {
+    min-height: 40px;
+    padding-inline: 9px;
+  }
+
+  .monthly-subpanel-shell .chart {
+    min-height: 190px;
+    padding: 14px 10px;
+  }
+
+  .monthly-subpanel-shell .pie-chart {
+    width: min(250px, 100%);
   }
 
   .diagnosis-card {
