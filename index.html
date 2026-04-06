@@ -24,13 +24,13 @@
           <p class="section-description">初めての方や、入力内容の意味を確認したい方のための補助ガイドです。</p>
         </div>
         <div class="step-guide-panel-inner">
-          <p class="step-guide-note">操作は下部ショートカットボタンから行えます。各ボタンの役割は次のとおりです。</p>
-          <ul class="step-guide-list" aria-label="下部ショートカットボタンの役割">
-            <li><strong>基本：</strong>年齢・年収・現在資産・積立設定など、将来推計の土台を入力します。</li>
-            <li><strong>定期：</strong>家賃・保険・通信費など、毎月ほぼ固定の支出を入力します。</li>
-            <li><strong>収支：</strong>変動収入・変動支出や臨時の入出金を入力します。</li>
-            <li><strong>ライフ：</strong>将来の大きな支出や収入予定を入力します。</li>
-            <li><strong>TOP：</strong>画面上部へ戻りたいときに使います。</li>
+          <p class="step-guide-note">主タブと入力タブを切り替えながら操作できます。必要に応じて右下のTOPボタンで画面先頭へ戻れます。</p>
+          <ul class="step-guide-list" aria-label="主タブとTOPボタンの役割">
+            <li><strong>初めに：</strong>このアプリの使い方と導入手順を確認できます。</li>
+            <li><strong>ダッシュボード：</strong>収支と資産形成のサマリーを確認できます。</li>
+            <li><strong>資産形成：</strong>将来の資産推計やキャッシュフローを確認できます。</li>
+            <li><strong>入力：</strong>基本情報・定期支出・ライフイベント・毎月収支を登録できます。</li>
+            <li><strong>TOPボタン：</strong>現在表示中のタブ先頭へ戻るときに使います。</li>
           </ul>
         </div>
       </section>
@@ -562,31 +562,10 @@
 
     </main>
 
-    <nav class="bottom-nav" aria-label="下部ナビゲーション">
-      <button type="button" class="bottom-nav-btn is-active" data-nav-target="basic" aria-current="page">
-        <span class="nav-icon" aria-hidden="true">⌂</span>
-        <span class="nav-label">基本</span>
-      </button>
-      <button type="button" class="bottom-nav-btn" data-nav-target="recurring">
-        <span class="nav-icon" aria-hidden="true">✎</span>
-        <span class="nav-label">定期</span>
-      </button>
-      <button type="button" class="bottom-nav-btn" data-nav-target="income-expense">
-        <span class="nav-icon" aria-hidden="true">◔</span>
-        <span class="nav-label">収支</span>
-      </button>
-      <button type="button" class="bottom-nav-btn" data-nav-target="life">
-        <span class="nav-icon" aria-hidden="true">☰</span>
-        <span class="nav-label">ライフ</span>
-      </button>
-      <button type="button" class="bottom-nav-btn" data-nav-target="top">
-        <span class="nav-icon" aria-hidden="true">↑</span>
-        <span class="nav-label">TOP</span>
-      </button>
-    </nav>
-
-
-    <p id="nav-toast" class="nav-toast" role="status" aria-live="polite"></p>
+    <button type="button" id="floating-top-button" class="floating-top-button" aria-label="現在表示中のタブ先頭へ戻る">
+      <span class="floating-top-button-icon" aria-hidden="true">↑</span>
+      <span class="floating-top-button-label">TOP</span>
+    </button>
 
     <template id="transaction-item-template">
       <li class="item">
