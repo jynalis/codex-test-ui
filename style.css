@@ -2954,16 +2954,30 @@ button.ghost {
   }
 
   #expense-chart {
-    gap: 12px;
-    padding: 14px 12px;
+    gap: 14px;
+    padding: 14px 8px 16px;
   }
 
   #expense-chart .pie-wrap {
-    padding-inline: 4px;
+    padding-inline: 0;
+    margin-bottom: 2px;
   }
 
   #expense-chart .pie-chart {
-    width: min(220px, 62vw);
+    width: clamp(236px, 84%, 300px);
+  }
+
+  #expense-chart .pie-center {
+    inset: 24%;
+    gap: 3px;
+  }
+
+  #expense-chart .pie-center span {
+    font-size: 0.8rem;
+  }
+
+  #expense-chart .pie-center strong {
+    font-size: 1.08rem;
   }
 
   .recurring-actions button {
