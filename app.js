@@ -3898,8 +3898,11 @@ function startPlanEdit(planId) {
   setPrimaryMainTab("input");
   setInputMainTab("basic");
   setInputSubTab("basic", "register", { keepBasicEditingState: true });
-  targetBlock.scrollIntoView({ behavior: "smooth", block: "center" });
-  targetBlock.querySelector(".plan-name")?.focus();
+  targetBlock.scrollIntoView({ behavior: "smooth", block: "start" });
+  const planTypeField = targetBlock.querySelector(".plan-type");
+  if (planTypeField) {
+    planTypeField.focus({ preventScroll: true });
+  }
 }
 
 function deletePlanById(planId) {
