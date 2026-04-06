@@ -82,9 +82,8 @@ const dashboardAssetFormationChart = document.getElementById("dashboard-asset-fo
 const assetGrowthMonthlyChip = document.getElementById("asset-growth-monthly-chip");
 const assetGrowthMetricToggle = document.getElementById("asset-growth-metric-toggle");
 const expenseChart = document.getElementById("expense-chart");
-const bottomNavButtons = Array.from(document.querySelectorAll(".bottom-nav-btn"));
 const dashboardJumpCards = Array.from(document.querySelectorAll("[data-dashboard-jump-section]"));
-const navToast = document.getElementById("nav-toast");
+const floatingTopButton = document.getElementById("floating-top-button");
 const accordionSections = Array.from(document.querySelectorAll("[data-accordion-section]"));
 const dashboardSection = document.getElementById("section-home");
 const assetsSection = document.getElementById("section-assets");
@@ -107,7 +106,6 @@ const cashflowDownloadPdfButton = document.getElementById("cashflow-download-pdf
 const accordionCloseTimers = new WeakMap();
 const accordionCollapseWaiters = new WeakMap();
 const NAV_CLOSE_FAR_DISTANCE = 520;
-let navActionToken = 0;
 let mobileUpdateScrollToken = 0;
 
 let latestAssetForecastSettings = null;
@@ -167,12 +165,6 @@ const INPUT_SUB_SECTION_IDS = {
     "expense-balance": ["section-expense"],
   },
 };
-
-const NAV_TARGETS = {
-  top: "section-home",
-};
-
-const INPUT_SHORTCUT_NAV_TARGETS = new Set(["basic", "recurring", "income-expense", "life"]);
 
 const DEFAULT_CASHFLOW_ASSUMPTIONS = {
   salaryGrowthRateBefore60: 1,
@@ -3600,12 +3592,6 @@ function setPrimaryMainTab(tabName = "dashboard") {
   if (nextTab === "assets") {
     queueAssetForecastRender(true);
   }
-
-  if (nextTab === "dashboard") {
-    setBottomNavActive("top");
-  } else {
-    setBottomNavActive("__none__");
-  }
 }
 
 function setInputMainTab(tabName = "basic") {
@@ -4241,27 +4227,6 @@ function cancelRecurringExpenseEdit() {
   resetRecurringFormFields();
 }
 
-function setBottomNavActive(target) {
-  bottomNavButtons.forEach((button) => {
-    const isActive = button.dataset.navTarget === target;
-    button.classList.toggle("is-active", isActive);
-    if (isActive) {
-      button.setAttribute("aria-current", "page");
-    } else {
-      button.removeAttribute("aria-current");
-    }
-  });
-}
-
-function showNavToast(message) {
-  if (!navToast) return;
-  navToast.textContent = message;
-  navToast.classList.add("show");
-  window.setTimeout(() => {
-    navToast.classList.remove("show");
-  }, 1500);
-}
-
 function isAssetsSectionExpanded() {
   if (!assetsSection) return false;
   const parentPanel = assetsSection.closest("[data-primary-main-panel]");
@@ -4587,57 +4552,51 @@ function scrollToTopAfterMobileUpdate() {
   });
 }
 
-function scrollToNavSection(target) {
-  const actionToken = ++navActionToken;
-  if (target === "top") {
-    setBottomNavActive(target);
-    closeNonDashboardAccordions().then(() => {
-      if (actionToken !== navActionToken) return;
-      scrollToDashboardHeading();
-    });
-    return;
-  }
-
-  if (INPUT_SHORTCUT_NAV_TARGETS.has(target)) {
-    setPrimaryMainTab("input");
-    window.requestAnimationFrame(() => {
-      if (actionToken !== navActionToken) return;
-      const inputMainSection = document.getElementById("section-input-main");
-      if (!inputMainSection) return;
-      ensureSectionHeadingVisible(inputMainSection, { behavior: "smooth" });
-    });
-    return;
-  }
-
-  const sectionId = NAV_TARGETS[target];
-  if (!sectionId) return;
-  setBottomNavActive(target);
-  scrollToSection(sectionId, { actionToken, toggleIfExpanded: true, syncInputMainTabFromSection: false });
+function resolveCurrentPrimaryPanel() {
+  const activePanel = primaryMainPanels.find((panel) => !panel.hidden && panel.classList.contains("is-active"));
+  return activePanel || primaryMainPanels.find((panel) => !panel.hidden) || null;
 }
 
-function closeNonDashboardAccordions() {
-  const closePromises = accordionSections
-    .filter((section) => section !== dashboardSection)
-    .map((section) => {
-      if (!isAccordionSectionExpanded(section)) return Promise.resolve();
-      return Promise.resolve(setAccordionExpanded(section, false));
-    });
-  return Promise.all(closePromises);
+function scrollCurrentPrimaryPanelToTop() {
+  const activePanel = resolveCurrentPrimaryPanel();
+  if (!activePanel) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  ensureSectionHeadingVisible(activePanel, { behavior: "smooth" });
 }
 
-function scrollToDashboardHeading() {
-  if (!dashboardSection) return;
-  window.requestAnimationFrame(() => {
-    window.requestAnimationFrame(() => {
-      ensureSectionHeadingVisible(dashboardSection, { behavior: "smooth" });
-    });
+function setupFloatingTopButton() {
+  if (!floatingTopButton) return;
+
+  const handleTopAction = () => {
+    scrollCurrentPrimaryPanelToTop();
+  };
+
+  floatingTopButton.addEventListener("pointerup", (event) => {
+    if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
+    event.preventDefault();
+    const button = event.currentTarget;
+    if (!(button instanceof HTMLElement)) return;
+    button.dataset.suppressNextClickUntil = String(Date.now() + 500);
+    handleTopAction();
+  });
+
+  floatingTopButton.addEventListener("click", (event) => {
+    const button = event.currentTarget;
+    if (!(button instanceof HTMLElement)) return;
+    const suppressNextClickUntil = Number.parseInt(button.dataset.suppressNextClickUntil || "0", 10);
+    if (Date.now() < suppressNextClickUntil) {
+      button.dataset.suppressNextClickUntil = "0";
+      return;
+    }
+    handleTopAction();
   });
 }
 
 function scrollToSection(
   sectionId,
   {
-    actionToken,
     toggleIfExpanded = false,
     assetMainTab,
     syncInputMainTabFromSection = true,
@@ -4676,7 +4635,6 @@ function scrollToSection(
     if (expanded) {
       if (toggleIfExpanded) {
         setAccordionExpanded(targetSection, false).then(() => {
-          if (actionToken && actionToken !== navActionToken) return;
           ensureSectionHeadingVisible(targetSection);
         });
         return;
@@ -4691,7 +4649,6 @@ function scrollToSection(
     setAccordionExpanded(targetSection, true).then(() => {
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
-          if (actionToken && actionToken !== navActionToken) return;
           ensureSectionHeadingVisible(targetSection);
         });
       });
@@ -4703,56 +4660,6 @@ function scrollToSection(
   } else {
     proceedScroll();
   }
-}
-
-function setupBottomNavigation() {
-  const handleBottomNavAction = (button) => {
-    if (!button?.dataset?.navTarget) return;
-    scrollToNavSection(button.dataset.navTarget);
-  };
-
-  bottomNavButtons.forEach((button) => {
-    button.addEventListener("pointerup", (event) => {
-      if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
-      event.preventDefault();
-      const pressedButton = event.currentTarget;
-      if (!(pressedButton instanceof HTMLElement)) return;
-      pressedButton.dataset.suppressNextClickUntil = String(Date.now() + 500);
-      handleBottomNavAction(pressedButton);
-    });
-    button.addEventListener("click", (event) => {
-      const pressedButton = event.currentTarget;
-      if (!(pressedButton instanceof HTMLElement)) return;
-      const suppressNextClickUntil = Number.parseInt(pressedButton.dataset.suppressNextClickUntil || "0", 10);
-      if (Date.now() < suppressNextClickUntil) {
-        pressedButton.dataset.suppressNextClickUntil = "0";
-        return;
-      }
-      handleBottomNavAction(pressedButton);
-    });
-  });
-
-  const sectionElements = Object.entries(NAV_TARGETS)
-    .map(([name, id]) => ({ name, element: document.getElementById(id) }))
-    .filter((item) => item.element);
-  if (sectionElements.length === 0) return;
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (!visible) return;
-
-      const activeSection = sectionElements.find((item) => item.element === visible.target);
-      if (activeSection) {
-        setBottomNavActive(activeSection.name);
-      }
-    },
-    { threshold: [0.35, 0.6], rootMargin: "-10% 0px -35% 0px" }
-  );
-
-  sectionElements.forEach((item) => observer.observe(item.element));
 }
 
 function setupDashboardCardNavigation() {
@@ -4918,7 +4825,7 @@ function init() {
   setupInputSubTabs();
   setupSectionAccordions();
   setupChildAccordions();
-  setupBottomNavigation();
+  setupFloatingTopButton();
   setupDashboardCardNavigation();
   assetGrowthMetricToggle?.addEventListener("click", handleAssetGrowthMetricToggleClick);
 
