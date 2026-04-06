@@ -2524,8 +2524,11 @@ function renderExpenseChart(expenseComposition, isAverageMode) {
     return `${EXPENSE_CHART_COLORS[index % EXPENSE_CHART_COLORS.length]} ${start}deg ${end}deg`;
   });
 
+  const chartStage = document.createElement("div");
+  chartStage.className = "expense-chart-stage";
+
   const pieWrap = document.createElement("div");
-  pieWrap.className = "pie-wrap";
+  pieWrap.className = "pie-wrap expense-chart-frame";
 
   const pieChart = document.createElement("div");
   pieChart.className = "pie-chart";
@@ -2537,10 +2540,11 @@ function renderExpenseChart(expenseComposition, isAverageMode) {
 
   pieChart.appendChild(pieCenter);
   pieWrap.appendChild(pieChart);
-  chartLayout.appendChild(pieWrap);
+  chartStage.appendChild(pieWrap);
+  chartLayout.appendChild(chartStage);
 
   const legend = document.createElement("ul");
-  legend.className = "pie-legend";
+  legend.className = "pie-legend expense-chart-legend";
 
   expenseComposition.entries.forEach(({ name, amount, ratio }, index) => {
     const item = document.createElement("li");
