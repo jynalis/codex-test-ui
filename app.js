@@ -162,8 +162,8 @@ const INPUT_SUB_SECTION_IDS = {
   },
   monthly: {
     register: ["transaction-form"],
-    history: ["section-history"],
-    "expense-balance": ["section-expense"],
+    history: ["input-sub-panel-monthly-history", "section-history"],
+    "expense-balance": ["input-sub-panel-monthly-expense-balance", "section-expense"],
   },
 };
 

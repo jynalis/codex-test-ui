@@ -175,7 +175,7 @@
                 class="dashboard-card dashboard-card-jump dashboard-card-balance"
                 role="button"
                 tabindex="0"
-                data-dashboard-jump-section="section-history"
+                data-dashboard-jump-section="input-sub-panel-monthly-history"
                 aria-label="取引履歴へ移動"
               >
                 <span>当月末残高</span>
@@ -207,7 +207,7 @@
                 class="dashboard-card dashboard-card-jump dashboard-card-expense"
                 role="button"
                 tabindex="0"
-                data-dashboard-jump-section="section-expense"
+                data-dashboard-jump-section="input-sub-panel-monthly-expense-balance"
                 aria-label="支出分析へ移動"
               >
                 <span>当月支出</span>
@@ -342,8 +342,7 @@
           <button type="button" id="input-sub-tab-monthly-expense-balance" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-monthly-expense-balance" data-input-sub-tab="expense-balance" tabindex="-1">支出分析</button>
         </div>
         <div class="input-sub-content" data-input-sub-content="monthly">
-              <section id="input-sub-panel-monthly-register" class="input-sub-panel is-active" role="tabpanel" aria-labelledby="input-sub-tab-monthly-register" data-input-sub-panel="register">
-                <div class="monthly-subpanel-shell monthly-subpanel-shell-register">
+                <section id="input-sub-panel-monthly-register" class="input-sub-panel is-active" role="tabpanel" aria-labelledby="input-sub-tab-monthly-register" data-input-sub-panel="register">
                   <form id="transaction-form" class="grid">
                     <p id="transaction-edit-status" class="transaction-edit-status full" aria-live="polite" hidden>
                       日ごとの支出を編集中
@@ -376,60 +375,53 @@
                       <button type="button" id="transaction-cancel-button" class="ghost" hidden>キャンセル</button>
                     </div>
                   </form>
-                </div>
-              </section>
+                </section>
               <section id="input-sub-panel-monthly-history" class="input-sub-panel" role="tabpanel" aria-labelledby="input-sub-tab-monthly-history" data-input-sub-panel="history" hidden>
-                <section id="section-history" class="monthly-subpanel-shell monthly-subpanel-shell-register monthly-history-card" data-nav-section="transactions">
-                  <div class="monthly-subpanel-body">
-                    <div class="filters history-filters shared-view-filters" data-shared-view-filter="history">
-                      <select id="history-year-filter" aria-label="取引履歴表示年"></select>
-                      <select id="history-month-filter" aria-label="取引履歴表示月"></select>
+                <div class="filters history-filters shared-view-filters" data-shared-view-filter="history">
+                  <select id="history-year-filter" aria-label="取引履歴表示年"></select>
+                  <select id="history-month-filter" aria-label="取引履歴表示月"></select>
+                </div>
+                <section id="section-history" class="history-block monthly-history-card" data-nav-section="transactions">
+                  <ul id="transaction-list" class="list transaction-list"></ul>
+                </section>
+                <section id="planned-history-block" class="history-block">
+                  <section class="child-accordion history-planned-accordion" data-child-accordion>
+                    <button
+                      type="button"
+                      class="child-accordion-trigger history-planned-trigger"
+                      aria-expanded="false"
+                      aria-controls="panel-history-planned"
+                      id="trigger-history-planned"
+                    >
+                      <h3 id="planned-history-title">予定の取引履歴</h3>
+                      <span class="child-accordion-toggle" aria-hidden="true">＋</span>
+                    </button>
+                    <div
+                      class="child-accordion-panel history-planned-panel"
+                      id="panel-history-planned"
+                      role="region"
+                      aria-labelledby="trigger-history-planned"
+                      aria-hidden="true"
+                      hidden
+                    >
+                      <div class="child-accordion-panel-inner history-planned-panel-inner">
+                        <div id="planned-transaction-list" class="planned-transaction-list"></div>
+                      </div>
                     </div>
-                    <section class="history-block">
-                      <ul id="transaction-list" class="list transaction-list"></ul>
-                    </section>
-                    <section id="planned-history-block" class="history-block">
-                      <section class="child-accordion history-planned-accordion" data-child-accordion>
-                        <button
-                          type="button"
-                          class="child-accordion-trigger history-planned-trigger"
-                          aria-expanded="false"
-                          aria-controls="panel-history-planned"
-                          id="trigger-history-planned"
-                        >
-                          <h3 id="planned-history-title">予定の取引履歴</h3>
-                          <span class="child-accordion-toggle" aria-hidden="true">＋</span>
-                        </button>
-                        <div
-                          class="child-accordion-panel history-planned-panel"
-                          id="panel-history-planned"
-                          role="region"
-                          aria-labelledby="trigger-history-planned"
-                          aria-hidden="true"
-                          hidden
-                        >
-                          <div class="child-accordion-panel-inner history-planned-panel-inner">
-                            <div id="planned-transaction-list" class="planned-transaction-list"></div>
-                          </div>
-                        </div>
-                      </section>
-                    </section>
-                  </div>
+                  </section>
                 </section>
               </section>
               <section id="input-sub-panel-monthly-expense-balance" class="input-sub-panel" role="tabpanel" aria-labelledby="input-sub-tab-monthly-expense-balance" data-input-sub-panel="expense-balance" hidden>
-                <section id="section-expense" class="monthly-subpanel-shell monthly-subpanel-shell-register monthly-expense-card" data-nav-section="expense">
-                  <div class="monthly-subpanel-body">
-                    <div class="filters shared-view-filters" data-shared-view-filter="expense">
-                      <select id="expense-view-mode" aria-label="支出分析表示モード">
-                        <option value="month">年月</option>
-                        <option value="average">平均</option>
-                      </select>
-                      <select id="expense-year-filter" aria-label="支出分析表示年"></select>
-                      <select id="expense-month-filter" aria-label="支出分析表示月"></select>
-                    </div>
-                    <div id="expense-chart" class="chart"></div>
-                  </div>
+                <div class="filters shared-view-filters" data-shared-view-filter="expense">
+                  <select id="expense-view-mode" aria-label="支出分析表示モード">
+                    <option value="month">年月</option>
+                    <option value="average">平均</option>
+                  </select>
+                  <select id="expense-year-filter" aria-label="支出分析表示年"></select>
+                  <select id="expense-month-filter" aria-label="支出分析表示月"></select>
+                </div>
+                <section id="section-expense" class="monthly-expense-card" data-nav-section="expense">
+                  <div id="expense-chart" class="chart"></div>
                 </section>
               </section>
         </div>
