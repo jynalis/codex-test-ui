@@ -144,17 +144,27 @@ header p {
   overflow: hidden;
 }
 
-.step-guide-card {
-  padding: 10px 12px;
-  border-color: #c9d8eb;
-  background: linear-gradient(160deg, #f9fcff 0%, #edf4fe 100%);
+.step-guide-section {
+  display: grid;
+  gap: 10px;
 }
 
-.step-guide-trigger h2 {
+.step-guide-heading {
+  display: grid;
+  gap: 6px;
+}
+
+.step-guide-heading h2 {
   width: fit-content;
   font-size: 1.08rem;
   color: #15375d;
   font-weight: 850;
+}
+
+.step-guide-heading .section-description {
+  color: #425f80;
+  font-size: 0.84rem;
+  line-height: 1.5;
 }
 
 .step-guide-panel-inner {
@@ -2542,11 +2552,11 @@ button.ghost {
     line-height: 1.52;
   }
 
-  .step-guide-card {
-    padding: 8px;
+  .step-guide-section {
+    gap: 8px;
   }
 
-  .step-guide-trigger h2 {
+  .step-guide-heading h2 {
     font-size: 1.02rem;
   }
 
