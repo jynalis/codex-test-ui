@@ -128,10 +128,11 @@ header p {
 
 .hero-subtitle {
   color: #425369;
-  font-size: clamp(1.02rem, 2vw, 1.2rem);
+  font-size: clamp(0.95rem, 1.8vw, 1.08rem);
   font-weight: 600;
-  line-height: 1.58;
-  max-width: 760px;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  max-width: 22ch;
 }
 
 .card {
@@ -2613,8 +2614,8 @@ button.ghost {
   }
 
   .hero-subtitle {
-    font-size: 0.98rem;
-    line-height: 1.52;
+    font-size: 0.9rem;
+    line-height: 1.4;
   }
 
   .step-guide-section {
