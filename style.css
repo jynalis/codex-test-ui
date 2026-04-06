@@ -456,6 +456,10 @@ header p {
   gap: 14px;
 }
 
+.input-main-header {
+  min-width: 0;
+}
+
 .input-main-tabbar {
   width: 100%;
 }
@@ -499,6 +503,8 @@ header p {
 
 .input-main-content {
   min-width: 0;
+  display: grid;
+  gap: 14px;
 }
 
 .input-main-panel {
