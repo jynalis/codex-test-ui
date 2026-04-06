@@ -2904,13 +2904,11 @@ button.ghost {
   }
 
   #panel-chart .pie-legend,
-  #expense-chart .pie-legend,
   #asset-main-panel-current-assets .pie-legend {
     gap: 6px;
   }
 
   #panel-chart .pie-legend-item,
-  #expense-chart .pie-legend-item,
   #asset-main-panel-current-assets .pie-legend-item {
     grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-rows: auto auto;
@@ -2921,13 +2919,11 @@ button.ghost {
   }
 
   #panel-chart .pie-legend-item .dot,
-  #expense-chart .pie-legend-item .dot,
   #asset-main-panel-current-assets .pie-legend-item .dot {
     margin-top: 1px;
   }
 
   #panel-chart .pie-legend-item .category,
-  #expense-chart .pie-legend-item .category,
   #asset-main-panel-current-assets .pie-legend-item .category {
     grid-column: 2;
     grid-row: 1;
@@ -2935,7 +2931,6 @@ button.ghost {
   }
 
   #panel-chart .pie-legend-item .value,
-  #expense-chart .pie-legend-item .value,
   #asset-main-panel-current-assets .pie-legend-item .value {
     grid-column: 2;
     grid-row: 2;
@@ -2944,7 +2939,6 @@ button.ghost {
   }
 
   #panel-chart .pie-legend-item .ratio,
-  #expense-chart .pie-legend-item .ratio,
   #asset-main-panel-current-assets .pie-legend-item .ratio {
     grid-column: 3;
     grid-row: 2;
@@ -2953,14 +2947,56 @@ button.ghost {
     font-size: 0.9rem;
   }
 
+  .input-sub-panel[data-input-sub-panel="expense-balance"] .shared-view-filters[data-shared-view-filter="expense"] {
+    margin-bottom: 10px;
+  }
+
   #expense-chart {
-    gap: 14px;
-    padding: 14px 8px 16px;
+    gap: 17px;
+    padding: 16px 9px 18px;
   }
 
   #expense-chart .pie-wrap {
     padding-inline: 0;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+  }
+
+  #expense-chart .pie-legend {
+    gap: 9px;
+  }
+
+  #expense-chart .pie-legend-item {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    column-gap: 7px;
+    row-gap: 3px;
+    align-items: start;
+    padding: 8px 9px;
+  }
+
+  #expense-chart .pie-legend-item .dot {
+    margin-top: 1px;
+  }
+
+  #expense-chart .pie-legend-item .category {
+    grid-column: 2;
+    grid-row: 1;
+    line-height: 1.32;
+  }
+
+  #expense-chart .pie-legend-item .value {
+    grid-column: 2;
+    grid-row: 2;
+    line-height: 1.3;
+    font-size: 0.85rem;
+  }
+
+  #expense-chart .pie-legend-item .ratio {
+    grid-column: 3;
+    grid-row: 2;
+    align-self: end;
+    line-height: 1.2;
+    font-size: 0.9rem;
   }
 
   #expense-chart .pie-chart {
