@@ -963,19 +963,36 @@ function setProfileFormMode(isEditing) {
   }
 }
 
-function resetProfileFormFields() {
+function isBasicEditingMode() {
+  return Boolean(basicEditingPlanId);
+}
+
+function getInitialProfileFormState() {
   const settings = loadSettings();
+  const transactions = loadTransactions();
+  return {
+    entryStartMonth: resolveEntryStartMonth(settings, transactions),
+    birthDate: settings?.birthDate || "",
+  };
+}
+
+function resetProfileRegisterForm() {
+  const initialState = getInitialProfileFormState();
   basicEditingPlanId = null;
   if (profileForm) {
     profileForm.reset();
   }
-  entryStartMonthInput.value = resolveEntryStartMonth(settings, loadTransactions());
-  birthDateInput.value = settings?.birthDate || "";
+  entryStartMonthInput.value = initialState.entryStartMonth;
+  birthDateInput.value = initialState.birthDate;
   if (planEditorList) {
     planEditorList.innerHTML = "";
+    renderPlans(loadSettings());
   }
-  renderPlans(settings);
   setProfileFormMode(false);
+}
+
+function resetProfileFormFields() {
+  resetProfileRegisterForm();
 }
 
 function setLifeEventError(message = "") {
@@ -3638,7 +3655,7 @@ function setInputMainTab(tabName = "basic") {
   });
 }
 
-function setInputSubTab(groupName, tabName = "register") {
+function setInputSubTab(groupName, tabName = "register", options = {}) {
   if (!groupName) return;
   const switchRoot = document.querySelector(`[data-input-sub-switch="${groupName}"]`);
   if (!switchRoot) return;
@@ -3647,6 +3664,10 @@ function setInputSubTab(groupName, tabName = "register") {
   const requestedTab = tabName || "register";
   const hasRequestedTab = tabs.some((button) => button.dataset.inputSubTab === requestedTab);
   const nextTab = hasRequestedTab ? requestedTab : tabs[0].dataset.inputSubTab;
+  const shouldResetBasicRegisterForm = groupName === "basic" && nextTab === "register" && !options?.keepBasicEditingState;
+  if (shouldResetBasicRegisterForm) {
+    resetProfileRegisterForm();
+  }
   activeInputSubTabs[groupName] = nextTab;
   tabs.forEach((button) => {
     const isActive = button.dataset.inputSubTab === nextTab;
@@ -3872,7 +3893,7 @@ function startPlanEdit(planId) {
   setProfileFormMode(true);
   setPrimaryMainTab("input");
   setInputMainTab("basic");
-  setInputSubTab("basic", "register");
+  setInputSubTab("basic", "register", { keepBasicEditingState: true });
   targetBlock.scrollIntoView({ behavior: "smooth", block: "center" });
   targetBlock.querySelector(".plan-name")?.focus();
 }
@@ -4022,8 +4043,7 @@ function saveProfile(event) {
   if (!settings.birthDate || !settings.entryStartMonth) return;
 
   saveSettings(settings);
-  basicEditingPlanId = null;
-  setProfileFormMode(false);
+  resetProfileRegisterForm();
   render();
   setInputSubTab("basic", "registered");
 }
@@ -4091,7 +4111,7 @@ function render() {
 
   entryStartMonthInput.value = resolveEntryStartMonth(settings, transactions);
   birthDateInput.value = settings.birthDate || "";
-  setProfileFormMode(Boolean(basicEditingPlanId));
+  setProfileFormMode(isBasicEditingMode());
   updateCashflowAssumptionInputs(assumptions);
 
   const historyItems = buildTransactionHistoryItems(transactions, autoTransactions, currentHistoryMonth);
