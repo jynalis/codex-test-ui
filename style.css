@@ -2313,11 +2313,21 @@ button.ghost {
 #expense-chart .pie-wrap {
   width: 100%;
   padding-inline: 8px;
+  margin-block: 2px 6px;
 }
 
 #expense-chart .pie-chart {
   width: min(272px, 72vw);
   max-width: 100%;
+}
+
+#expense-chart .pie-legend {
+  margin-top: 2px;
+  padding-bottom: 4px;
+}
+
+#expense-chart .pie-legend-item:last-child {
+  margin-bottom: 2px;
 }
 
 .pie-center {
@@ -2849,7 +2859,7 @@ button.ghost {
   }
 
   .input-sub-panel[data-input-sub-panel="expense-balance"] {
-    padding-bottom: calc(86px + env(safe-area-inset-bottom));
+    padding-bottom: calc(74px + env(safe-area-inset-bottom));
   }
 
   .diagnosis-card {
@@ -2967,21 +2977,23 @@ button.ghost {
   }
 
   .input-sub-panel[data-input-sub-panel="expense-balance"] .shared-view-filters[data-shared-view-filter="expense"] {
-    margin-bottom: 10px;
+    margin-bottom: 14px;
   }
 
   #expense-chart {
-    gap: 17px;
-    padding: 16px 9px 18px;
+    gap: 18px;
+    padding: 20px 11px;
   }
 
   #expense-chart .pie-wrap {
     padding-inline: 0;
-    margin-bottom: 4px;
+    margin-block: 2px 6px;
   }
 
   #expense-chart .pie-legend {
     gap: 9px;
+    margin-top: 2px;
+    padding-bottom: 2px;
   }
 
   #expense-chart .pie-legend-item {
