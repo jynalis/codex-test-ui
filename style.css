@@ -201,8 +201,20 @@ header p {
 
 .primary-main-tabbar {
   position: sticky;
-  top: 8px;
-  z-index: 30;
+  top: 0;
+  z-index: 80;
+  margin-top: calc(-1 * env(safe-area-inset-top, 0px));
+  padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
+  padding-bottom: 8px;
+  background: #e8eff9;
+}
+
+.primary-main-tabbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #e8eff9;
+  z-index: -1;
 }
 
 .primary-main-tabs {
@@ -2547,7 +2559,8 @@ button.ghost {
   }
 
   .primary-main-tabbar {
-    top: 6px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 6px);
+    padding-bottom: 6px;
   }
 
   .primary-main-tabs {
