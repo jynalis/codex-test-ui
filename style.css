@@ -2369,12 +2369,12 @@ button.ghost {
 }
 
 #expense-chart .pie-chart {
-  width: min(272px, 72vw);
+  width: min(300px, 80vw);
   max-width: 100%;
 }
 
 #expense-chart .pie-wrap {
-  margin-block: 2px 4px;
+  margin-block: 0;
 }
 
 .pie-center {
@@ -3036,12 +3036,12 @@ button.ghost {
 
   #expense-chart {
     gap: 16px;
-    padding: 8px 0 12px;
+    padding: 14px 10px;
   }
 
   #expense-chart .pie-wrap {
     padding-inline: 0;
-    margin-block: 4px 6px;
+    margin-block: 0;
   }
 
   #expense-chart .pie-legend {
@@ -3083,20 +3083,7 @@ button.ghost {
   }
 
   #expense-chart .pie-chart {
-    width: clamp(236px, 84%, 300px);
-  }
-
-  #expense-chart .pie-center {
-    inset: 24%;
-    gap: 3px;
-  }
-
-  #expense-chart .pie-center span {
-    font-size: 0.8rem;
-  }
-
-  #expense-chart .pie-center strong {
-    font-size: 1.08rem;
+    width: min(300px, 80vw);
   }
 
   .recurring-actions button {
