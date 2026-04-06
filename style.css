@@ -700,6 +700,15 @@ header p {
   margin: 0;
 }
 
+.monthly-expense-card {
+  margin: 0;
+  border-radius: 12px;
+}
+
+.monthly-expense-card .chart {
+  margin-top: 0;
+}
+
 .section-heading {
   display: grid;
   gap: 4px;
@@ -2301,6 +2310,16 @@ button.ghost {
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 40%);
 }
 
+#expense-chart .pie-wrap {
+  width: 100%;
+  padding-inline: 8px;
+}
+
+#expense-chart .pie-chart {
+  width: min(272px, 72vw);
+  max-width: 100%;
+}
+
 .pie-center {
   position: absolute;
   inset: 22%;
@@ -2810,6 +2829,10 @@ button.ghost {
     width: min(250px, 100%);
   }
 
+  .input-sub-panel[data-input-sub-panel="expense-balance"] {
+    padding-bottom: calc(86px + env(safe-area-inset-bottom));
+  }
+
   .diagnosis-card {
     margin-top: 10px;
     padding: 14px 12px;
@@ -2881,11 +2904,13 @@ button.ghost {
   }
 
   #panel-chart .pie-legend,
+  #expense-chart .pie-legend,
   #asset-main-panel-current-assets .pie-legend {
     gap: 6px;
   }
 
   #panel-chart .pie-legend-item,
+  #expense-chart .pie-legend-item,
   #asset-main-panel-current-assets .pie-legend-item {
     grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-rows: auto auto;
@@ -2896,11 +2921,13 @@ button.ghost {
   }
 
   #panel-chart .pie-legend-item .dot,
+  #expense-chart .pie-legend-item .dot,
   #asset-main-panel-current-assets .pie-legend-item .dot {
     margin-top: 1px;
   }
 
   #panel-chart .pie-legend-item .category,
+  #expense-chart .pie-legend-item .category,
   #asset-main-panel-current-assets .pie-legend-item .category {
     grid-column: 2;
     grid-row: 1;
@@ -2908,6 +2935,7 @@ button.ghost {
   }
 
   #panel-chart .pie-legend-item .value,
+  #expense-chart .pie-legend-item .value,
   #asset-main-panel-current-assets .pie-legend-item .value {
     grid-column: 2;
     grid-row: 2;
@@ -2916,12 +2944,26 @@ button.ghost {
   }
 
   #panel-chart .pie-legend-item .ratio,
+  #expense-chart .pie-legend-item .ratio,
   #asset-main-panel-current-assets .pie-legend-item .ratio {
     grid-column: 3;
     grid-row: 2;
     align-self: end;
     line-height: 1.2;
     font-size: 0.9rem;
+  }
+
+  #expense-chart {
+    gap: 12px;
+    padding: 14px 12px;
+  }
+
+  #expense-chart .pie-wrap {
+    padding-inline: 4px;
+  }
+
+  #expense-chart .pie-chart {
+    width: min(220px, 62vw);
   }
 
   .recurring-actions button {
