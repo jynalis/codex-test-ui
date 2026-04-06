@@ -724,9 +724,9 @@ header p {
 .monthly-expense-card {
   margin: 0;
   border-radius: 14px;
-  background: linear-gradient(180deg, #f8fbff 0%, #f1f7ff 100%);
-  border: 1px solid #cfdded;
-  padding: 14px 12px 26px;
+  background: transparent;
+  border: 0;
+  padding: 0;
 }
 
 .monthly-expense-card .chart {
@@ -737,6 +737,9 @@ header p {
   display: grid;
   gap: 12px;
   padding-top: 8px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .section-heading {
@@ -2367,17 +2370,18 @@ button.ghost {
 }
 
 #expense-chart {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
+  margin-top: 0;
+  padding: 16px 14px;
+  border: 1px solid #dadfe6;
+  border-radius: 14px;
+  background: #fff;
   box-shadow: none;
   min-height: 0;
-  gap: 0;
+  gap: 14px;
 }
 
 #expense-chart.has-data {
-  background: transparent;
+  background: #fff;
 }
 
 #expense-chart .expense-analysis-layout {
@@ -2437,7 +2441,7 @@ button.ghost {
 
 #expense-chart .chart-empty {
   margin: 0;
-  padding: 8px 2px;
+  padding: 8px 4px;
 }
 
 .pie-center {
@@ -3117,7 +3121,11 @@ button.ghost {
   }
 
   #section-expense.monthly-expense-card {
-    padding: 10px 10px calc(86px + env(safe-area-inset-bottom));
+    padding: 0 0 calc(86px + env(safe-area-inset-bottom));
+  }
+
+  #expense-chart {
+    padding: 14px 10px;
   }
 
   #expense-chart .expense-analysis-layout {
