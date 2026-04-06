@@ -84,6 +84,7 @@ const assetGrowthMetricToggle = document.getElementById("asset-growth-metric-tog
 const expenseChart = document.getElementById("expense-chart");
 const dashboardJumpCards = Array.from(document.querySelectorAll("[data-dashboard-jump-section]"));
 const floatingTopButton = document.getElementById("floating-top-button");
+const primaryMainTabbar = document.querySelector(".primary-main-tabbar");
 const accordionSections = Array.from(document.querySelectorAll("[data-accordion-section]"));
 const dashboardSection = document.getElementById("section-home");
 const assetsSection = document.getElementById("section-assets");
@@ -4557,13 +4558,43 @@ function resolveCurrentPrimaryPanel() {
   return activePanel || primaryMainPanels.find((panel) => !panel.hidden) || null;
 }
 
+function resolveCurrentPrimaryTopAnchor() {
+  const sectionIds = PRIMARY_MAIN_SECTION_IDS[activePrimaryMainTab] || [];
+  for (const sectionId of sectionIds) {
+    const section = document.getElementById(sectionId);
+    if (section) return section;
+  }
+  return resolveCurrentPrimaryPanel();
+}
+
+function getPrimaryTopAnchorOffset() {
+  const viewportOffset = getViewportTopOffset();
+  if (!primaryMainTabbar) return viewportOffset;
+  const tabbarRect = primaryMainTabbar.getBoundingClientRect();
+  const stickyTopThreshold = viewportOffset + 1;
+  const isSticky = tabbarRect.top <= stickyTopThreshold;
+  if (!isSticky) return viewportOffset;
+  return Math.max(viewportOffset + tabbarRect.height + 10, 0);
+}
+
+function scrollToElementWithOffset(targetElement, { behavior = "smooth" } = {}) {
+  if (!targetElement) return;
+  const topOffset = getPrimaryTopAnchorOffset();
+  const targetY = Math.max(0, window.scrollY + targetElement.getBoundingClientRect().top - topOffset);
+  const distance = Math.abs(window.scrollY - targetY);
+  window.scrollTo({
+    top: targetY,
+    behavior: behavior || distanceBasedScrollBehavior(distance),
+  });
+}
+
 function scrollCurrentPrimaryPanelToTop() {
-  const activePanel = resolveCurrentPrimaryPanel();
-  if (!activePanel) {
+  const topAnchor = resolveCurrentPrimaryTopAnchor();
+  if (!topAnchor) {
     window.scrollTo({ top: 0, behavior: "smooth" });
     return;
   }
-  ensureSectionHeadingVisible(activePanel, { behavior: "smooth" });
+  scrollToElementWithOffset(topAnchor, { behavior: "smooth" });
 }
 
 function setupFloatingTopButton() {
