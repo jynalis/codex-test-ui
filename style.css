@@ -717,6 +717,12 @@ header p {
   margin-top: 0;
 }
 
+#input-sub-panel-monthly-expense-balance {
+  display: grid;
+  gap: 14px;
+  padding-top: 4px;
+}
+
 .section-heading {
   display: grid;
   gap: 4px;
@@ -2354,12 +2360,12 @@ button.ghost {
 }
 
 #expense-chart {
-  padding: 4px 0 0;
+  padding: 8px 0 10px;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  gap: 14px;
+  gap: 18px;
 }
 
 #expense-chart.has-data {
@@ -2369,6 +2375,10 @@ button.ghost {
 #expense-chart .pie-chart {
   width: min(272px, 72vw);
   max-width: 100%;
+}
+
+#expense-chart .pie-wrap {
+  margin-block: 2px 4px;
 }
 
 .pie-center {
@@ -3025,17 +3035,17 @@ button.ghost {
   }
 
   .input-sub-panel[data-input-sub-panel="expense-balance"] .shared-view-filters[data-shared-view-filter="expense"] {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
 
   #expense-chart {
-    gap: 14px;
-    padding: 2px 0 4px;
+    gap: 16px;
+    padding: 8px 0 12px;
   }
 
   #expense-chart .pie-wrap {
     padding-inline: 0;
-    margin-bottom: 2px;
+    margin-block: 4px 6px;
   }
 
   #expense-chart .pie-legend {
