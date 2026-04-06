@@ -2603,18 +2603,37 @@ button.ghost {
     border-radius: 16px;
   }
 
-  .page-header {
-    padding: 26px 20px;
-    border-radius: 20px;
+  .page-header.card {
+    padding: 20px 16px;
+    border-radius: 18px;
+    border-top-width: 5px;
   }
 
-  .page-header h1 {
-    font-size: clamp(1.9rem, 9.5vw, 2.35rem);
+  .hero-topline {
+    gap: 8px;
+  }
+
+  .eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    padding: 6px 12px;
+    box-shadow: 0 4px 10px rgb(25 31 39 / 10%);
+  }
+
+  .hero-copy {
+    margin-top: 6px;
+    gap: 7px;
+  }
+
+  .page-header.card h1 {
+    font-size: clamp(1.62rem, 8vw, 2.02rem);
+    line-height: 1.08;
   }
 
   .hero-subtitle {
-    font-size: 0.98rem;
-    line-height: 1.52;
+    font-size: 0.88rem;
+    line-height: 1.46;
+    max-width: 100%;
   }
 
   .step-guide-section {

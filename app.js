@@ -4537,17 +4537,15 @@ function isMobileViewport() {
 function scrollToTopAfterMobileUpdate() {
   if (!isMobileViewport()) return;
   const token = ++mobileUpdateScrollToken;
-  const scrollToDashboardStart = () => {
+  const scrollToPageStart = () => {
     if (token !== mobileUpdateScrollToken) return;
-    if (!dashboardSection) return;
-    const targetY = getSectionHeadingTargetY(dashboardSection);
-    window.scrollTo({ top: targetY, behavior: "auto" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   };
 
   window.requestAnimationFrame(() => {
     window.requestAnimationFrame(() => {
       window.setTimeout(() => {
-        window.requestAnimationFrame(scrollToDashboardStart);
+        window.requestAnimationFrame(scrollToPageStart);
       }, 80);
     });
   });
@@ -4626,15 +4624,9 @@ function scrollToElementWithOffset(targetElement, { behavior = "smooth" } = {}) 
 }
 
 function scrollCurrentPrimaryPanelToTop() {
-  const topAnchor = resolveCurrentPrimaryTopAnchor();
-  if (!topAnchor) {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    return;
-  }
-  const targetY = getPrimaryTopButtonTargetY(topAnchor);
-  const distance = Math.abs(window.scrollY - targetY);
+  const distance = Math.abs(window.scrollY);
   window.scrollTo({
-    top: targetY,
+    top: 0,
     behavior: distanceBasedScrollBehavior(distance),
   });
 }
