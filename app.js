@@ -2486,11 +2486,14 @@ function renderDashboard({
 function renderExpenseChart(expenseComposition, isAverageMode) {
   expenseChart.innerHTML = "";
   expenseChart.classList.toggle("has-data", false);
+  const chartLayout = document.createElement("div");
+  chartLayout.className = "expense-analysis-layout";
   if (expenseComposition.totalExpense === 0 || expenseComposition.entries.length === 0) {
     const empty = document.createElement("p");
     empty.className = "chart-empty";
     empty.textContent = isAverageMode ? "平均対象期間の支出データがありません。" : "この月の支出データはありません。";
-    expenseChart.appendChild(empty);
+    chartLayout.appendChild(empty);
+    expenseChart.appendChild(chartLayout);
     return;
   }
 
@@ -2517,7 +2520,7 @@ function renderExpenseChart(expenseComposition, isAverageMode) {
 
   pieChart.appendChild(pieCenter);
   pieWrap.appendChild(pieChart);
-  expenseChart.appendChild(pieWrap);
+  chartLayout.appendChild(pieWrap);
 
   const legend = document.createElement("ul");
   legend.className = "pie-legend";
@@ -2534,7 +2537,8 @@ function renderExpenseChart(expenseComposition, isAverageMode) {
     legend.appendChild(item);
   });
 
-  expenseChart.appendChild(legend);
+  chartLayout.appendChild(legend);
+  expenseChart.appendChild(chartLayout);
 }
 
 function createPieChartElements(entries, total, options = {}) {
