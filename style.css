@@ -27,13 +27,14 @@
   --history-bg: linear-gradient(180deg, #fbfcff 0%, #f4f7fd 100%);
   --accordion-duration: 180ms;
   --accordion-fade-duration: 120ms;
-  --primary-main-tabbar-offset-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-  --primary-main-tabbar-height: 58px;
+  --primary-main-tabbar-safe-bottom: max(env(safe-area-inset-bottom, 0px), 14px);
+  --primary-main-tabbar-offset-bottom: calc(10px + var(--primary-main-tabbar-safe-bottom));
+  --primary-main-tabbar-height: calc(54px + var(--primary-main-tabbar-safe-bottom));
   --floating-top-button-gap: 10px;
   --floating-top-button-offset-bottom: calc(
     var(--primary-main-tabbar-offset-bottom) + var(--primary-main-tabbar-height) + var(--floating-top-button-gap)
   );
-  --primary-main-tabbar-reserved-space: calc(110px + env(safe-area-inset-bottom, 0px));
+  --primary-main-tabbar-reserved-space: calc(132px + var(--primary-main-tabbar-safe-bottom));
   --asset-main-first-content-offset: 14px;
 }
 
@@ -248,9 +249,9 @@ header p {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: var(--primary-main-tabbar-offset-bottom);
   z-index: 90;
-  padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px));
+  padding: 8px 0 var(--primary-main-tabbar-safe-bottom);
   border-radius: 0;
   background: linear-gradient(180deg, #e7efff 0%, #dbe7fb 100%);
   border-top: 1px solid #bdcceb;
