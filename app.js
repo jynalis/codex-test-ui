@@ -1003,6 +1003,23 @@ function resetProfileFormFields() {
   resetProfileRegisterForm();
 }
 
+function scrollToBasicRegisterStart() {
+  const target = profileForm || document.getElementById("section-profile");
+  if (!target) return;
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      scrollToElementWithOffset(target, { behavior: "auto" });
+    });
+  });
+}
+
+function cancelProfileEdit() {
+  const wasEditing = isBasicEditingMode();
+  resetProfileFormFields();
+  if (!wasEditing) return;
+  scrollToBasicRegisterStart();
+}
+
 function setLifeEventError(message = "") {
   if (!lifeEventError) return;
   const hasError = Boolean(message);
@@ -4912,7 +4929,7 @@ function init() {
   setupFormattedAmountInput(lifeEventAmountInput);
 
   profileForm.addEventListener("submit", saveProfile);
-  profileCancelButton?.addEventListener("click", resetProfileFormFields);
+  profileCancelButton?.addEventListener("click", cancelProfileEdit);
   recurringForm.addEventListener("submit", addRecurringExpense);
   recurringCancelButton?.addEventListener("click", cancelRecurringExpenseEdit);
   lifeEventForm?.addEventListener("submit", addLifeEvent);
