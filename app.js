@@ -3729,7 +3729,7 @@ function setupPrimaryMainTabs() {
   if (primaryMainTabs.length === 0) return;
   primaryMainTabs.forEach((button) => {
     button.addEventListener("click", () => {
-      setPrimaryMainTab(button.dataset.primaryMainTab || "dashboard");
+      switchPrimaryMainTabAndScrollTop(button.dataset.primaryMainTab || "dashboard");
     });
   });
   setPrimaryMainTab(activePrimaryMainTab);
@@ -4632,6 +4632,15 @@ function resolveCurrentPrimaryTopAnchor() {
   return resolveCurrentPrimaryPanel();
 }
 
+function resolvePrimaryTopAnchorByTab(tabName = activePrimaryMainTab) {
+  const sectionIds = PRIMARY_MAIN_SECTION_IDS[tabName] || [];
+  for (const sectionId of sectionIds) {
+    const section = document.getElementById(sectionId);
+    if (section) return section;
+  }
+  return document.querySelector(`[data-primary-main-panel="${tabName}"]`) || resolveCurrentPrimaryPanel();
+}
+
 function getPrimaryTopAnchorOffset() {
   const viewportOffset = getViewportTopOffset();
   if (!primaryMainTabbar) return viewportOffset;
@@ -4695,6 +4704,22 @@ function scrollCurrentPrimaryPanelToTop() {
   window.scrollTo({
     top: 0,
     behavior: distanceBasedScrollBehavior(distance),
+  });
+}
+
+function scrollPrimaryMainTabToTop(tabName, { behavior = "auto" } = {}) {
+  const topAnchor = resolvePrimaryTopAnchorByTab(tabName);
+  if (!topAnchor) return;
+  scrollToElementWithOffset(topAnchor, { behavior });
+}
+
+function switchPrimaryMainTabAndScrollTop(tabName) {
+  const nextTab = tabName || "dashboard";
+  setPrimaryMainTab(nextTab);
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      scrollPrimaryMainTabToTop(nextTab, { behavior: "auto" });
+    });
   });
 }
 
