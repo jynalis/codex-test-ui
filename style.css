@@ -28,6 +28,11 @@
   --accordion-duration: 180ms;
   --accordion-fade-duration: 120ms;
   --primary-main-tabbar-offset-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  --primary-main-tabbar-height: 58px;
+  --floating-top-button-gap: 10px;
+  --floating-top-button-offset-bottom: calc(
+    var(--primary-main-tabbar-offset-bottom) + var(--primary-main-tabbar-height) + var(--floating-top-button-gap)
+  );
   --primary-main-tabbar-reserved-space: calc(110px + env(safe-area-inset-bottom, 0px));
 }
 
@@ -2556,7 +2561,7 @@ button.ghost {
 .floating-top-button {
   position: fixed;
   right: max(14px, env(safe-area-inset-right));
-  bottom: calc(var(--primary-main-tabbar-reserved-space) - 18px);
+  bottom: var(--floating-top-button-offset-bottom);
   width: 62px;
   min-height: 62px;
   border-radius: 999px;
@@ -3222,7 +3227,6 @@ button.ghost {
 @media (min-width: 1000px) {
   .floating-top-button {
     right: max(20px, env(safe-area-inset-right));
-    bottom: calc(var(--primary-main-tabbar-reserved-space) - 14px);
   }
 }
 
