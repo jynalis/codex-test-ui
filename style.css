@@ -28,13 +28,13 @@
   --accordion-duration: 180ms;
   --accordion-fade-duration: 120ms;
   --primary-main-tabbar-safe-bottom: max(env(safe-area-inset-bottom, 0px), 14px);
-  --primary-main-tabbar-offset-bottom: calc(10px + var(--primary-main-tabbar-safe-bottom));
-  --primary-main-tabbar-height: calc(54px + var(--primary-main-tabbar-safe-bottom));
+  --primary-main-tabbar-offset-bottom: 0px;
+  --primary-main-tabbar-height: calc(62px + var(--primary-main-tabbar-safe-bottom));
   --floating-top-button-gap: 10px;
   --floating-top-button-offset-bottom: calc(
     var(--primary-main-tabbar-offset-bottom) + var(--primary-main-tabbar-height) + var(--floating-top-button-gap)
   );
-  --primary-main-tabbar-reserved-space: calc(132px + var(--primary-main-tabbar-safe-bottom));
+  --primary-main-tabbar-reserved-space: calc(102px + var(--primary-main-tabbar-safe-bottom));
   --asset-main-first-content-offset: 14px;
 }
 
@@ -250,16 +250,23 @@ header p {
   left: 0;
   right: 0;
   bottom: var(--primary-main-tabbar-offset-bottom);
-  z-index: 90;
+  z-index: 1000;
   padding: 8px 0 var(--primary-main-tabbar-safe-bottom);
+  pointer-events: auto;
+  opacity: 1;
   border-radius: 0;
-  background: linear-gradient(180deg, #e7efff 0%, #dbe7fb 100%);
+  background: #dbe7fb;
   border-top: 1px solid #bdcceb;
   box-shadow: 0 -8px 22px rgb(20 41 74 / 16%);
 }
 
 .primary-main-tabbar::before {
-  content: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .primary-main-tabs {
@@ -2607,7 +2614,7 @@ button.ghost {
   gap: 1px;
   font-weight: 800;
   cursor: pointer;
-  z-index: 120;
+  z-index: 930;
 }
 
 .floating-top-button:hover {
