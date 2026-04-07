@@ -34,7 +34,7 @@
     var(--primary-main-tabbar-offset-bottom) + var(--primary-main-tabbar-height) + var(--floating-top-button-gap)
   );
   --primary-main-tabbar-reserved-space: calc(110px + env(safe-area-inset-bottom, 0px));
-  --asset-main-first-content-offset: 14px;
+  --asset-main-first-content-offset: 8px;
 }
 
 * {
@@ -406,6 +406,10 @@ header p {
 
 .asset-main-content {
   min-width: 0;
+}
+
+.asset-main-tabbar + .asset-main-content {
+  margin-top: -6px;
 }
 
 .asset-main-panel-body {
