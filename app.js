@@ -4715,12 +4715,51 @@ function scrollPrimaryMainTabToTop(tabName, { behavior = "auto" } = {}) {
 
 function switchPrimaryMainTabAndScrollTop(tabName) {
   const nextTab = tabName || "dashboard";
+  const previousTab = activePrimaryMainTab;
+  if (previousTab && previousTab !== nextTab) {
+    resetPrimaryMainTabState(previousTab);
+  }
   setPrimaryMainTab(nextTab);
   window.requestAnimationFrame(() => {
     window.requestAnimationFrame(() => {
       scrollPrimaryMainTabToTop(nextTab, { behavior: "auto" });
     });
   });
+}
+
+function resetInputTabState() {
+  resetProfileFormFields();
+  resetRecurringFormFields();
+  resetLifeEventFormFields();
+  resetTransactionFormFields({ date: todayISO() });
+  setInputMainTab("basic");
+  Object.keys(activeInputSubTabs).forEach((groupName) => {
+    setInputSubTab(groupName, "register");
+  });
+}
+
+function resetDashboardTabState() {
+  setIncomeMainTab("expense-balance");
+}
+
+function resetAssetsTabState() {
+  setAssetMainTab("formation");
+}
+
+function resetPrimaryMainTabState(tabName) {
+  switch (tabName) {
+    case "dashboard":
+      resetDashboardTabState();
+      break;
+    case "assets":
+      resetAssetsTabState();
+      break;
+    case "input":
+      resetInputTabState();
+      break;
+    default:
+      break;
+  }
 }
 
 function setupFloatingTopButton() {
