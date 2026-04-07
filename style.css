@@ -2372,16 +2372,16 @@ button.ghost {
 #expense-chart {
   margin-top: 0;
   padding: 16px 14px;
-  border: 1px solid #dadfe6;
-  border-radius: 14px;
-  background: #fff;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   box-shadow: none;
   min-height: 0;
   gap: 14px;
 }
 
 #expense-chart.has-data {
-  background: #fff;
+  background: transparent;
 }
 
 #expense-chart .expense-analysis-layout {
