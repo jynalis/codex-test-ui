@@ -861,11 +861,7 @@ function handleCancelEditFromRegistered(groupName, options = {}) {
   setPrimaryMainTab("input");
   setInputMainTab(groupName);
   setInputSubTab(groupName, "register");
-  if (groupName === "basic" || groupName === "recurring" || groupName === "life") {
-    scrollAppToAbsoluteTopAfterCancel();
-    return;
-  }
-  scrollInputRegisterTopStable(groupName);
+  scrollAppToAbsoluteTopAfterCancel();
 }
 
 function resetTransactionFormFields(options = {}) {
@@ -4455,6 +4451,13 @@ function cancelRecurringExpenseEdit() {
   });
 }
 
+function cancelTransactionEdit() {
+  handleCancelEditFromRegistered("monthly", {
+    isEditing: transactionEditingId,
+    resetForm: () => resetTransactionFormFields(),
+  });
+}
+
 function isAssetsSectionExpanded() {
   if (!assetsSection) return false;
   const parentPanel = assetsSection.closest("[data-primary-main-panel]");
@@ -5158,7 +5161,7 @@ function init() {
 
   form.addEventListener("submit", addTransaction);
   typeInput.addEventListener("change", syncCategoryOptions);
-  transactionCancelButton?.addEventListener("click", () => resetTransactionFormFields());
+  transactionCancelButton?.addEventListener("click", cancelTransactionEdit);
   setupSharedViewFilters();
   setupFormattedAmountInput(amountInput);
   setupFormattedAmountInput(recurringAmountInput);
