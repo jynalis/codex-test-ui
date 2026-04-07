@@ -432,6 +432,11 @@ header p {
   margin-top: var(--asset-main-first-content-offset);
 }
 
+#asset-main-panel-formation > .asset-main-first-content,
+#asset-main-panel-current-assets > .asset-main-first-content {
+  margin-top: 6px;
+}
+
 .section-tone-cashflow {
   background: var(--cashflow-bg);
   border-color: #2f7e9d;
