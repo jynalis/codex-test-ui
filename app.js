@@ -4718,7 +4718,7 @@ function switchPrimaryMainTabAndScrollTop(tabName) {
   setPrimaryMainTab(nextTab);
   window.requestAnimationFrame(() => {
     window.requestAnimationFrame(() => {
-      scrollPrimaryMainTabToTop(nextTab, { behavior: "auto" });
+      scrollCurrentPrimaryPanelToTop();
     });
   });
 }
