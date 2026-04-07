@@ -27,6 +27,8 @@
   --history-bg: linear-gradient(180deg, #fbfcff 0%, #f4f7fd 100%);
   --accordion-duration: 180ms;
   --accordion-fade-duration: 120ms;
+  --primary-main-tabbar-offset-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  --primary-main-tabbar-reserved-space: calc(110px + env(safe-area-inset-bottom, 0px));
 }
 
 * {
@@ -53,7 +55,7 @@ body.is-nav-closing {
 .container {
   max-width: 1160px;
   margin: 0 auto;
-  padding: 24px 18px 28px;
+  padding: 24px 18px calc(28px + var(--primary-main-tabbar-reserved-space));
   display: grid;
   gap: 18px;
 }
@@ -221,20 +223,24 @@ header p {
 }
 
 .primary-main-tabbar {
-  position: sticky;
-  top: 0;
-  z-index: 80;
-  margin-top: calc(-1 * env(safe-area-inset-top, 0px));
-  padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
-  padding-bottom: 8px;
-  background: #e8eff9;
+  position: fixed;
+  left: 50%;
+  bottom: var(--primary-main-tabbar-offset-bottom);
+  transform: translateX(-50%);
+  width: min(calc(100% - 20px), 1124px);
+  z-index: 90;
+  padding: 0;
+  background: transparent;
 }
 
 .primary-main-tabbar::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: #e8eff9;
+  border-radius: 18px;
+  background: rgb(232 239 249 / 94%);
+  box-shadow: 0 12px 28px rgb(20 41 74 / 18%);
+  backdrop-filter: blur(4px);
   z-index: -1;
 }
 
@@ -2553,7 +2559,7 @@ button.ghost {
 .floating-top-button {
   position: fixed;
   right: max(14px, env(safe-area-inset-right));
-  bottom: calc(16px + env(safe-area-inset-bottom));
+  bottom: calc(var(--primary-main-tabbar-reserved-space) + 16px);
   width: 62px;
   min-height: 62px;
   border-radius: 999px;
@@ -2567,7 +2573,7 @@ button.ghost {
   gap: 1px;
   font-weight: 800;
   cursor: pointer;
-  z-index: 40;
+  z-index: 120;
 }
 
 .floating-top-button:hover {
@@ -2798,8 +2804,7 @@ button.ghost {
   }
 
   .primary-main-tabbar {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 6px);
-    padding-bottom: 6px;
+    width: min(calc(100% - 14px), 1124px);
   }
 
   .primary-main-tabs {
@@ -3220,7 +3225,7 @@ button.ghost {
 @media (min-width: 1000px) {
   .floating-top-button {
     right: max(20px, env(safe-area-inset-right));
-    bottom: max(20px, calc(20px + env(safe-area-inset-bottom)));
+    bottom: calc(var(--primary-main-tabbar-reserved-space) + 18px);
   }
 }
 
