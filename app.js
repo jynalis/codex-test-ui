@@ -113,6 +113,7 @@ const accordionCloseTimers = new WeakMap();
 const accordionCollapseWaiters = new WeakMap();
 const NAV_CLOSE_FAR_DISTANCE = 520;
 let mobileUpdateScrollToken = 0;
+let baselineVisualViewportHeight = 0;
 
 let latestAssetForecastSettings = null;
 let assetForecastDirty = true;
@@ -263,6 +264,53 @@ const yen = new Intl.NumberFormat("ja-JP", {
   currency: "JPY",
   maximumFractionDigits: 0,
 });
+
+function isEditableField(element) {
+  if (!(element instanceof HTMLElement)) return false;
+  if (element.isContentEditable) return true;
+  if (element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement) return true;
+  if (!(element instanceof HTMLInputElement)) return false;
+  const blockedTypes = new Set(["button", "checkbox", "radio", "range", "color", "file", "image", "submit", "reset"]);
+  return !blockedTypes.has(element.type);
+}
+
+function setupKeyboardLayoutStability() {
+  const root = document.documentElement;
+  const body = document.body;
+  if (!root || !body) return;
+
+  const visualViewport = window.visualViewport;
+  const resolveViewportHeight = () => visualViewport?.height || window.innerHeight || 0;
+  baselineVisualViewportHeight = Math.max(baselineVisualViewportHeight, resolveViewportHeight());
+
+  const updateKeyboardState = () => {
+    const activeElement = document.activeElement;
+    const hasFocusedEditable = isEditableField(activeElement);
+    const currentViewportHeight = resolveViewportHeight();
+    baselineVisualViewportHeight = Math.max(baselineVisualViewportHeight, currentViewportHeight);
+    const heightDelta = Math.max(0, baselineVisualViewportHeight - currentViewportHeight);
+    const isKeyboardOpen = hasFocusedEditable && heightDelta > 120;
+
+    body.classList.toggle("is-input-focused", hasFocusedEditable);
+    root.classList.toggle("is-input-focused", hasFocusedEditable);
+    body.classList.toggle("is-keyboard-open", isKeyboardOpen);
+    root.style.setProperty("--keyboard-viewport-delta", `${heightDelta}px`);
+  };
+
+  const scheduleUpdate = () => window.requestAnimationFrame(updateKeyboardState);
+  document.addEventListener("focusin", scheduleUpdate, true);
+  document.addEventListener("focusout", () => {
+    window.setTimeout(scheduleUpdate, 40);
+  }, true);
+  window.addEventListener("orientationchange", () => {
+    baselineVisualViewportHeight = 0;
+    scheduleUpdate();
+  });
+  window.addEventListener("resize", scheduleUpdate);
+  visualViewport?.addEventListener("resize", scheduleUpdate);
+  visualViewport?.addEventListener("scroll", scheduleUpdate);
+  updateKeyboardState();
+}
 const numberWithComma = new Intl.NumberFormat("ja-JP");
 
 function parseRateInput(value, fallback = 0) {
@@ -5141,6 +5189,8 @@ function setupSharedViewFilters() {
 }
 
 function init() {
+  setupKeyboardLayoutStability();
+
   const settings = loadSettings();
   const initialMonth = todayISO().slice(0, 7);
   const initialYearMonth = resolveInitialYearMonthState(initialMonth);
