@@ -2388,7 +2388,7 @@ button.ghost {
   width: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 22px;
+  gap: 24px;
   align-content: start;
 }
 
@@ -3126,7 +3126,7 @@ button.ghost {
   }
 
   #section-expense.monthly-expense-card {
-    padding: 0 0 calc(24px + env(safe-area-inset-bottom));
+    padding: 0 0 calc(20px + env(safe-area-inset-bottom));
   }
 
   #expense-chart {
