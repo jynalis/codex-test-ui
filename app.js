@@ -3743,10 +3743,12 @@ function renderAssetForecast(settings) {
     colors: ASSET_PIE_COLORS,
     formatCategoryLabel: formatAssetCompositionCategoryLabel,
   });
+  formationPieWrap.classList.add("asset-formation-pie-wrap");
+  formationLegend.classList.add("asset-formation-contract-list");
   const typeHeading = formationChartSection.querySelector(".asset-type-breakdown-heading");
   if (typeHeading) {
-    typeHeading.insertAdjacentElement("beforebegin", formationLegend);
     typeHeading.insertAdjacentElement("beforebegin", formationPieWrap);
+    typeHeading.insertAdjacentElement("beforebegin", formationLegend);
   } else {
     formationChartSection.appendChild(formationPieWrap);
     formationChartSection.appendChild(formationLegend);
