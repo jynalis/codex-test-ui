@@ -34,6 +34,7 @@
     var(--primary-main-tabbar-offset-bottom) + var(--primary-main-tabbar-height) + var(--floating-top-button-gap)
   );
   --primary-main-tabbar-reserved-space: calc(110px + env(safe-area-inset-bottom, 0px));
+  --asset-main-first-content-offset: 14px;
 }
 
 * {
@@ -417,6 +418,17 @@ header p {
 
 .asset-main-panel[hidden] {
   display: none !important;
+}
+
+/*
+  キャッシュフロータブの先頭要素（.grid）の見た目開始位置を基準に、
+  他タブの「子タブ直下→最初のコンテンツ開始位置」を揃える。
+*/
+#asset-main-panel-cashflow .cashflow-settings-grid,
+#asset-main-panel-formation .asset-forecast > :first-child,
+#asset-main-panel-current-assets .asset-forecast > :first-child,
+#asset-main-panel-withdraw .asset-forecast > :first-child {
+  margin-top: var(--asset-main-first-content-offset);
 }
 
 .section-tone-cashflow {
