@@ -72,6 +72,7 @@ const lifeEventCancelButton = document.getElementById("life-event-cancel-button"
 const lifeEventEditStatus = document.getElementById("life-event-edit-status");
 const lifeEventError = document.getElementById("life-event-error");
 const lifeEventsSection = document.getElementById("section-life-events");
+const appTitleHeading = document.querySelector(".page-header h1");
 
 const list = document.getElementById("transaction-list");
 const plannedList = document.getElementById("planned-transaction-list");
@@ -801,6 +802,58 @@ function scrollInputRegisterTopStable(groupName) {
   });
 }
 
+function isVerticallyScrollable(element) {
+  if (!element) return false;
+  if (element === document.body || element === document.documentElement) return true;
+  const style = window.getComputedStyle(element);
+  const overflowY = style.overflowY;
+  const allowsScroll = overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay";
+  return allowsScroll && element.scrollHeight > element.clientHeight;
+}
+
+function collectScrollableAncestors(element) {
+  const ancestors = [];
+  let current = element?.parentElement || null;
+  while (current) {
+    if (isVerticallyScrollable(current)) ancestors.push(current);
+    current = current.parentElement;
+  }
+  const scrollingElement = document.scrollingElement;
+  if (scrollingElement && !ancestors.includes(scrollingElement)) {
+    ancestors.push(scrollingElement);
+  }
+  return ancestors;
+}
+
+function scrollAppToAbsoluteTopAfterCancel() {
+  ++mobileUpdateScrollToken;
+  const token = mobileUpdateScrollToken;
+  const titleAnchor = appTitleHeading || document.querySelector(".page-header") || document.body;
+  const scrollTargets = collectScrollableAncestors(titleAnchor);
+
+  const moveToTop = () => {
+    if (token !== mobileUpdateScrollToken) return;
+    scrollTargets.forEach((target) => {
+      if (typeof target.scrollTo === "function") {
+        target.scrollTo({ top: 0, behavior: "auto" });
+      } else {
+        target.scrollTop = 0;
+      }
+    });
+    window.scrollTo({ top: 0, behavior: "auto" });
+    titleAnchor.scrollIntoView({ behavior: "auto", block: "start" });
+  };
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      moveToTop();
+      window.setTimeout(() => {
+        window.requestAnimationFrame(moveToTop);
+      }, 80);
+    });
+  });
+}
+
 function handleCancelEditFromRegistered(groupName, options = {}) {
   const wasEditing = Boolean(options.isEditing);
   options.resetForm?.();
@@ -808,6 +861,10 @@ function handleCancelEditFromRegistered(groupName, options = {}) {
   setPrimaryMainTab("input");
   setInputMainTab(groupName);
   setInputSubTab(groupName, "register");
+  if (groupName === "basic" || groupName === "recurring" || groupName === "life") {
+    scrollAppToAbsoluteTopAfterCancel();
+    return;
+  }
   scrollInputRegisterTopStable(groupName);
 }
 
