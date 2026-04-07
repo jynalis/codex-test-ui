@@ -34,6 +34,7 @@ const entryStartMonthInput = document.getElementById("entry-start-month");
 const birthDateInput = document.getElementById("birth-date");
 const profileSubmitButton = document.getElementById("profile-submit-button") || profileForm?.querySelector('button[type="submit"]');
 const profileCancelButton = document.getElementById("profile-cancel-button");
+const basicEditStatus = document.getElementById("basic-edit-status");
 const planList = document.getElementById("plan-list");
 const planEditorList = document.getElementById("plan-editor-list");
 const basicRegisteredSummary = document.getElementById("basic-registered-summary");
@@ -961,6 +962,9 @@ function setLifeEventFormMode(isEditing) {
 function setProfileFormMode(isEditing) {
   if (profileSubmitButton) {
     profileSubmitButton.textContent = isEditing ? "更新" : "設定を保存";
+  }
+  if (basicEditStatus) {
+    basicEditStatus.hidden = !isEditing;
   }
   if (profileCancelButton) {
     profileCancelButton.hidden = !isEditing;
@@ -3899,7 +3903,7 @@ function startPlanEdit(planId) {
   setPrimaryMainTab("input");
   setInputMainTab("basic");
   setInputSubTab("basic", "register", { keepBasicEditingState: true });
-  scrollToEditFormStart(profileForm, planEditorList);
+  scrollToEditFormStart(basicEditStatus || profileForm, planEditorList);
 }
 
 function deletePlanById(planId) {
