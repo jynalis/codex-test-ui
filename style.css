@@ -2577,6 +2577,15 @@ button.ghost {
   font-size: 0.92rem;
 }
 
+#asset-main-panel-formation .asset-formation-pie-wrap {
+  margin: 8px auto 0;
+}
+
+#asset-main-panel-formation .asset-formation-contract-list {
+  margin-top: 8px;
+  margin-bottom: 14px;
+}
+
 .floating-top-button {
   position: fixed;
   right: max(14px, env(safe-area-inset-right));
@@ -3148,6 +3157,14 @@ body.is-keyboard-open .floating-top-button {
     align-self: end;
     line-height: 1.2;
     font-size: 0.9rem;
+  }
+
+  #asset-main-panel-formation .asset-formation-pie-wrap {
+    margin-top: 6px;
+  }
+
+  #asset-main-panel-formation .asset-formation-contract-list {
+    margin-bottom: 18px;
   }
 
   #input-sub-panel-monthly-expense-balance {
