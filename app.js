@@ -1013,6 +1013,16 @@ function scrollToBasicRegisterStart() {
   });
 }
 
+function scrollToBasicRegisteredTop() {
+  const target = basicRegisteredSummary || document.getElementById("input-sub-panel-basic-registered");
+  if (!target) return;
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      scrollToElementWithOffset(target, { behavior: "auto" });
+    });
+  });
+}
+
 function cancelProfileEdit() {
   const wasEditing = isBasicEditingMode();
   resetProfileFormFields();
@@ -4071,6 +4081,7 @@ function saveProfile(event) {
   resetProfileRegisterForm();
   render();
   setInputSubTab("basic", "registered");
+  scrollToBasicRegisteredTop();
 }
 
 function render() {
