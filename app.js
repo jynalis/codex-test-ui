@@ -758,6 +758,16 @@ function setTransactionFormMode(isEditing, editingType = "expense") {
   }
 }
 
+function scrollToEditFormStart(primaryTarget, fallbackTarget) {
+  if (primaryTarget) {
+    primaryTarget.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  if (fallbackTarget) {
+    fallbackTarget.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
 function resetTransactionFormFields(options = {}) {
   const nextDate = options.date ?? dateInput.value ?? todayISO();
   transactionEditingId = null;
@@ -784,13 +794,7 @@ function startTransactionEdit(id) {
   setPrimaryMainTab("input");
   setInputMainTab("monthly");
   setInputSubTab("monthly", "register");
-
-  if (inputSection) {
-    inputSection.scrollIntoView({ behavior: "smooth", block: "start" });
-  } else {
-    form.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-  categoryInput.focus();
+  scrollToEditFormStart(inputSection, form);
 }
 
 function startRecurringExpenseEdit(id) {
@@ -809,7 +813,7 @@ function startRecurringExpenseEdit(id) {
   recurringEndMonthInput.value = recurringExpense.endMonth || "";
   recurringMemoInput.value = recurringExpense.memo || "";
   setRecurringFormMode(true);
-  recurringCategoryInput.focus();
+  scrollToEditFormStart(recurringSection, recurringForm);
 }
 
 function normalizeLifeEvent(item) {
@@ -1033,10 +1037,7 @@ function startLifeEventEdit(id) {
   updateLifeEventAgePreview();
   setLifeEventError("");
   setLifeEventFormMode(true);
-  if (lifeEventsSection) {
-    lifeEventsSection.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-  lifeEventMonthInput.focus();
+  scrollToEditFormStart(lifeEventsSection, lifeEventForm);
 }
 
 function resolveLifeEventHistoryPeriodLabel(item, settings) {
@@ -3898,13 +3899,7 @@ function startPlanEdit(planId) {
   setPrimaryMainTab("input");
   setInputMainTab("basic");
   setInputSubTab("basic", "register", { keepBasicEditingState: true });
-  const targetTypeField = targetBlock.querySelector(".plan-type");
-  if (!targetTypeField) return;
-  const scrollTargetY = Math.max(0, window.scrollY + targetTypeField.getBoundingClientRect().top - window.innerHeight * 0.42);
-  window.scrollTo({ top: scrollTargetY, behavior: "smooth" });
-  setTimeout(() => {
-    targetTypeField.focus({ preventScroll: true });
-  }, 220);
+  scrollToEditFormStart(profileForm, planEditorList);
 }
 
 function deletePlanById(planId) {
