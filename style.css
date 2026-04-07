@@ -230,18 +230,15 @@ header p {
   width: min(calc(100% - 20px), 1124px);
   z-index: 90;
   padding: 0;
-  background: transparent;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #edf2ff 0%, #e3eafc 100%);
+  border: 1px solid #c3d0ee;
+  box-shadow: 0 12px 28px rgb(20 41 74 / 22%);
+  overflow: hidden;
 }
 
 .primary-main-tabbar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 18px;
-  background: rgb(232 239 249 / 94%);
-  box-shadow: 0 12px 28px rgb(20 41 74 / 18%);
-  backdrop-filter: blur(4px);
-  z-index: -1;
+  content: none;
 }
 
 .primary-main-tabs {
@@ -2559,7 +2556,7 @@ button.ghost {
 .floating-top-button {
   position: fixed;
   right: max(14px, env(safe-area-inset-right));
-  bottom: calc(var(--primary-main-tabbar-reserved-space) + 16px);
+  bottom: calc(var(--primary-main-tabbar-reserved-space) - 18px);
   width: 62px;
   min-height: 62px;
   border-radius: 999px;
@@ -3225,7 +3222,7 @@ button.ghost {
 @media (min-width: 1000px) {
   .floating-top-button {
     right: max(20px, env(safe-area-inset-right));
-    bottom: calc(var(--primary-main-tabbar-reserved-space) + 18px);
+    bottom: calc(var(--primary-main-tabbar-reserved-space) - 14px);
   }
 }
 
