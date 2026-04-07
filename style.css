@@ -2388,7 +2388,7 @@ button.ghost {
   width: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
+  gap: 22px;
   align-content: start;
 }
 
@@ -2432,6 +2432,11 @@ button.ghost {
 #expense-chart .expense-chart-legend {
   display: grid;
   gap: 10px;
+  margin: 0;
+}
+
+#expense-chart .expense-chart-legend .pie-legend-item:last-child {
+  margin-bottom: 0;
 }
 
 #expense-chart .expense-chart-legend .pie-legend-item {
@@ -3121,7 +3126,7 @@ button.ghost {
   }
 
   #section-expense.monthly-expense-card {
-    padding: 0 0 calc(56px + env(safe-area-inset-bottom));
+    padding: 0 0 calc(24px + env(safe-area-inset-bottom));
   }
 
   #expense-chart {
@@ -3129,7 +3134,7 @@ button.ghost {
   }
 
   #expense-chart .expense-analysis-layout {
-    gap: 18px;
+    gap: 24px;
   }
 
   #expense-chart .expense-chart-stage {
