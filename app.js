@@ -4965,6 +4965,9 @@ function resetInputTabState() {
 
 function resetDashboardTabState() {
   setIncomeMainTab("expense-balance");
+  dashboardAssetGrowthMetric = "assetFormationBalance";
+  updateDashboardAssetGrowthMetricToggleUI();
+  render();
 }
 
 function resetAssetsTabState() {
