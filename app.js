@@ -3898,8 +3898,12 @@ function startPlanEdit(planId) {
   setPrimaryMainTab("input");
   setInputMainTab("basic");
   setInputSubTab("basic", "register", { keepBasicEditingState: true });
-  targetBlock.scrollIntoView({ behavior: "smooth", block: "center" });
-  targetBlock.querySelector(".plan-name")?.focus();
+  const targetTypeField = targetBlock.querySelector(".plan-type");
+  if (!targetTypeField) return;
+  targetTypeField.focus({ preventScroll: true });
+  requestAnimationFrame(() => {
+    targetTypeField.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+  });
 }
 
 function deletePlanById(planId) {
