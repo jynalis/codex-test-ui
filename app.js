@@ -4102,6 +4102,7 @@ function renderBasicRegisteredSummary(settings) {
 
 function saveProfile(event) {
   event.preventDefault();
+  const wasEditing = isBasicEditingMode();
   const existingSettings = loadSettings();
   const existingPlans = Array.isArray(existingSettings?.plans) ? existingSettings.plans : [];
   const editedPlans = collectPlansFromForm();
@@ -4118,6 +4119,11 @@ function saveProfile(event) {
   saveSettings(settings);
   resetProfileRegisterForm();
   render();
+  if (wasEditing) {
+    setInputSubTab("basic", "register");
+    scrollToPageAbsoluteTop();
+    return;
+  }
   setInputSubTab("basic", "registered");
   scrollToBasicRegisteredTop();
 }
@@ -4663,6 +4669,18 @@ function scrollToTopAfterMobileUpdate() {
       window.setTimeout(() => {
         window.requestAnimationFrame(scrollToPageStart);
       }, 80);
+    });
+  });
+}
+
+function scrollToPageAbsoluteTop() {
+  if (isMobileViewport()) {
+    scrollToTopAfterMobileUpdate();
+    return;
+  }
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "auto" });
     });
   });
 }
