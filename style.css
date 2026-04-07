@@ -27,7 +27,7 @@
   --history-bg: linear-gradient(180deg, #fbfcff 0%, #f4f7fd 100%);
   --accordion-duration: 180ms;
   --accordion-fade-duration: 120ms;
-  --primary-main-tabbar-safe-bottom: max(env(safe-area-inset-bottom, 0px), 14px);
+  --primary-main-tabbar-safe-bottom: env(safe-area-inset-bottom, 0px);
   --primary-main-tabbar-offset-bottom: 0px;
   --primary-main-tabbar-height: calc(62px + var(--primary-main-tabbar-safe-bottom));
   --floating-top-button-gap: 10px;
@@ -250,12 +250,17 @@ header p {
   left: 0;
   right: 0;
   bottom: var(--primary-main-tabbar-offset-bottom);
-  z-index: 1000;
-  padding: 8px 0 var(--primary-main-tabbar-safe-bottom);
-  pointer-events: auto;
+  z-index: 2147483647;
+  min-height: calc(62px + var(--primary-main-tabbar-safe-bottom));
+  padding: 6px 0 calc(var(--primary-main-tabbar-safe-bottom) + 2px);
+  pointer-events: auto !important;
   opacity: 1;
   border-radius: 0;
+  isolation: isolate;
+  transform: translateZ(0);
   background: #dbe7fb;
+  background-color: #dbe7fb;
+  background-image: none;
   border-top: 1px solid #bdcceb;
   box-shadow: 0 -8px 22px rgb(20 41 74 / 16%);
 }
@@ -283,6 +288,8 @@ header p {
 }
 
 .primary-main-tab {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -298,6 +305,8 @@ header p {
   padding: 8px 4px;
   text-align: center;
   cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
   transition: background 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   white-space: nowrap;
 }
