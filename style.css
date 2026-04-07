@@ -443,12 +443,12 @@ header p {
 
 #asset-main-panel-formation > .asset-main-first-content,
 #asset-main-panel-current-assets > .asset-main-first-content {
-  margin-top: 2px;
+  margin-top: 0;
 }
 
 #asset-main-panel-formation > .asset-main-first-content > .chart,
 #asset-main-panel-current-assets > .asset-main-first-content > .chart {
-  margin-top: 6px;
+  margin-top: 2px;
 }
 
 .section-tone-cashflow {
