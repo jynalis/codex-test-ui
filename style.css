@@ -1961,7 +1961,6 @@ button.plan-card-trigger {
 }
 
 .asset-forecast {
-  margin-top: 14px;
   display: grid;
   gap: 14px;
 }
@@ -2040,7 +2039,6 @@ button.plan-card-trigger {
 }
 
 .asset-withdraw-layout {
-  margin-top: 14px;
   display: grid;
   gap: 12px;
 }
