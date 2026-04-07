@@ -55,6 +55,9 @@ const recurringCancelButton = document.getElementById("recurring-cancel-button")
 const recurringEditStatus = document.getElementById("recurring-edit-status");
 const recurringSection = document.getElementById("section-recurring");
 const inputSection = document.getElementById("section-input");
+const basicRegisterPanel = document.getElementById("input-sub-panel-basic-register");
+const recurringRegisterPanel = document.getElementById("input-sub-panel-recurring-register");
+const lifeRegisterPanel = document.getElementById("input-sub-panel-life-register");
 
 const lifeEventForm = document.getElementById("life-event-form");
 const lifeEventMonthInput = document.getElementById("life-event-month");
@@ -769,6 +772,45 @@ function scrollToEditFormStart(primaryTarget, fallbackTarget) {
   }
 }
 
+function resolveInputRegisterTopAnchor(groupName) {
+  switch (groupName) {
+    case "basic":
+      return basicRegisterPanel || profileForm || document.getElementById("section-profile");
+    case "recurring":
+      return recurringRegisterPanel || recurringForm || document.getElementById("section-recurring");
+    case "life":
+      return lifeRegisterPanel || lifeEventForm || document.getElementById("section-life-events");
+    default:
+      return null;
+  }
+}
+
+function scrollInputRegisterTopStable(groupName) {
+  const target = resolveInputRegisterTopAnchor(groupName);
+  if (!target) return;
+  ++mobileUpdateScrollToken;
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      scrollToElementWithOffset(target, { behavior: "auto" });
+      window.setTimeout(() => {
+        window.requestAnimationFrame(() => {
+          scrollToElementWithOffset(target, { behavior: "auto" });
+        });
+      }, 80);
+    });
+  });
+}
+
+function handleCancelEditFromRegistered(groupName, options = {}) {
+  const wasEditing = Boolean(options.isEditing);
+  options.resetForm?.();
+  if (!wasEditing) return;
+  setPrimaryMainTab("input");
+  setInputMainTab(groupName);
+  setInputSubTab(groupName, "register");
+  scrollInputRegisterTopStable(groupName);
+}
+
 function resetTransactionFormFields(options = {}) {
   const nextDate = options.date ?? dateInput.value ?? todayISO();
   transactionEditingId = null;
@@ -1024,10 +1066,10 @@ function scrollToBasicRegisteredTop() {
 }
 
 function cancelProfileEdit() {
-  const wasEditing = isBasicEditingMode();
-  resetProfileFormFields();
-  if (!wasEditing) return;
-  scrollToBasicRegisterStart();
+  handleCancelEditFromRegistered("basic", {
+    isEditing: isBasicEditingMode(),
+    resetForm: resetProfileFormFields,
+  });
 }
 
 function setLifeEventError(message = "") {
@@ -1709,7 +1751,10 @@ function addLifeEvent(event) {
 }
 
 function cancelLifeEventEdit() {
-  resetLifeEventFormFields();
+  handleCancelEditFromRegistered("life", {
+    isEditing: lifeEventEditingId,
+    resetForm: resetLifeEventFormFields,
+  });
 }
 
 function updateLifeEventAgePreview() {
@@ -4347,7 +4392,10 @@ function addRecurringExpense(event) {
 }
 
 function cancelRecurringExpenseEdit() {
-  resetRecurringFormFields();
+  handleCancelEditFromRegistered("recurring", {
+    isEditing: recurringEditingId,
+    resetForm: resetRecurringFormFields,
+  });
 }
 
 function isAssetsSectionExpanded() {
