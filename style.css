@@ -1626,18 +1626,19 @@ button.plan-card-trigger {
 }
 
 .profile-save-settings-button {
-  margin-top: 2px;
   min-height: 54px;
   font-size: 1rem;
+  width: 100%;
 }
 
 .profile-form-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .profile-basic-settings-actions {
-  margin-top: 2px;
+  margin-top: 14px;
 }
 
 .profile-form-actions button {
@@ -1652,7 +1653,7 @@ button.plan-card-trigger {
   flex-wrap: wrap;
 }
 
-#profile-form button[type="submit"] {
+.profile-save-settings-button {
   color: #fff;
 }
 
