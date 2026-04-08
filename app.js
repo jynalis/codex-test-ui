@@ -2706,8 +2706,8 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "assetForm
   dashboardAssetFormationChart.innerHTML = "";
   const metric = DASHBOARD_ASSET_GROWTH_METRICS[metricKey] || DASHBOARD_ASSET_GROWTH_METRICS.assetFormationBalance;
   const points = (Array.isArray(cashflowRows) ? cashflowRows : [])
-    .map((row) => ({ year: row.year, amount: row[metricKey] }))
-    .filter((row) => Number.isFinite(row.year) && Number.isFinite(row.amount) && row.amount >= 0);
+    .map((row) => ({ year: row.year, age: row.age, amount: row[metricKey] }))
+    .filter((row) => Number.isFinite(row.year) && Number.isFinite(row.age) && Number.isFinite(row.amount) && row.amount >= 0);
   const labels = points.map((item) => item.year);
   const amounts = points.map((item) => item.amount);
 
@@ -2736,16 +2736,19 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "assetForm
   const yTickCount = Math.max(2, Math.ceil(yMax / yStep));
   const slotWidth = YEAR_SLOT_WIDTH_PX;
   const barWidth = BAR_WIDTH_PX;
+  let selectedBarIndex = null;
 
   const svgNS = "http://www.w3.org/2000/svg";
   const hidePressedValue = () => {
+    selectedBarIndex = null;
     const tooltip = dashboardAssetFormationChart.querySelector(".dashboard-bar-chart-press-tooltip");
     if (!tooltip) return;
     tooltip.classList.remove("is-visible");
     tooltip.textContent = "";
   };
-  const showPressedValue = (barElement, year, amount) => {
+  const showPressedValue = (barElement, age, amount, index) => {
     if (!(barElement instanceof SVGRectElement) || !dashboardAssetFormationChart) return;
+    selectedBarIndex = index;
     let tooltip = dashboardAssetFormationChart.querySelector(".dashboard-bar-chart-press-tooltip");
     if (!(tooltip instanceof HTMLElement)) {
       tooltip = document.createElement("p");
@@ -2753,7 +2756,7 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "assetForm
       tooltip.setAttribute("aria-live", "polite");
       dashboardAssetFormationChart.appendChild(tooltip);
     }
-    tooltip.textContent = `${year}年 / ${yen.format(amount)}`;
+    tooltip.textContent = `${age}歳 ${numberWithComma.format(amount)}円`;
     tooltip.classList.add("is-visible");
 
     const chartRect = dashboardAssetFormationChart.getBoundingClientRect();
@@ -2770,6 +2773,13 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "assetForm
     const top = preferredTop >= topPadding ? preferredTop : topPadding;
     tooltip.style.left = `${left}px`;
     tooltip.style.top = `${top}px`;
+  };
+  const togglePressedValue = (barElement, age, amount, index) => {
+    if (selectedBarIndex === index) {
+      hidePressedValue();
+      return;
+    }
+    showPressedValue(barElement, age, amount, index);
   };
 
   const yAxisSvg = document.createElementNS(svgNS, "svg");
@@ -2809,8 +2819,8 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "assetForm
     plotSvg.appendChild(grid);
   }
 
-  labels.forEach((yearLabel, index) => {
-    const amount = amounts[index];
+  points.forEach((point, index) => {
+    const amount = point.amount;
     const xCenter = slotWidth * index + slotWidth / 2;
     const barHeight = amount > 0 ? Math.max(1, (amount / yMax) * plotHeight) : 0;
     const y = margin.top + plotHeight - barHeight;
@@ -2823,18 +2833,18 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "assetForm
     rect.setAttribute("class", "dashboard-bar-chart-bar");
     rect.setAttribute("tabindex", "0");
     rect.setAttribute("role", "button");
-    rect.setAttribute("aria-label", `${yearLabel}年 ${yen.format(amount)}`);
-    rect.addEventListener("pointerdown", () => {
-      showPressedValue(rect, yearLabel, amount);
+    rect.setAttribute("aria-label", `${point.age}歳 ${numberWithComma.format(amount)}円`);
+    rect.addEventListener("click", () => {
+      togglePressedValue(rect, point.age, amount, index);
     });
-    rect.addEventListener("pointerup", hidePressedValue);
-    rect.addEventListener("pointercancel", hidePressedValue);
-    rect.addEventListener("pointerleave", hidePressedValue);
-    rect.addEventListener("touchstart", () => {
-      showPressedValue(rect, yearLabel, amount);
-    }, { passive: true });
-    rect.addEventListener("touchend", hidePressedValue, { passive: true });
-    rect.addEventListener("touchcancel", hidePressedValue, { passive: true });
+    rect.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        togglePressedValue(rect, point.age, amount, index);
+      } else if (event.key === "Escape") {
+        hidePressedValue();
+      }
+    });
     plotSvg.appendChild(rect);
 
     const xLabel = document.createElementNS(svgNS, "text");
@@ -2842,7 +2852,7 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "assetForm
     xLabel.setAttribute("y", String(chartHeight - 24));
     xLabel.setAttribute("text-anchor", "middle");
     xLabel.setAttribute("class", "dashboard-bar-chart-x-label");
-    xLabel.textContent = String(yearLabel);
+    xLabel.textContent = String(point.year);
     plotSvg.appendChild(xLabel);
   });
 
@@ -2872,6 +2882,10 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "assetForm
 
   const chartLayout = document.createElement("div");
   chartLayout.className = "dashboard-asset-formation-chart-layout";
+  chartLayout.addEventListener("click", (event) => {
+    if (event.target instanceof Element && event.target.closest(".dashboard-bar-chart-bar")) return;
+    hidePressedValue();
+  });
   const fixedAxisPane = document.createElement("div");
   fixedAxisPane.className = "dashboard-asset-formation-chart-fixed-axis";
   fixedAxisPane.appendChild(yAxisSvg);

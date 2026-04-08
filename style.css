@@ -1949,6 +1949,8 @@ button.plan-card-trigger {
   fill: #3f7fc4;
   transition: fill 120ms ease;
   touch-action: pan-x pan-y;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .dashboard-bar-chart-bar:active {
