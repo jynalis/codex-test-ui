@@ -148,7 +148,6 @@ const activeInputSubTabs = {
 };
 
 const PRIMARY_MAIN_SECTION_IDS = {
-  intro: ["section-step-guide"],
   dashboard: ["section-home"],
   assets: ["section-assets"],
   input: ["section-input-main", "section-profile", "section-recurring", "section-life-events", "section-input"],
