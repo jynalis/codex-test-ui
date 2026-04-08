@@ -3062,6 +3062,7 @@ function calculateAverageMonthlyAmount(transactions, {
   endMonth,
   type,
   categories,
+  divisorMode = "enteredMonths",
 }) {
   if (!parseMonth(startMonth) || !parseMonth(endMonth) || compareMonth(startMonth, endMonth) > 0) return 0;
   const filteredTransactions = (Array.isArray(transactions) ? transactions : []).filter((item) => {
@@ -3073,9 +3074,14 @@ function calculateAverageMonthlyAmount(transactions, {
     return true;
   });
 
-  const enteredMonths = new Set(filteredTransactions.map((item) => monthISO(item.date)).filter((month) => parseMonth(month)));
+  const enteredMonths = new Set(
+    filteredTransactions.map((item) => monthISO(item.date)).filter((month) => parseMonth(month))
+  );
   const enteredMonthCount = enteredMonths.size;
-  if (enteredMonthCount <= 0) return 0;
+  const periodMonthCount = monthsBetweenInclusive(startMonth, endMonth);
+  const divisor = divisorMode === "periodMonths" ? periodMonthCount : enteredMonthCount;
+  if (!Number.isFinite(divisor) || divisor <= 0) return 0;
+  if (divisorMode !== "periodMonths" && enteredMonthCount <= 0) return 0;
 
   const total = filteredTransactions.reduce((sum, item) => {
     const amount = Number(item?.amount);
@@ -3084,17 +3090,12 @@ function calculateAverageMonthlyAmount(transactions, {
   }, 0);
   if (!Number.isFinite(total)) return 0;
 
-  return total / enteredMonthCount;
+  return total / divisor;
 }
 
 function resolveCashflowAverageEndMonth(transactions, startMonth) {
   if (!parseMonth(startMonth)) return "";
-  const nowMonth = todayISO().slice(0, 7);
-  const latestDataMonth = getLatestMonthFromTransactions(Array.isArray(transactions) ? transactions : []);
-  const candidates = [nowMonth, latestDataMonth].filter((month) => parseMonth(month));
-  if (candidates.length === 0) return startMonth;
-  const endMonth = candidates.sort(compareMonth).at(-1) || startMonth;
-  return compareMonth(endMonth, startMonth) < 0 ? startMonth : endMonth;
+  return subtractOneMonth(todayISO().slice(0, 7));
 }
 
 function getRecurringExpenseMonthsInYear(item, year) {
@@ -3390,6 +3391,7 @@ function buildCashflowRowsUntilAge({
     endMonth: averageEndMonth,
     type: 'expense',
     categories: EXPENSE_CATEGORIES,
+    divisorMode: "periodMonths",
   });
   const safeMonthlyIncome = Number.isFinite(monthlyIncome) ? monthlyIncome : 0;
   const safeMonthlyRegularExpense = Number.isFinite(monthlyRegularExpense) ? monthlyRegularExpense : 0;
