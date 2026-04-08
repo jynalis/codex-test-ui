@@ -3064,24 +3064,27 @@ function calculateAverageMonthlyAmount(transactions, {
   categories,
 }) {
   if (!parseMonth(startMonth) || !parseMonth(endMonth) || compareMonth(startMonth, endMonth) > 0) return 0;
+  const filteredTransactions = (Array.isArray(transactions) ? transactions : []).filter((item) => {
+    const month = monthISO(item?.date);
+    if (!parseMonth(month)) return false;
+    if (compareMonth(month, startMonth) < 0 || compareMonth(month, endMonth) > 0) return false;
+    if (item?.type !== type) return false;
+    if (Array.isArray(categories) && !categories.includes(item?.category)) return false;
+    return true;
+  });
 
-  let cursor = startMonth;
-  let targetMonths = 0;
-  while (compareMonth(cursor, endMonth) <= 0) {
-    targetMonths += 1;
-    cursor = addOneMonth(cursor);
-  }
-  if (targetMonths <= 0) return 0;
+  const enteredMonths = new Set(filteredTransactions.map((item) => monthISO(item.date)).filter((month) => parseMonth(month)));
+  const enteredMonthCount = enteredMonths.size;
+  if (enteredMonthCount <= 0) return 0;
 
-  const total = transactions.reduce((sum, item) => {
-    const month = monthISO(item.date);
-    if (compareMonth(month, startMonth) < 0 || compareMonth(month, endMonth) > 0) return sum;
-    if (item.type !== type) return sum;
-    if (Array.isArray(categories) && !categories.includes(item.category)) return sum;
-    return sum + item.amount;
+  const total = filteredTransactions.reduce((sum, item) => {
+    const amount = Number(item?.amount);
+    if (!Number.isFinite(amount)) return sum;
+    return sum + amount;
   }, 0);
+  if (!Number.isFinite(total)) return 0;
 
-  return total / targetMonths;
+  return total / enteredMonthCount;
 }
 
 function resolveCashflowAverageEndMonth(transactions, startMonth) {
@@ -3388,6 +3391,8 @@ function buildCashflowRowsUntilAge({
     type: 'expense',
     categories: EXPENSE_CATEGORIES,
   });
+  const safeMonthlyIncome = Number.isFinite(monthlyIncome) ? monthlyIncome : 0;
+  const safeMonthlyRegularExpense = Number.isFinite(monthlyRegularExpense) ? monthlyRegularExpense : 0;
 
   const inflationRate = parseRateInput(assumptions?.inflationRate) / 100;
   const incomeSettings = loadCashflowIncomeSettings();
@@ -3418,7 +3423,7 @@ function buildCashflowRowsUntilAge({
     const annualIncome = Math.round(activeMonths.reduce((sum, month) => (
       sum + resolveMonthlyIncomeAmount({
         month,
-        defaultMonthlyIncome: monthlyIncome,
+        defaultMonthlyIncome: safeMonthlyIncome,
         defaultIncomeGrowthRate,
         cashflowStartMonth,
         incomeSettings,
@@ -3429,13 +3434,13 @@ function buildCashflowRowsUntilAge({
       ? Math.round(activeMonths.reduce((sum, month) => (
         sum + resolveMonthlyRegularExpenseAmount({
           month,
-          defaultMonthlyRegularExpense: monthlyRegularExpense,
+          defaultMonthlyRegularExpense: safeMonthlyRegularExpense,
           cashflowStartMonth,
           inflationRate,
           sortedExpenseScenarios,
         })
       ), 0))
-      : Math.round(monthlyRegularExpense * activeMonthsInYear * ((1 + inflationRate) ** yearOffset));
+      : Math.round(safeMonthlyRegularExpense * activeMonthsInYear * ((1 + inflationRate) ** yearOffset));
 
     const annualAssetFormationExpense = isReferenceYear
       ? Math.round(calculateAnnualAssetFormationExpense(settings, year) * yearProgressRate)
