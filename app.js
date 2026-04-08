@@ -2732,6 +2732,40 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "assetForm
   const barWidth = BAR_WIDTH_PX;
 
   const svgNS = "http://www.w3.org/2000/svg";
+  const hidePressedValue = () => {
+    const tooltip = dashboardAssetFormationChart.querySelector(".dashboard-bar-chart-press-tooltip");
+    if (!tooltip) return;
+    tooltip.classList.remove("is-visible");
+    tooltip.textContent = "";
+  };
+  const showPressedValue = (barElement, year, amount) => {
+    if (!(barElement instanceof SVGRectElement) || !dashboardAssetFormationChart) return;
+    let tooltip = dashboardAssetFormationChart.querySelector(".dashboard-bar-chart-press-tooltip");
+    if (!(tooltip instanceof HTMLElement)) {
+      tooltip = document.createElement("p");
+      tooltip.className = "dashboard-bar-chart-press-tooltip";
+      tooltip.setAttribute("aria-live", "polite");
+      dashboardAssetFormationChart.appendChild(tooltip);
+    }
+    tooltip.textContent = `${year}年 / ${yen.format(amount)}`;
+    tooltip.classList.add("is-visible");
+
+    const chartRect = dashboardAssetFormationChart.getBoundingClientRect();
+    const barRect = barElement.getBoundingClientRect();
+    const barCenterX = barRect.left - chartRect.left + barRect.width / 2;
+    const topPadding = 8;
+    const edgePadding = 8;
+    const tooltipWidth = tooltip.offsetWidth;
+    const tooltipHeight = tooltip.offsetHeight;
+    const maxLeft = Math.max(edgePadding, chartRect.width - tooltipWidth - edgePadding);
+    const left = Math.min(Math.max(barCenterX - tooltipWidth / 2, edgePadding), maxLeft);
+    const barTop = barRect.top - chartRect.top;
+    const preferredTop = barTop - tooltipHeight - 8;
+    const top = preferredTop >= topPadding ? preferredTop : topPadding;
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  };
+
   const yAxisSvg = document.createElementNS(svgNS, "svg");
   yAxisSvg.setAttribute("viewBox", `0 0 ${fixedAxisWidth} ${chartHeight}`);
   yAxisSvg.setAttribute("aria-hidden", "true");
@@ -2781,6 +2815,20 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "assetForm
     rect.setAttribute("height", String(barHeight));
     rect.setAttribute("rx", "4");
     rect.setAttribute("class", "dashboard-bar-chart-bar");
+    rect.setAttribute("tabindex", "0");
+    rect.setAttribute("role", "button");
+    rect.setAttribute("aria-label", `${yearLabel}年 ${yen.format(amount)}`);
+    rect.addEventListener("pointerdown", () => {
+      showPressedValue(rect, yearLabel, amount);
+    });
+    rect.addEventListener("pointerup", hidePressedValue);
+    rect.addEventListener("pointercancel", hidePressedValue);
+    rect.addEventListener("pointerleave", hidePressedValue);
+    rect.addEventListener("touchstart", () => {
+      showPressedValue(rect, yearLabel, amount);
+    }, { passive: true });
+    rect.addEventListener("touchend", hidePressedValue, { passive: true });
+    rect.addEventListener("touchcancel", hidePressedValue, { passive: true });
     plotSvg.appendChild(rect);
 
     const xLabel = document.createElementNS(svgNS, "text");
@@ -2825,6 +2873,8 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "assetForm
 
   const scrollPane = document.createElement("div");
   scrollPane.className = "dashboard-asset-formation-chart-scroll-pane";
+  scrollPane.addEventListener("scroll", hidePressedValue, { passive: true });
+  scrollPane.addEventListener("touchmove", hidePressedValue, { passive: true });
   const scrollContent = document.createElement("div");
   scrollContent.className = "dashboard-asset-formation-chart-scroll-content";
   scrollContent.style.minWidth = `${minScrollableWidth}px`;
