@@ -3540,32 +3540,49 @@ function renderCashflowTable({ settings, transactions, recurringExpenses, lifeEv
     },
   ];
   const scrollColumns = [
-    { label: '年収', className: 'is-amount', render: (row) => yen.format(row.annualIncome) },
-    { label: '資産取崩金', className: 'is-amount', render: (row) => yen.format(row.annualAssetWithdrawalTransfer) },
-    { label: '通常支出', className: 'is-amount', render: (row) => yen.format(row.annualRegularExpense) },
-    { label: '定期支出', className: 'is-amount', render: (row) => yen.format(row.annualRecurringExpense) },
-    { label: '積立支出', className: 'is-amount', render: (row) => yen.format(row.annualAssetFormationExpense) },
-    { label: '一括投資額', className: 'is-amount', render: (row) => yen.format(row.annualLumpInvestmentExpense) },
-    { label: '臨時収入', className: 'is-amount', render: (row) => yen.format(row.annualExtraIncome) },
-    { label: '臨時支出', className: 'is-amount', render: (row) => yen.format(row.annualExtraExpense) },
+    { label: '年収', className: 'is-amount', value: (row) => row.annualIncome, render: (row) => yen.format(row.annualIncome) },
+    { label: '資産取崩金', className: 'is-amount', value: (row) => row.annualAssetWithdrawalTransfer, render: (row) => yen.format(row.annualAssetWithdrawalTransfer) },
+    { label: '通常支出', className: 'is-amount', value: (row) => row.annualRegularExpense, render: (row) => yen.format(row.annualRegularExpense) },
+    { label: '定期支出', className: 'is-amount', value: (row) => row.annualRecurringExpense, render: (row) => yen.format(row.annualRecurringExpense) },
+    { label: '積立支出', className: 'is-amount', value: (row) => row.annualAssetFormationExpense, render: (row) => yen.format(row.annualAssetFormationExpense) },
+    { label: '一括投資額', className: 'is-amount', value: (row) => row.annualLumpInvestmentExpense, render: (row) => yen.format(row.annualLumpInvestmentExpense) },
+    { label: '臨時収入', className: 'is-amount', value: (row) => row.annualExtraIncome, render: (row) => yen.format(row.annualExtraIncome) },
+    { label: '臨時支出', className: 'is-amount', value: (row) => row.annualExtraExpense, render: (row) => yen.format(row.annualExtraExpense) },
     {
       label: '収支',
+      value: (row) => row.annualBalance,
       className: (row) => `is-amount is-annual-balance ${row.annualBalance >= 0 ? 'is-positive' : 'is-negative'}`,
       render: (row) => yen.format(row.annualBalance),
     },
     {
       label: '残高',
+      value: (row) => row.endingBalance,
       className: (row) => `is-amount is-ending-balance ${row.endingBalance >= 0 ? 'is-positive' : 'is-negative'}`,
       render: (row) => yen.format(row.endingBalance),
     },
-    { label: '資産形成額', className: 'is-amount is-asset-formation-balance', render: (row) => yen.format(row.assetFormationBalance) },
-    { label: '金融資産合計', className: 'is-amount is-financial-asset-total', render: (row) => yen.format(row.financialAssetTotal) },
+    {
+      label: '資産形成額',
+      className: 'is-amount is-asset-formation-balance',
+      value: (row) => row.assetFormationBalance,
+      render: (row) => yen.format(row.assetFormationBalance),
+    },
+    {
+      label: '金融資産合計',
+      className: 'is-amount is-financial-asset-total',
+      value: (row) => row.financialAssetTotal,
+      render: (row) => yen.format(row.financialAssetTotal),
+    },
   ];
   const renderHeaderCells = (columns) => columns.map((column) => `<th>${column.label}</th>`).join('');
   const renderBodyRows = (columns) => rows.map((row) => `
     <tr>
       ${columns.map((column) => {
-        const className = typeof column.className === 'function' ? column.className(row) : (column.className || '');
+        const baseClassName = typeof column.className === 'function' ? column.className(row) : (column.className || '');
+        const rawValue = typeof column.value === 'function' ? column.value(row) : null;
+        const isNegativeValue = Number.isFinite(rawValue) && rawValue < 0;
+        const className = isNegativeValue
+          ? `${baseClassName} is-negative-value`.trim()
+          : baseClassName;
         return `<td${className ? ` class="${className}"` : ''}>${column.render(row)}</td>`;
       }).join('')}
     </tr>

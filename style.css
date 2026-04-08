@@ -3617,6 +3617,17 @@ body.is-keyboard-open .floating-top-button {
   background: linear-gradient(180deg, #f5f9ff 0%, #edf4ff 100%);
 }
 
+
+.cashflow-table .is-negative-value {
+  color: #b83a4b;
+  font-weight: 600;
+}
+
+.cashflow-table .is-financial-asset-total.is-negative-value {
+  color: #a22f41;
+  font-weight: 700;
+}
+
 .cashflow-actions {
   margin-top: 10px;
   display: flex;
