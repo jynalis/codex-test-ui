@@ -556,6 +556,15 @@
                 </div>
               </section>
               <section id="cashflow-sub-panel-cf" class="cashflow-sub-panel is-active" role="tabpanel" aria-labelledby="cashflow-sub-tab-cf" data-cashflow-sub-panel="cf">
+                <div class="cashflow-table-wrap" id="cashflow-table-wrap"></div>
+                <div class="cashflow-actions">
+                  <button type="button" id="cashflow-download-pdf-button">PDF保存</button>
+                </div>
+                <div class="cashflow-footnotes" aria-label="キャッシュフロー補足">
+                  <p class="cashflow-forecast-note">※59歳までは通常昇給、60歳時は一度だけ補正、60歳以降は毎年の補正率で調整します。</p>
+                  <p class="cashflow-forecast-note">※将来の見込みを表示します。</p>
+                  <p class="cashflow-scroll-hint">左右にスワイプで確認できます。</p>
+                </div>
                 <form id="cashflow-settings-form" class="grid cashflow-settings-grid asset-main-first-content" autocomplete="off">
                   <label>
                     59歳までの昇給率（%）
@@ -574,13 +583,6 @@
                     <input id="cashflow-inflation-rate" type="number" inputmode="decimal" min="-10" max="20" step="any" />
                   </label>
                 </form>
-                <p class="cashflow-forecast-note">※59歳までは通常昇給、60歳時は一度だけ補正、60歳以降は毎年の補正率で調整します。</p>
-                <p class="cashflow-forecast-note">※将来の見込みを表示します。</p>
-                <p class="cashflow-scroll-hint">左右にスワイプで確認できます。</p>
-                <div class="cashflow-table-wrap" id="cashflow-table-wrap"></div>
-                <div class="cashflow-actions">
-                  <button type="button" id="cashflow-download-pdf-button">PDF保存</button>
-                </div>
               </section>
             </div>
           </div>
