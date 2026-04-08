@@ -34,8 +34,8 @@ const expenseViewFilterControls = {
 const profileForm = document.getElementById("profile-form");
 const entryStartMonthInput = document.getElementById("entry-start-month");
 const birthDateInput = document.getElementById("birth-date");
+const profileBasicSaveButton = document.getElementById("profile-basic-save-button");
 const profileSubmitButton = document.getElementById("profile-submit-button") || profileForm?.querySelector('button[type="submit"]');
-const profileSaveButtons = profileForm ? Array.from(profileForm.querySelectorAll("[data-profile-save-button]")) : [];
 const profileCancelButton = document.getElementById("profile-cancel-button");
 const basicEditStatus = document.getElementById("basic-edit-status");
 const planList = document.getElementById("plan-list");
@@ -1333,12 +1333,7 @@ function setLifeEventFormMode(isEditing) {
 }
 
 function setProfileFormMode(isEditing) {
-  if (profileSaveButtons.length > 0) {
-    const saveButtonLabel = isEditing ? "更新" : "設定を保存";
-    profileSaveButtons.forEach((button) => {
-      button.textContent = saveButtonLabel;
-    });
-  } else if (profileSubmitButton) {
+  if (profileSubmitButton) {
     profileSubmitButton.textContent = isEditing ? "更新" : "設定を保存";
   }
   if (basicEditStatus) {
@@ -4727,8 +4722,37 @@ function renderBasicRegisteredSummary(settings) {
   `;
 }
 
-function saveProfile(event) {
-  event.preventDefault();
+function saveBasicProfileSettings() {
+  const wasEditing = isBasicEditingMode();
+  const existingSettings = loadSettings();
+  const settings = {
+    ...existingSettings,
+    birthDate: birthDateInput.value,
+    entryStartMonth: entryStartMonthInput.value,
+    plans: Array.isArray(existingSettings?.plans) ? existingSettings.plans : [],
+  };
+
+  if (!settings.birthDate || !settings.entryStartMonth) {
+    if (!entryStartMonthInput.value) {
+      entryStartMonthInput.reportValidity();
+    } else if (!birthDateInput.value) {
+      birthDateInput.reportValidity();
+    }
+    return;
+  }
+
+  saveSettings(settings);
+  render();
+  if (wasEditing) {
+    setInputSubTab("basic", "register");
+    scrollToPageAbsoluteTop();
+    return;
+  }
+  setInputSubTab("basic", "registered");
+  scrollToBasicRegisteredTop();
+}
+
+function saveAssetFormationSettings() {
   const wasEditing = isBasicEditingMode();
   const existingSettings = loadSettings();
   const existingPlans = Array.isArray(existingSettings?.plans) ? existingSettings.plans : [];
@@ -4736,12 +4760,11 @@ function saveProfile(event) {
   const editedPlanIds = new Set(editedPlans.map((plan) => plan.id));
   const untouchedPlans = existingPlans.filter((plan) => !editedPlanIds.has(plan.id));
   const settings = {
-    birthDate: birthDateInput.value,
-    entryStartMonth: entryStartMonthInput.value,
+    ...existingSettings,
+    birthDate: existingSettings?.birthDate || "",
+    entryStartMonth: existingSettings?.entryStartMonth || "",
     plans: [...untouchedPlans, ...editedPlans],
   };
-
-  if (!settings.birthDate || !settings.entryStartMonth) return;
 
   saveSettings(settings);
   resetProfileRegisterForm();
@@ -5718,7 +5741,9 @@ function init() {
   setupFormattedAmountInput(recurringAmountInput);
   setupFormattedAmountInput(lifeEventAmountInput);
 
-  profileForm.addEventListener("submit", saveProfile);
+  profileForm.addEventListener("submit", (event) => event.preventDefault());
+  profileBasicSaveButton?.addEventListener("click", saveBasicProfileSettings);
+  profileSubmitButton?.addEventListener("click", saveAssetFormationSettings);
   profileCancelButton?.addEventListener("click", cancelProfileEdit);
   recurringForm.addEventListener("submit", addRecurringExpense);
   recurringCancelButton?.addEventListener("click", cancelRecurringExpenseEdit);
