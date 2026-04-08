@@ -35,6 +35,7 @@ const profileForm = document.getElementById("profile-form");
 const entryStartMonthInput = document.getElementById("entry-start-month");
 const birthDateInput = document.getElementById("birth-date");
 const profileSubmitButton = document.getElementById("profile-submit-button") || profileForm?.querySelector('button[type="submit"]');
+const profileSaveButtons = profileForm ? Array.from(profileForm.querySelectorAll("[data-profile-save-button]")) : [];
 const profileCancelButton = document.getElementById("profile-cancel-button");
 const basicEditStatus = document.getElementById("basic-edit-status");
 const planList = document.getElementById("plan-list");
@@ -1332,7 +1333,12 @@ function setLifeEventFormMode(isEditing) {
 }
 
 function setProfileFormMode(isEditing) {
-  if (profileSubmitButton) {
+  if (profileSaveButtons.length > 0) {
+    const saveButtonLabel = isEditing ? "更新" : "設定を保存";
+    profileSaveButtons.forEach((button) => {
+      button.textContent = saveButtonLabel;
+    });
+  } else if (profileSubmitButton) {
     profileSubmitButton.textContent = isEditing ? "更新" : "設定を保存";
   }
   if (basicEditStatus) {
