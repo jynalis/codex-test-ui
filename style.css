@@ -2944,6 +2944,19 @@ body.is-keyboard-open .floating-top-button {
     flex: 1;
   }
 
+  .shared-view-filters[data-shared-view-filter="dashboard"],
+  .shared-view-filters[data-shared-view-filter="expense"] {
+    display: grid;
+    grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.14fr) minmax(0, 0.92fr);
+    gap: 6px;
+  }
+
+  .shared-view-filters[data-shared-view-filter="dashboard"] select,
+  .shared-view-filters[data-shared-view-filter="expense"] select {
+    width: 100%;
+    min-width: 0;
+  }
+
   .plan-item {
     padding: 14px 12px;
     gap: 10px;
