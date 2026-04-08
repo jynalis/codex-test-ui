@@ -3318,6 +3318,75 @@ body.is-keyboard-open .floating-top-button {
   margin-bottom: 8px;
 }
 
+.cashflow-sub-tabbar {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.cashflow-sub-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 4px;
+  border-radius: 13px;
+  background: linear-gradient(180deg, #eef8fc 0%, #e2f1f9 100%);
+  border: 1px solid #b7d6e5;
+}
+
+.cashflow-sub-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  border: 1px solid #9ec7db;
+  background: #f7fcff;
+  color: #245c76;
+  border-radius: 10px;
+  min-height: 38px;
+  padding: 7px 6px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.cashflow-sub-tab.is-active {
+  background: linear-gradient(180deg, #3b92b3 0%, #2a7e9d 100%);
+  border-color: #2a7e9d;
+  color: #fff;
+}
+
+.cashflow-sub-panel {
+  display: none;
+}
+
+.cashflow-sub-panel.is-active {
+  display: block;
+}
+
+.cashflow-sub-panel[hidden] {
+  display: none !important;
+}
+
+.cashflow-sub-placeholder {
+  border: 1px solid #bad6e4;
+  border-radius: 12px;
+  padding: 14px 12px;
+  background: linear-gradient(180deg, #fbfeff 0%, #f0f8fc 100%);
+}
+
+.cashflow-sub-placeholder p {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #355968;
+  line-height: 1.45;
+}
+
 .cashflow-forecast-note {
   margin: 4px 2px 2px;
   font-size: 0.8rem;
@@ -3460,6 +3529,22 @@ body.is-keyboard-open .floating-top-button {
 }
 
 @media (max-width: 680px) {
+  .cashflow-sub-tabs {
+    gap: 5px;
+    padding: 5px;
+  }
+
+  .cashflow-sub-tab {
+    min-height: 40px;
+    padding: 6px 2px;
+    font-size: 0.72rem;
+    letter-spacing: 0;
+  }
+
+  .cashflow-sub-placeholder {
+    padding: 12px 10px;
+  }
+
   .cashflow-settings-grid {
     grid-template-columns: 1fr;
   }
