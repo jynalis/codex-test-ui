@@ -104,12 +104,11 @@ const inputMainPanels = Array.from(document.querySelectorAll("[data-input-main-p
 const primaryMainTabs = Array.from(document.querySelectorAll("[data-primary-main-tab]"));
 const primaryMainPanels = Array.from(document.querySelectorAll("[data-primary-main-panel]"));
 const inputSubSwitches = Array.from(document.querySelectorAll("[data-input-sub-switch]"));
-const cashflowSettingsForm = document.getElementById("cashflow-settings-form");
 const cashflowSalaryGrowthRateBefore60Input = document.getElementById("cashflow-salary-growth-rate-before-60");
-const cashflowSalaryCorrectionRateAt60Input = document.getElementById("cashflow-salary-correction-rate-at-60");
-const cashflowSalaryCorrectionRateAfter60Input = document.getElementById("cashflow-salary-correction-rate-after-60");
 const cashflowInflationRateInput = document.getElementById("cashflow-inflation-rate");
 const cashflowIncomeRetirementMonthInput = document.getElementById("cashflow-income-retirement-month");
+const cashflowIncomeSettingsForm = document.getElementById("cashflow-income-settings-form");
+const cashflowExpenseSettingsForm = document.getElementById("cashflow-expense-settings-form");
 const cashflowIncomeScenarioList = document.getElementById("cashflow-income-scenario-list");
 const cashflowIncomeScenarioAddButton = document.getElementById("cashflow-income-scenario-add");
 const cashflowExpenseScenarioList = document.getElementById("cashflow-expense-scenario-list");
@@ -185,8 +184,6 @@ const INPUT_SUB_SECTION_IDS = {
 
 const DEFAULT_CASHFLOW_ASSUMPTIONS = {
   salaryGrowthRateBefore60: 1,
-  salaryCorrectionRateAt60: 100,
-  salaryCorrectionRateAfter60: 100,
   inflationRate: 1,
 };
 
@@ -1041,26 +1038,14 @@ function loadCashflowAssumptions() {
   try {
     const data = JSON.parse(raw);
     const legacySalaryGrowthRate = parseRateInput(data?.salaryGrowthRate, Number.NaN);
-    const legacySalaryGrowthRateAfter60 = parseRateInput(data?.salaryGrowthRateAfter60, Number.NaN);
     const normalizedLegacySalaryGrowthRate = Number.isFinite(legacySalaryGrowthRate)
       ? legacySalaryGrowthRate
       : DEFAULT_CASHFLOW_ASSUMPTIONS.salaryGrowthRateBefore60;
-    const normalizedLegacySalaryCorrectionRateAfter60 = Number.isFinite(legacySalaryGrowthRateAfter60)
-      ? (100 + legacySalaryGrowthRateAfter60)
-      : DEFAULT_CASHFLOW_ASSUMPTIONS.salaryCorrectionRateAfter60;
     const salaryGrowthRateBefore60 = Number.isFinite(parseRateInput(data?.salaryGrowthRateBefore60, Number.NaN))
       ? parseRateInput(data.salaryGrowthRateBefore60)
       : normalizedLegacySalaryGrowthRate;
-    const salaryCorrectionRateAt60 = Number.isFinite(parseRateInput(data?.salaryCorrectionRateAt60, Number.NaN))
-      ? parseRateInput(data.salaryCorrectionRateAt60)
-      : DEFAULT_CASHFLOW_ASSUMPTIONS.salaryCorrectionRateAt60;
-    const salaryCorrectionRateAfter60 = Number.isFinite(parseRateInput(data?.salaryCorrectionRateAfter60, Number.NaN))
-      ? parseRateInput(data.salaryCorrectionRateAfter60)
-      : normalizedLegacySalaryCorrectionRateAfter60;
     return {
       salaryGrowthRateBefore60,
-      salaryCorrectionRateAt60,
-      salaryCorrectionRateAfter60,
       inflationRate: Number.isFinite(parseRateInput(data?.inflationRate, Number.NaN))
         ? parseRateInput(data.inflationRate)
         : DEFAULT_CASHFLOW_ASSUMPTIONS.inflationRate,
@@ -1073,8 +1058,6 @@ function loadCashflowAssumptions() {
 function saveCashflowAssumptions(assumptions) {
   localStorage.setItem(CASHFLOW_ASSUMPTIONS_KEY, JSON.stringify({
     salaryGrowthRateBefore60: parseRateInput(assumptions?.salaryGrowthRateBefore60),
-    salaryCorrectionRateAt60: parseRateInput(assumptions?.salaryCorrectionRateAt60),
-    salaryCorrectionRateAfter60: parseRateInput(assumptions?.salaryCorrectionRateAfter60),
     inflationRate: parseRateInput(assumptions?.inflationRate),
   }));
 }
@@ -1260,21 +1243,11 @@ function renderCashflowExpenseScenarioList(scenarios = []) {
 }
 
 function updateCashflowAssumptionInputs(assumptions) {
-  if (!cashflowSalaryGrowthRateBefore60Input || !cashflowSalaryCorrectionRateAt60Input || !cashflowSalaryCorrectionRateAfter60Input || !cashflowInflationRateInput) return;
+  if (!cashflowSalaryGrowthRateBefore60Input || !cashflowInflationRateInput) return;
   const activeElement = document.activeElement;
   if (activeElement !== cashflowSalaryGrowthRateBefore60Input) {
     cashflowSalaryGrowthRateBefore60Input.value = String(
       assumptions.salaryGrowthRateBefore60 ?? DEFAULT_CASHFLOW_ASSUMPTIONS.salaryGrowthRateBefore60
-    );
-  }
-  if (activeElement !== cashflowSalaryCorrectionRateAt60Input) {
-    cashflowSalaryCorrectionRateAt60Input.value = String(
-      assumptions.salaryCorrectionRateAt60 ?? DEFAULT_CASHFLOW_ASSUMPTIONS.salaryCorrectionRateAt60
-    );
-  }
-  if (activeElement !== cashflowSalaryCorrectionRateAfter60Input) {
-    cashflowSalaryCorrectionRateAfter60Input.value = String(
-      assumptions.salaryCorrectionRateAfter60 ?? DEFAULT_CASHFLOW_ASSUMPTIONS.salaryCorrectionRateAfter60
     );
   }
   if (activeElement !== cashflowInflationRateInput) {
@@ -1344,15 +1317,6 @@ function updateCashflowExpenseScenarioField(scenarioId, fieldName, value) {
     return;
   }
   saveCashflowExpenseSettings(settings);
-}
-
-function resolveAnnualIncomeTransitionFactor(assumptions, age) {
-  const before60GrowthRate = parseRateInput(assumptions?.salaryGrowthRateBefore60) / 100;
-  const correctionRateAt60 = parseRateInput(assumptions?.salaryCorrectionRateAt60) / 100;
-  const correctionRateAfter60 = parseRateInput(assumptions?.salaryCorrectionRateAfter60) / 100;
-  if (age <= 59) return 1 + before60GrowthRate;
-  if (age === 60) return correctionRateAt60;
-  return correctionRateAfter60;
 }
 
 function setLifeEventFormMode(isEditing) {
@@ -3309,15 +3273,21 @@ function calculateScenarioMonthlyIncomeAtMonth(scenario, month) {
 function resolveMonthlyIncomeAmount({
   month,
   defaultMonthlyIncome = 0,
-  defaultIncomeGrowthFactor = 1,
+  defaultIncomeGrowthRate = 0,
+  cashflowStartMonth = "",
   incomeSettings,
 }) {
-  if (!parseMonth(month)) return 0;
+  const parsedMonth = parseMonth(month);
+  if (!parsedMonth) return 0;
 
   const retirementMonth = parseMonth(incomeSettings?.retirementMonth) ? incomeSettings.retirementMonth : "";
   const isAfterCurrentWorkStyle = retirementMonth && compareMonth(month, retirementMonth) > 0;
   if (!isAfterCurrentWorkStyle) {
-    return defaultMonthlyIncome * defaultIncomeGrowthFactor;
+    const parsedStartMonth = parseMonth(cashflowStartMonth);
+    if (!parsedStartMonth) return defaultMonthlyIncome;
+    const elapsedMonths = (parsedMonth.year - parsedStartMonth.year) * 12 + (parsedMonth.monthIndex - parsedStartMonth.monthIndex);
+    const elapsedYears = Math.floor(Math.max(elapsedMonths, 0) / 12);
+    return defaultMonthlyIncome * ((1 + defaultIncomeGrowthRate) ** elapsedYears);
   }
 
   const sortedScenarios = sortCashflowIncomeScenarios(incomeSettings?.scenarios || []);
@@ -3423,14 +3393,11 @@ function buildCashflowRowsUntilAge({
   const initialBalance = calculateCarryover(transactions, settings, cashflowStartMonth);
   const rows = [];
   let endingBalance = initialBalance;
-  let annualIncomeGrowthFactor = 1;
+  const defaultIncomeGrowthRate = parseRateInput(assumptions?.salaryGrowthRateBefore60) / 100;
 
   for (let year = startYear; year <= endYear; year += 1) {
     const age = resolveAgeAtYear(settings.birthDate, year);
     if (!Number.isFinite(age) || age < currentAge || age > targetAge) continue;
-    if (year !== startYear) {
-      annualIncomeGrowthFactor *= resolveAnnualIncomeTransitionFactor(assumptions, age);
-    }
 
     const isReferenceYear = year === referenceYear;
     const activeMonthsInYear = isReferenceYear ? (referenceDate.getMonth() + 1) : 12;
@@ -3443,7 +3410,8 @@ function buildCashflowRowsUntilAge({
       sum + resolveMonthlyIncomeAmount({
         month,
         defaultMonthlyIncome: monthlyIncome,
-        defaultIncomeGrowthFactor: annualIncomeGrowthFactor,
+        defaultIncomeGrowthRate,
+        cashflowStartMonth,
         incomeSettings,
       })
     ), 0));
@@ -5651,11 +5619,17 @@ function init() {
   lifeEventTypeInput?.addEventListener("change", handleLifeEventTypeChange);
   lifeEventMonthInput?.addEventListener("change", updateLifeEventAgePreview);
   lifeEventCancelButton?.addEventListener("click", cancelLifeEventEdit);
-  cashflowSettingsForm?.addEventListener("input", () => {
+  cashflowIncomeSettingsForm?.addEventListener("input", () => {
     const assumptions = {
       salaryGrowthRateBefore60: parseRateInput(cashflowSalaryGrowthRateBefore60Input?.value),
-      salaryCorrectionRateAt60: parseRateInput(cashflowSalaryCorrectionRateAt60Input?.value),
-      salaryCorrectionRateAfter60: parseRateInput(cashflowSalaryCorrectionRateAfter60Input?.value),
+      inflationRate: parseRateInput(cashflowInflationRateInput?.value),
+    };
+    saveCashflowAssumptions(assumptions);
+    refreshCashflowTableOnly();
+  });
+  cashflowExpenseSettingsForm?.addEventListener("input", () => {
+    const assumptions = {
+      salaryGrowthRateBefore60: parseRateInput(cashflowSalaryGrowthRateBefore60Input?.value),
       inflationRate: parseRateInput(cashflowInflationRateInput?.value),
     };
     saveCashflowAssumptions(assumptions);

@@ -526,6 +526,10 @@
                   <form id="cashflow-income-settings-form" class="cashflow-income-settings-form" autocomplete="off">
                     <div class="cashflow-income-core-grid">
                       <label>
+                        現在の収入昇給率（%）
+                        <input id="cashflow-salary-growth-rate-before-60" type="number" inputmode="decimal" min="-10" max="20" step="any" />
+                      </label>
+                      <label>
                         現在の働き方の終了年月
                         <input id="cashflow-income-retirement-month" type="month" />
                       </label>
@@ -544,6 +548,12 @@
               <section id="cashflow-sub-panel-expense-settings" class="cashflow-sub-panel" role="tabpanel" aria-labelledby="cashflow-sub-tab-expense-settings" data-cashflow-sub-panel="expense-settings" hidden>
                 <div class="cashflow-expense-settings asset-main-first-content">
                   <form id="cashflow-expense-settings-form" class="cashflow-income-settings-form" autocomplete="off">
+                    <div class="cashflow-income-core-grid">
+                      <label>
+                        物価上昇率（%）
+                        <input id="cashflow-inflation-rate" type="number" inputmode="decimal" min="0" max="20" step="0.1" />
+                      </label>
+                    </div>
                     <div class="cashflow-income-scenarios">
                       <div class="cashflow-income-scenarios-header">
                         <p class="cashflow-income-scenarios-title">支出シナリオ</p>
@@ -561,28 +571,9 @@
                   <button type="button" id="cashflow-download-pdf-button">PDF保存</button>
                 </div>
                 <div class="cashflow-footnotes" aria-label="キャッシュフロー補足">
-                  <p class="cashflow-forecast-note">※59歳までは通常昇給、60歳時は一度だけ補正、60歳以降は毎年の補正率で調整します。</p>
                   <p class="cashflow-forecast-note">※将来の見込みを表示します。</p>
                   <p class="cashflow-scroll-hint">左右にスワイプで確認できます。</p>
                 </div>
-                <form id="cashflow-settings-form" class="grid cashflow-settings-grid asset-main-first-content" autocomplete="off">
-                  <label>
-                    59歳までの昇給率（%）
-                    <input id="cashflow-salary-growth-rate-before-60" type="number" inputmode="decimal" min="-10" max="20" step="any" />
-                  </label>
-                  <label>
-                    60歳時の年収補正率（%）
-                    <input id="cashflow-salary-correction-rate-at-60" type="number" inputmode="decimal" min="0" max="300" step="any" />
-                  </label>
-                  <label>
-                    60歳以降の年収補正率（%）
-                    <input id="cashflow-salary-correction-rate-after-60" type="number" inputmode="decimal" min="0" max="300" step="any" />
-                  </label>
-                  <label>
-                    物価上昇率（%）
-                    <input id="cashflow-inflation-rate" type="number" inputmode="decimal" min="-10" max="20" step="any" />
-                  </label>
-                </form>
               </section>
             </div>
           </div>
