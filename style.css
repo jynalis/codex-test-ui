@@ -1636,6 +1636,10 @@ button.plan-card-trigger {
   gap: 8px;
 }
 
+.profile-basic-settings-actions {
+  margin-top: 2px;
+}
+
 .profile-form-actions button {
   flex: 1;
 }
