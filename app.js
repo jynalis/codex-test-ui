@@ -109,6 +109,8 @@ const cashflowSalaryCorrectionRateAfter60Input = document.getElementById("cashfl
 const cashflowInflationRateInput = document.getElementById("cashflow-inflation-rate");
 const cashflowTableWrap = document.getElementById("cashflow-table-wrap");
 const cashflowDownloadPdfButton = document.getElementById("cashflow-download-pdf-button");
+const cashflowSubTabs = Array.from(document.querySelectorAll("[data-cashflow-sub-tab]"));
+const cashflowSubPanels = Array.from(document.querySelectorAll("[data-cashflow-sub-panel]"));
 const accordionCloseTimers = new WeakMap();
 const accordionCollapseWaiters = new WeakMap();
 const NAV_CLOSE_FAR_DISTANCE = 520;
@@ -130,6 +132,7 @@ let activeAssetMainTab = "formation";
 let activeIncomeMainTab = "expense-balance";
 let activeInputMainTab = "basic";
 let activePrimaryMainTab = "dashboard";
+let activeCashflowSubTab = "cf";
 const activeInputSubTabs = {
   basic: "register",
   recurring: "register",
@@ -3777,6 +3780,27 @@ function setAssetMainTab(tabName = "formation") {
   });
 }
 
+function setCashflowSubTab(tabName = "cf") {
+  if (cashflowSubTabs.length === 0 || cashflowSubPanels.length === 0) return;
+  const requestedTab = tabName || "cf";
+  const hasRequestedTab = cashflowSubTabs.some((button) => button.dataset.cashflowSubTab === requestedTab);
+  const nextTab = hasRequestedTab ? requestedTab : "cf";
+  activeCashflowSubTab = nextTab;
+
+  cashflowSubTabs.forEach((button) => {
+    const isActive = button.dataset.cashflowSubTab === nextTab;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    button.tabIndex = isActive ? 0 : -1;
+  });
+
+  cashflowSubPanels.forEach((panel) => {
+    const isActive = panel.dataset.cashflowSubPanel === nextTab;
+    panel.hidden = !isActive;
+    panel.classList.toggle("is-active", isActive);
+  });
+}
+
 function setIncomeMainTab(tabName = "expense-balance") {
   if (incomeMainTabs.length === 0 || incomeMainPanels.length === 0) return;
   const requestedTab = tabName || "expense-balance";
@@ -3978,6 +4002,16 @@ function setupAssetMainTabs() {
     });
   });
   setAssetMainTab(activeAssetMainTab);
+}
+
+function setupCashflowSubTabs() {
+  if (cashflowSubTabs.length === 0) return;
+  cashflowSubTabs.forEach((button) => {
+    button.addEventListener("click", () => {
+      setCashflowSubTab(button.dataset.cashflowSubTab || "cf");
+    });
+  });
+  setCashflowSubTab(activeCashflowSubTab);
 }
 
 function setupIncomeMainTabs() {
@@ -5246,6 +5280,7 @@ function init() {
   buildIncomeMainPanels();
   setupPrimaryMainTabs();
   setupAssetMainTabs();
+  setupCashflowSubTabs();
   setupIncomeMainTabs();
   setupInputMainTabs();
   setupInputSubTabs();
