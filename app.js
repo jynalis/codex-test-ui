@@ -4805,6 +4805,15 @@ function render() {
   queueAssetForecastRender();
 }
 
+function refreshCashflowTableOnly() {
+  const settings = loadSettings();
+  const transactions = loadTransactions();
+  const recurringExpenses = loadRecurringExpenses();
+  const lifeEvents = loadLifeEvents();
+  const assumptions = loadCashflowAssumptions();
+  renderCashflowTable({ settings, transactions, recurringExpenses, lifeEvents, assumptions });
+}
+
 function addTransaction(event) {
   event.preventDefault();
   const wasEditing = Boolean(transactionEditingId);
@@ -5650,7 +5659,7 @@ function init() {
       inflationRate: parseRateInput(cashflowInflationRateInput?.value),
     };
     saveCashflowAssumptions(assumptions);
-    render();
+    refreshCashflowTableOnly();
   });
   cashflowIncomeRetirementMonthInput?.addEventListener("change", () => {
     const settings = loadCashflowIncomeSettings();
@@ -5674,7 +5683,7 @@ function init() {
       target.dataset.incomeScenarioField,
       target.value
     );
-    render();
+    refreshCashflowTableOnly();
   });
   cashflowExpenseScenarioAddButton?.addEventListener("click", addCashflowExpenseScenario);
   cashflowExpenseScenarioList?.addEventListener("click", (event) => {
@@ -5692,7 +5701,7 @@ function init() {
       target.dataset.expenseScenarioField,
       target.value
     );
-    render();
+    refreshCashflowTableOnly();
   });
   cashflowDownloadPdfButton?.addEventListener("click", downloadCashflowPdf);
   buildPrimaryMainPanels();
