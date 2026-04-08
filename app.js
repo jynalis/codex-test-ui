@@ -319,6 +319,7 @@ function restoreInputMenuViewportPosition({ force = false } = {}) {
 
 function ensureEditableFieldInViewport(target, { prioritizeBottomEdge = false } = {}) {
   if (!isEditableField(target)) return;
+  if (activePrimaryMainTab !== "input") return;
   const visualViewport = window.visualViewport;
   const viewportTop = visualViewport?.offsetTop ?? 0;
   const viewportHeight = visualViewport?.height ?? window.innerHeight ?? 0;
@@ -341,7 +342,11 @@ function ensureEditableFieldInViewport(target, { prioritizeBottomEdge = false } 
     delta = targetRect.bottom - effectiveBottom;
   }
   if (Math.abs(delta) < 1) return;
-  window.scrollBy({ top: delta, behavior: "auto" });
+  const nextY = window.scrollY + delta;
+  const maxScrollableY = Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
+  const clampedY = Math.min(Math.max(nextY, 0), maxScrollableY);
+  if (Math.abs(clampedY - window.scrollY) < 1) return;
+  window.scrollTo({ top: clampedY, behavior: "auto" });
 }
 
 function closeKeyboardAndReflowInputLayout({ restoreScroll = false, forceScrollRestore = false } = {}) {
@@ -350,7 +355,7 @@ function closeKeyboardAndReflowInputLayout({ restoreScroll = false, forceScrollR
   const runRestore = () => {
     if (!restoreScroll) return;
     if (isEditableField(activeElementBeforeBlur)) {
-      ensureEditableFieldInViewport(activeElementBeforeBlur, { prioritizeBottomEdge: true });
+      ensureEditableFieldInViewport(activeElementBeforeBlur, { prioritizeBottomEdge: false });
       return;
     }
     restoreInputMenuViewportPosition({ force: forceScrollRestore });
@@ -385,11 +390,17 @@ function setupKeyboardLayoutStability() {
     body.classList.toggle("is-input-focused", hasFocusedEditable);
     root.classList.toggle("is-input-focused", hasFocusedEditable);
     body.classList.toggle("is-keyboard-open", isKeyboardOpen);
-    root.style.setProperty("--keyboard-viewport-delta", `${heightDelta}px`);
+    if (!isKeyboardOpen) {
+      const maxScrollableY = Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
+      if (window.scrollY > maxScrollableY + 1) {
+        window.scrollTo({ top: maxScrollableY, behavior: "auto" });
+      }
+    }
   };
 
   const scheduleUpdate = () => window.requestAnimationFrame(updateKeyboardState);
   document.addEventListener("focusin", (event) => {
+    if (activePrimaryMainTab !== "input") return;
     scheduleUpdate();
     const nextTarget = event.target;
     window.requestAnimationFrame(() => {
@@ -418,6 +429,7 @@ function setupKeyboardLayoutStability() {
   visualViewport?.addEventListener("resize", () => {
     scheduleUpdate();
     window.requestAnimationFrame(() => {
+      if (activePrimaryMainTab !== "input") return;
       ensureEditableFieldInViewport(document.activeElement, { prioritizeBottomEdge: true });
     });
   });
