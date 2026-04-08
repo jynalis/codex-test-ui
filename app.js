@@ -123,6 +123,7 @@ const accordionCollapseWaiters = new WeakMap();
 const NAV_CLOSE_FAR_DISTANCE = 520;
 let mobileUpdateScrollToken = 0;
 let baselineVisualViewportHeight = 0;
+const IOS_SAFARI_KEYBOARD_ASSIST_BAR_HEIGHT = 52;
 
 let latestAssetForecastSettings = null;
 let assetForecastDirty = true;
@@ -326,22 +327,39 @@ function ensureEditableFieldInViewport(target, { prioritizeBottomEdge = false } 
 
   const topOffset = getViewportTopOffset();
   const keyboardOpen = document.body?.classList.contains("is-keyboard-open");
-  const bottomSafeInset = keyboardOpen ? 8 : 20;
+  const isIPhoneSafari = (() => {
+    const ua = navigator.userAgent || "";
+    const isIPhone = /iPhone/i.test(ua);
+    const isSafari = /Safari/i.test(ua) && !/(CriOS|FxiOS|EdgiOS|OPiOS|YaBrowser)/i.test(ua);
+    return isIPhone && isSafari;
+  })();
+  const keyboardAssistBarInset = keyboardOpen && isIPhoneSafari ? IOS_SAFARI_KEYBOARD_ASSIST_BAR_HEIGHT : 0;
+  const bottomSafeInset = keyboardOpen ? (12 + keyboardAssistBarInset) : 20;
   const targetRect = target.getBoundingClientRect();
-  const label = target.closest(".field, .stacked-field, .plan-form-row, .life-event-form-grid > label");
-  const labelRect = label?.getBoundingClientRect() || targetRect;
   const preferredTop = viewportTop + topOffset + 8;
   const preferredBottom = viewportTop + viewportHeight - bottomSafeInset;
   const effectiveBottom = prioritizeBottomEdge ? preferredBottom : preferredBottom - Math.min(36, Math.max(0, (preferredBottom - preferredTop) * 0.1));
 
   let delta = 0;
-  if (labelRect.top < preferredTop) {
-    delta = labelRect.top - preferredTop;
+  if (targetRect.top < preferredTop) {
+    delta = targetRect.top - preferredTop;
   } else if (targetRect.bottom > effectiveBottom) {
     delta = targetRect.bottom - effectiveBottom;
   }
   if (Math.abs(delta) < 1) return;
   window.scrollBy({ top: delta, behavior: "auto" });
+}
+
+function recheckEditableFieldViewport(target, options) {
+  if (!isEditableField(target)) return;
+  const runIfStillActive = () => {
+    if (document.activeElement !== target) return;
+    ensureEditableFieldInViewport(target, options);
+  };
+  runIfStillActive();
+  window.requestAnimationFrame(runIfStillActive);
+  window.setTimeout(runIfStillActive, 120);
+  window.setTimeout(runIfStillActive, 260);
 }
 
 function closeKeyboardAndReflowInputLayout({ restoreScroll = false, forceScrollRestore = false } = {}) {
@@ -393,7 +411,7 @@ function setupKeyboardLayoutStability() {
     scheduleUpdate();
     const nextTarget = event.target;
     window.requestAnimationFrame(() => {
-      ensureEditableFieldInViewport(nextTarget, { prioritizeBottomEdge: true });
+      recheckEditableFieldViewport(nextTarget, { prioritizeBottomEdge: true });
     });
   }, true);
   document.addEventListener("focusout", (event) => {
@@ -418,7 +436,7 @@ function setupKeyboardLayoutStability() {
   visualViewport?.addEventListener("resize", () => {
     scheduleUpdate();
     window.requestAnimationFrame(() => {
-      ensureEditableFieldInViewport(document.activeElement, { prioritizeBottomEdge: true });
+      recheckEditableFieldViewport(document.activeElement, { prioritizeBottomEdge: true });
     });
   });
   visualViewport?.addEventListener("scroll", scheduleUpdate);
