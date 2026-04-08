@@ -292,6 +292,46 @@ function isEditableField(element) {
   return !blockedTypes.has(element.type);
 }
 
+function blurActiveEditableField() {
+  const activeElement = document.activeElement;
+  if (isEditableField(activeElement) && typeof activeElement.blur === "function") {
+    activeElement.blur();
+    return true;
+  }
+  return false;
+}
+
+function resolveInputMenuScrollAnchor() {
+  return document.getElementById("section-input-main")
+    || document.getElementById("section-profile")
+    || null;
+}
+
+function restoreInputMenuViewportPosition({ force = false } = {}) {
+  if (activePrimaryMainTab !== "input") return;
+  const anchor = resolveInputMenuScrollAnchor();
+  if (!anchor) return;
+  const targetY = getSectionHeadingTargetY(anchor);
+  if (!force && Math.abs(window.scrollY - targetY) < 24) return;
+  scrollToElementWithOffset(anchor, { behavior: "auto" });
+}
+
+function closeKeyboardAndReflowInputLayout({ restoreScroll = false, forceScrollRestore = false } = {}) {
+  blurActiveEditableField();
+  const runRestore = () => {
+    if (!restoreScroll) return;
+    restoreInputMenuViewportPosition({ force: forceScrollRestore });
+  };
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      runRestore();
+      window.setTimeout(() => {
+        window.requestAnimationFrame(runRestore);
+      }, 90);
+    });
+  });
+}
+
 function setupKeyboardLayoutStability() {
   const root = document.documentElement;
   const body = document.body;
@@ -317,8 +357,16 @@ function setupKeyboardLayoutStability() {
 
   const scheduleUpdate = () => window.requestAnimationFrame(updateKeyboardState);
   document.addEventListener("focusin", scheduleUpdate, true);
-  document.addEventListener("focusout", () => {
+  document.addEventListener("focusout", (event) => {
+    const blurredElement = event.target;
     window.setTimeout(scheduleUpdate, 40);
+    if (!(blurredElement instanceof HTMLElement) || activePrimaryMainTab !== "input") return;
+    const wasEditable = isEditableField(blurredElement);
+    const movedToEditable = isEditableField(document.activeElement);
+    if (!wasEditable || movedToEditable) return;
+    window.setTimeout(() => {
+      restoreInputMenuViewportPosition();
+    }, 120);
   }, true);
   window.addEventListener("orientationchange", () => {
     baselineVisualViewportHeight = 0;
@@ -2075,6 +2123,7 @@ function addLifeEvent(event) {
 
   resetLifeEventFormFields();
   render();
+  closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
   if (wasEditing) {
     scrollToTopAfterMobileUpdate();
   }
@@ -4741,6 +4790,7 @@ function saveBasicProfileSettings() {
   }
 
   saveSettings(settings);
+  closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
   render();
   if (wasEditing) {
     setInputSubTab("basic", "register");
@@ -4767,6 +4817,7 @@ function saveAssetFormationSettings() {
 
   saveSettings(settings);
   resetProfileRegisterForm();
+  closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
   render();
   if (wasEditing) {
     setInputSubTab("basic", "register");
@@ -4954,6 +5005,7 @@ function addTransaction(event) {
   }
 
   render();
+  closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
   if (wasEditing) {
     scrollToTopAfterMobileUpdate();
   }
@@ -5003,6 +5055,7 @@ function addRecurringExpense(event) {
 
   resetRecurringFormFields();
   render();
+  closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
   if (wasEditing) {
     scrollToTopAfterMobileUpdate();
   }
