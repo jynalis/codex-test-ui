@@ -148,6 +148,7 @@ const activeInputSubTabs = {
 };
 
 const PRIMARY_MAIN_SECTION_IDS = {
+  start: ["section-start"],
   dashboard: ["section-home"],
   assets: ["section-assets"],
   input: ["section-input-main", "section-profile", "section-recurring", "section-life-events", "section-input"],
@@ -5766,6 +5767,7 @@ function setupSharedViewFilters() {
 
 function init() {
   setupKeyboardLayoutStability();
+  activePrimaryMainTab = "dashboard";
 
   const settings = loadSettings();
   const initialMonth = todayISO().slice(0, 7);
@@ -5878,6 +5880,7 @@ function init() {
   assetGrowthMetricToggle?.addEventListener("click", handleAssetGrowthMetricToggleClick);
 
   render();
+  scrollPrimaryMainTabToTop("dashboard", { behavior: "auto" });
 }
 
 init();
