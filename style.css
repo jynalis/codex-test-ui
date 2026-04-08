@@ -3315,7 +3315,12 @@ body.is-keyboard-open .floating-top-button {
 }
 
 .cashflow-settings-grid {
+  margin-top: 12px;
   margin-bottom: 8px;
+}
+
+.cashflow-footnotes {
+  margin-top: 8px;
 }
 
 .cashflow-sub-tabbar {
