@@ -26,6 +26,18 @@
           <div class="primary-main-tabs" role="tablist" aria-label="主表示タブ切替">
             <button
               type="button"
+              id="primary-main-tab-start"
+              class="primary-main-tab"
+              role="tab"
+              aria-selected="false"
+              aria-controls="primary-main-panel-start"
+              data-primary-main-tab="start"
+              tabindex="-1"
+            >
+              最初に
+            </button>
+            <button
+              type="button"
               id="primary-main-tab-dashboard"
               class="primary-main-tab is-active"
               role="tab"
@@ -62,6 +74,14 @@
           </div>
         </div>
         <div class="primary-main-panels">
+          <section
+            id="primary-main-panel-start"
+            class="primary-main-panel"
+            role="tabpanel"
+            aria-labelledby="primary-main-tab-start"
+            data-primary-main-panel="start"
+            hidden
+          ></section>
           <section
             id="primary-main-panel-dashboard"
             class="primary-main-panel is-active"
@@ -112,6 +132,34 @@
             </section>
           </section>
         </div>
+      </section>
+
+      <section id="section-start" class="card section-tone-start" data-nav-section="start">
+        <div class="section-heading">
+          <p class="section-role-badge">まずここから</p>
+          <h2>最初にやること</h2>
+          <p class="section-description">
+            この画面は、家計診断を始める前の準備ガイドです。下の手順どおりに入力を進めると、ダッシュボードと資産形成の結果がより正確になります。
+          </p>
+        </div>
+        <ol class="start-guide-list">
+          <li>
+            <h3>1. 入力タブで「基本」を登録</h3>
+            <p>記入開始月・生年月日を設定し、資産形成プラン（NISA/iDeCo など）を登録します。</p>
+          </li>
+          <li>
+            <h3>2. 定期支出とライフイベントを入力</h3>
+            <p>毎月発生する固定費や、将来予定している臨時収入・臨時支出を反映します。</p>
+          </li>
+          <li>
+            <h3>3. 毎月収支を登録</h3>
+            <p>収入・支出を入力していくと、ダッシュボードで当月残高や診断コメントを確認できます。</p>
+          </li>
+          <li>
+            <h3>4. ダッシュボード/資産形成を確認</h3>
+            <p>入力後は、下部タブからダッシュボードと資産形成へ移動して推移を確認してください。</p>
+          </li>
+        </ol>
       </section>
 
       <section

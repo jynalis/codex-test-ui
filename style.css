@@ -296,10 +296,37 @@ header p {
   border-color: #cadaef;
 }
 
+.section-tone-start {
+  background: linear-gradient(180deg, #fffdf7 0%, #f7f1dd 100%);
+  border-color: #d8c9a2;
+  border-top: 5px solid #a88a42;
+}
+
 .section-tone-profile {
   background: linear-gradient(180deg, #fafdff 0%, #edf6ff 100%);
   border-color: #9abce2;
   border-top: 5px solid #2b78b8;
+}
+
+.start-guide-list {
+  margin: 14px 0 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 12px;
+}
+
+.start-guide-list li {
+  color: var(--label-strong);
+}
+
+.start-guide-list h3 {
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.start-guide-list p {
+  color: var(--support-text);
+  line-height: 1.5;
 }
 
 .section-tone-input {
