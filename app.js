@@ -5516,6 +5516,10 @@ function setupDashboardCardNavigation() {
   const handleDashboardCardAction = (card) => {
     const sectionId = card?.dataset?.dashboardJumpSection;
     if (!sectionId) return;
+    const cashflowSubTab = card?.dataset?.dashboardJumpCashflowSubTab || "";
+    if (cashflowSubTab) {
+      setCashflowSubTab(cashflowSubTab);
+    }
     scrollToSection(sectionId, {
       toggleIfExpanded: false,
       assetMainTab: card.dataset.dashboardJumpAssetTab,

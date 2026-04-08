@@ -1703,6 +1703,8 @@ button.plan-card-trigger {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  position: relative;
+  isolation: isolate;
 }
 
 .dashboard-card {
@@ -1719,6 +1721,10 @@ button.plan-card-trigger {
 .dashboard-card-jump {
   cursor: pointer;
   transition: transform 0.14s ease, box-shadow 0.14s ease;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .dashboard-card-jump:hover {
