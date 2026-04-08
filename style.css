@@ -190,56 +190,6 @@ header p {
   overflow: hidden;
 }
 
-.step-guide-section {
-  display: grid;
-  gap: 10px;
-}
-
-.step-guide-heading {
-  display: grid;
-  gap: 6px;
-}
-
-.step-guide-heading h2 {
-  width: fit-content;
-  font-size: 1.08rem;
-  color: #15375d;
-  font-weight: 850;
-}
-
-.step-guide-heading .section-description {
-  color: #425f80;
-  font-size: 0.84rem;
-  line-height: 1.5;
-}
-
-.step-guide-panel-inner {
-  display: grid;
-  gap: 10px;
-  padding-top: 12px;
-}
-
-.step-guide-note {
-  margin: 0;
-  color: #4a6079;
-  font-size: 0.84rem;
-  line-height: 1.55;
-}
-
-.step-guide-list {
-  margin: 0;
-  padding-left: 1.1rem;
-  display: grid;
-  gap: 8px;
-  color: #1d3551;
-  font-size: 0.83rem;
-  line-height: 1.55;
-}
-
-.step-guide-list strong {
-  color: #173e67;
-}
-
 .primary-main-section {
   display: grid;
   gap: 14px;
@@ -2892,23 +2842,6 @@ body.is-keyboard-open .floating-top-button {
     font-size: 0.88rem;
     line-height: 1.4;
     max-width: 100%;
-  }
-
-  .step-guide-section {
-    gap: 8px;
-  }
-
-  .step-guide-heading h2 {
-    font-size: 1.02rem;
-  }
-
-  .step-guide-note {
-    font-size: 0.79rem;
-  }
-
-  .step-guide-list {
-    gap: 7px;
-    font-size: 0.78rem;
   }
 
   .primary-main-tabs {
