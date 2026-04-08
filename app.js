@@ -3284,6 +3284,12 @@ function sortCashflowIncomeScenarios(scenarios = []) {
     .sort((a, b) => compareMonth(a.startMonth, b.startMonth));
 }
 
+function sortCashflowExpenseScenarios(scenarios = []) {
+  return [...scenarios]
+    .filter((scenario) => parseMonth(scenario?.startMonth))
+    .sort((a, b) => compareMonth(a.startMonth, b.startMonth));
+}
+
 function calculateScenarioMonthlyIncomeAtMonth(scenario, month) {
   const target = parseMonth(month);
   const start = parseMonth(scenario?.startMonth);
@@ -3321,6 +3327,45 @@ function resolveMonthlyIncomeAmount({
   }, null);
   if (!activeScenario) return 0;
   return calculateScenarioMonthlyIncomeAtMonth(activeScenario, month);
+}
+
+function calculateScenarioMonthlyExpenseAtMonth(scenario, month, inflationRate = 0) {
+  const target = parseMonth(month);
+  const start = parseMonth(scenario?.startMonth);
+  if (!target || !start || compareMonth(month, scenario.startMonth) < 0) return 0;
+
+  const baseMonthlyExpense = Math.max(Number(scenario?.monthlyExpense) || 0, 0);
+  if (baseMonthlyExpense <= 0) return 0;
+
+  const elapsedMonths = (target.year - start.year) * 12 + (target.monthIndex - start.monthIndex);
+  const elapsedYears = Math.floor(Math.max(elapsedMonths, 0) / 12);
+  return baseMonthlyExpense * ((1 + inflationRate) ** elapsedYears);
+}
+
+function resolveMonthlyRegularExpenseAmount({
+  month,
+  defaultMonthlyRegularExpense = 0,
+  cashflowStartMonth = "",
+  inflationRate = 0,
+  sortedExpenseScenarios = [],
+}) {
+  if (!parseMonth(month)) return 0;
+
+  const activeScenario = sortedExpenseScenarios.reduce((latest, scenario) => {
+    if (compareMonth(scenario.startMonth, month) > 0) return latest;
+    return scenario;
+  }, null);
+  if (activeScenario) {
+    return calculateScenarioMonthlyExpenseAtMonth(activeScenario, month, inflationRate);
+  }
+
+  const parsedStartMonth = parseMonth(cashflowStartMonth);
+  const parsedTargetMonth = parseMonth(month);
+  if (!parsedStartMonth || !parsedTargetMonth) return 0;
+  const elapsedMonths = (parsedTargetMonth.year - parsedStartMonth.year) * 12
+    + (parsedTargetMonth.monthIndex - parsedStartMonth.monthIndex);
+  const elapsedYears = Math.floor(Math.max(elapsedMonths, 0) / 12);
+  return defaultMonthlyRegularExpense * ((1 + inflationRate) ** elapsedYears);
 }
 
 function buildCashflowRowsUntilAge({
@@ -3367,6 +3412,9 @@ function buildCashflowRowsUntilAge({
 
   const inflationRate = parseRateInput(assumptions?.inflationRate) / 100;
   const incomeSettings = loadCashflowIncomeSettings();
+  const expenseSettings = loadCashflowExpenseSettings();
+  const sortedExpenseScenarios = sortCashflowExpenseScenarios(expenseSettings?.scenarios || []);
+  const hasExpenseScenarios = sortedExpenseScenarios.length > 0;
   const lifeEventByMonth = buildLifeEventTotalsByMonth(lifeEvents, settings.birthDate);
   const plannedExtraByMonth = buildPlannedExtraTotalsByMonth(transactions, averageStartMonth);
   const assetWithdrawalTransfersByMonth = buildAssetWithdrawalTransfersByMonth(settings);
@@ -3400,7 +3448,17 @@ function buildCashflowRowsUntilAge({
       })
     ), 0));
     const yearOffset = year - startYear;
-    const annualRegularExpense = Math.round(monthlyRegularExpense * activeMonthsInYear * ((1 + inflationRate) ** yearOffset));
+    const annualRegularExpense = hasExpenseScenarios
+      ? Math.round(activeMonths.reduce((sum, month) => (
+        sum + resolveMonthlyRegularExpenseAmount({
+          month,
+          defaultMonthlyRegularExpense: monthlyRegularExpense,
+          cashflowStartMonth,
+          inflationRate,
+          sortedExpenseScenarios,
+        })
+      ), 0))
+      : Math.round(monthlyRegularExpense * activeMonthsInYear * ((1 + inflationRate) ** yearOffset));
 
     const annualAssetFormationExpense = isReferenceYear
       ? Math.round(calculateAnnualAssetFormationExpense(settings, year) * yearProgressRate)
