@@ -317,10 +317,42 @@ function restoreInputMenuViewportPosition({ force = false } = {}) {
   scrollToElementWithOffset(anchor, { behavior: "auto" });
 }
 
+function ensureEditableFieldInViewport(target, { prioritizeBottomEdge = false } = {}) {
+  if (!isEditableField(target)) return;
+  const visualViewport = window.visualViewport;
+  const viewportTop = visualViewport?.offsetTop ?? 0;
+  const viewportHeight = visualViewport?.height ?? window.innerHeight ?? 0;
+  if (viewportHeight <= 0) return;
+
+  const topOffset = getViewportTopOffset();
+  const keyboardOpen = document.body?.classList.contains("is-keyboard-open");
+  const bottomSafeInset = keyboardOpen ? 8 : 20;
+  const targetRect = target.getBoundingClientRect();
+  const label = target.closest(".field, .stacked-field, .plan-form-row, .life-event-form-grid > label");
+  const labelRect = label?.getBoundingClientRect() || targetRect;
+  const preferredTop = viewportTop + topOffset + 8;
+  const preferredBottom = viewportTop + viewportHeight - bottomSafeInset;
+  const effectiveBottom = prioritizeBottomEdge ? preferredBottom : preferredBottom - Math.min(36, Math.max(0, (preferredBottom - preferredTop) * 0.1));
+
+  let delta = 0;
+  if (labelRect.top < preferredTop) {
+    delta = labelRect.top - preferredTop;
+  } else if (targetRect.bottom > effectiveBottom) {
+    delta = targetRect.bottom - effectiveBottom;
+  }
+  if (Math.abs(delta) < 1) return;
+  window.scrollBy({ top: delta, behavior: "auto" });
+}
+
 function closeKeyboardAndReflowInputLayout({ restoreScroll = false, forceScrollRestore = false } = {}) {
+  const activeElementBeforeBlur = document.activeElement;
   blurActiveEditableField();
   const runRestore = () => {
     if (!restoreScroll) return;
+    if (isEditableField(activeElementBeforeBlur)) {
+      ensureEditableFieldInViewport(activeElementBeforeBlur, { prioritizeBottomEdge: true });
+      return;
+    }
     restoreInputMenuViewportPosition({ force: forceScrollRestore });
   };
   window.requestAnimationFrame(() => {
@@ -357,7 +389,13 @@ function setupKeyboardLayoutStability() {
   };
 
   const scheduleUpdate = () => window.requestAnimationFrame(updateKeyboardState);
-  document.addEventListener("focusin", scheduleUpdate, true);
+  document.addEventListener("focusin", (event) => {
+    scheduleUpdate();
+    const nextTarget = event.target;
+    window.requestAnimationFrame(() => {
+      ensureEditableFieldInViewport(nextTarget, { prioritizeBottomEdge: true });
+    });
+  }, true);
   document.addEventListener("focusout", (event) => {
     const blurredElement = event.target;
     window.setTimeout(scheduleUpdate, 40);
@@ -366,7 +404,10 @@ function setupKeyboardLayoutStability() {
     const movedToEditable = isEditableField(document.activeElement);
     if (!wasEditable || movedToEditable) return;
     window.setTimeout(() => {
-      restoreInputMenuViewportPosition();
+      const nextActiveElement = document.activeElement;
+      if (isEditableField(nextActiveElement)) {
+        ensureEditableFieldInViewport(nextActiveElement, { prioritizeBottomEdge: true });
+      }
     }, 120);
   }, true);
   window.addEventListener("orientationchange", () => {
@@ -374,7 +415,12 @@ function setupKeyboardLayoutStability() {
     scheduleUpdate();
   });
   window.addEventListener("resize", scheduleUpdate);
-  visualViewport?.addEventListener("resize", scheduleUpdate);
+  visualViewport?.addEventListener("resize", () => {
+    scheduleUpdate();
+    window.requestAnimationFrame(() => {
+      ensureEditableFieldInViewport(document.activeElement, { prioritizeBottomEdge: true });
+    });
+  });
   visualViewport?.addEventListener("scroll", scheduleUpdate);
   updateKeyboardState();
 }
@@ -2065,7 +2111,6 @@ function renderLifeEvents(items) {
 
 function addLifeEvent(event) {
   event.preventDefault();
-  const wasEditing = Boolean(lifeEventEditingId);
   const month = lifeEventMonthInput.value;
   const type = lifeEventTypeInput.value;
   const category = lifeEventCategoryInput.value;
@@ -2125,9 +2170,6 @@ function addLifeEvent(event) {
   resetLifeEventFormFields();
   render();
   closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
-  if (wasEditing) {
-    scrollToTopAfterMobileUpdate();
-  }
 }
 
 function cancelLifeEventEdit() {
@@ -4793,11 +4835,7 @@ function saveBasicProfileSettings() {
   saveSettings(settings);
   closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
   render();
-  if (wasEditing) {
-    setInputSubTab("basic", "register");
-    scrollToPageAbsoluteTop();
-    return;
-  }
+  if (wasEditing) return;
   setInputSubTab("basic", "registered");
   scrollToBasicRegisteredTop();
 }
@@ -4820,11 +4858,7 @@ function saveAssetFormationSettings() {
   resetProfileRegisterForm();
   closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
   render();
-  if (wasEditing) {
-    setInputSubTab("basic", "register");
-    scrollToPageAbsoluteTop();
-    return;
-  }
+  if (wasEditing) return;
   setInputSubTab("basic", "registered");
   scrollToBasicRegisteredTop();
 }
@@ -4961,7 +4995,6 @@ function refreshCashflowTableOnly() {
 
 function addTransaction(event) {
   event.preventDefault();
-  const wasEditing = Boolean(transactionEditingId);
 
   const date = dateInput.value;
   const type = typeInput.value;
@@ -5007,14 +5040,10 @@ function addTransaction(event) {
 
   render();
   closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
-  if (wasEditing) {
-    scrollToTopAfterMobileUpdate();
-  }
 }
 
 function addRecurringExpense(event) {
   event.preventDefault();
-  const wasEditing = Boolean(recurringEditingId);
   const category = recurringCategoryInput.value;
   const amount = parseAmountInput(recurringAmountInput.value);
   const day = Math.min(Math.max(Number(recurringDayInput.value) || 1, 1), 31);
@@ -5057,9 +5086,6 @@ function addRecurringExpense(event) {
   resetRecurringFormFields();
   render();
   closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
-  if (wasEditing) {
-    scrollToTopAfterMobileUpdate();
-  }
 }
 
 function cancelRecurringExpenseEdit() {
