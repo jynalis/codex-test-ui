@@ -522,8 +522,23 @@
                 </div>
               </div>
               <section id="cashflow-sub-panel-income-settings" class="cashflow-sub-panel" role="tabpanel" aria-labelledby="cashflow-sub-tab-income-settings" data-cashflow-sub-panel="income-settings" hidden>
-                <div class="cashflow-sub-placeholder">
-                  <p>将来の働き方に応じた継続収入の変化をここで設定します。</p>
+                <div class="cashflow-income-settings asset-main-first-content">
+                  <form id="cashflow-income-settings-form" class="cashflow-income-settings-form" autocomplete="off">
+                    <div class="cashflow-income-core-grid">
+                      <label>
+                        現在の働き方の終了年月
+                        <input id="cashflow-income-retirement-month" type="month" />
+                      </label>
+                    </div>
+                    <div class="cashflow-income-scenarios">
+                      <div class="cashflow-income-scenarios-header">
+                        <p class="cashflow-income-scenarios-title">収入シナリオ</p>
+                        <button type="button" id="cashflow-income-scenario-add" class="small">シナリオを追加</button>
+                      </div>
+                      <p class="cashflow-income-scenario-note">毎年の増減率。マイナスも可。</p>
+                      <div id="cashflow-income-scenario-list" class="cashflow-income-scenario-list"></div>
+                    </div>
+                  </form>
                 </div>
               </section>
               <section id="cashflow-sub-panel-expense-settings" class="cashflow-sub-panel" role="tabpanel" aria-labelledby="cashflow-sub-tab-expense-settings" data-cashflow-sub-panel="expense-settings" hidden>

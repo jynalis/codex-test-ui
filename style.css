@@ -3387,6 +3387,93 @@ body.is-keyboard-open .floating-top-button {
   line-height: 1.45;
 }
 
+.cashflow-income-settings {
+  border: 1px solid #bad6e4;
+  border-radius: 12px;
+  padding: 12px;
+  background: linear-gradient(180deg, #fbfeff 0%, #f0f8fc 100%);
+}
+
+.cashflow-income-settings-form {
+  display: grid;
+  gap: 10px;
+}
+
+.cashflow-income-core-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.cashflow-income-scenarios {
+  display: grid;
+  gap: 8px;
+}
+
+.cashflow-income-scenarios-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.cashflow-income-scenarios-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #22495e;
+}
+
+.cashflow-income-scenario-note {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #486b7c;
+}
+
+.cashflow-income-scenario-list {
+  display: grid;
+  gap: 8px;
+}
+
+.cashflow-income-scenario {
+  border: 1px solid #b7d3e2;
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.cashflow-income-scenario-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.cashflow-income-scenario-title {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #2b5870;
+}
+
+.cashflow-income-scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.cashflow-income-scenario-empty {
+  margin: 0;
+  border: 1px dashed #b8cfdd;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fff;
+  color: #456273;
+  font-size: 0.82rem;
+}
+
 .cashflow-forecast-note {
   margin: 4px 2px 2px;
   font-size: 0.8rem;
@@ -3543,6 +3630,25 @@ body.is-keyboard-open .floating-top-button {
 
   .cashflow-sub-placeholder {
     padding: 12px 10px;
+  }
+
+  .cashflow-income-settings {
+    padding: 10px;
+  }
+
+  .cashflow-income-core-grid,
+  .cashflow-income-scenario-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cashflow-income-scenarios-header {
+    align-items: stretch;
+  }
+
+  #cashflow-income-scenario-add {
+    width: auto;
+    min-height: 40px;
+    white-space: nowrap;
   }
 
   .cashflow-settings-grid {
