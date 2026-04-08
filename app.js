@@ -188,6 +188,7 @@ const DEFAULT_CASHFLOW_ASSUMPTIONS = {
 };
 
 const MAX_CASHFLOW_INCOME_SCENARIOS = 5;
+const DEFAULT_CASHFLOW_INCOME_MAINTENANCE_RATE = 100;
 const DEFAULT_CASHFLOW_INCOME_SETTINGS = {
   retirementMonth: "",
   scenarios: [],
@@ -1072,11 +1073,14 @@ function saveCashflowAssumptions(assumptions) {
 }
 
 function normalizeCashflowIncomeScenario(item) {
+  const rawMaintenanceRate = Number.isFinite(parseRateInput(item?.annualIncomeMaintenanceRate, Number.NaN))
+    ? item.annualIncomeMaintenanceRate
+    : item?.annualAdjustmentRate;
   return {
     id: typeof item?.id === "string" && item.id ? item.id : crypto.randomUUID(),
     startMonth: parseMonth(item?.startMonth) ? item.startMonth : "",
     monthlyTakeHome: Math.max(parseAmountInput(String(item?.monthlyTakeHome ?? "")), 0),
-    annualAdjustmentRate: parseRateInput(item?.annualAdjustmentRate),
+    annualIncomeMaintenanceRate: parseRateInput(rawMaintenanceRate, DEFAULT_CASHFLOW_INCOME_MAINTENANCE_RATE),
   };
 }
 
@@ -1150,8 +1154,8 @@ function renderCashflowIncomeScenarioList(scenarios = []) {
             <input type="text" inputmode="numeric" value="${formatAmountInputValue(String(scenario.monthlyTakeHome || ""))}" placeholder="例）250,000" data-income-scenario-field="monthlyTakeHome" />
           </label>
           <label>
-            年間補正率（%）
-            <input type="number" inputmode="decimal" step="any" value="${Number.isFinite(scenario.annualAdjustmentRate) ? scenario.annualAdjustmentRate : 0}" data-income-scenario-field="annualAdjustmentRate" />
+            年間収入維持率（%）
+            <input type="number" inputmode="decimal" step="any" value="${Number.isFinite(scenario.annualIncomeMaintenanceRate) ? scenario.annualIncomeMaintenanceRate : DEFAULT_CASHFLOW_INCOME_MAINTENANCE_RATE}" data-income-scenario-field="annualIncomeMaintenanceRate" />
           </label>
         </div>
       `;
@@ -1214,8 +1218,8 @@ function updateCashflowIncomeScenarioField(scenarioId, fieldName, value) {
     scenario.startMonth = parseMonth(value) ? value : "";
   } else if (fieldName === "monthlyTakeHome") {
     scenario.monthlyTakeHome = parseAmountInput(String(value ?? ""));
-  } else if (fieldName === "annualAdjustmentRate") {
-    scenario.annualAdjustmentRate = parseRateInput(value);
+  } else if (fieldName === "annualIncomeMaintenanceRate") {
+    scenario.annualIncomeMaintenanceRate = parseRateInput(value, DEFAULT_CASHFLOW_INCOME_MAINTENANCE_RATE);
   } else {
     return;
   }
@@ -3154,6 +3158,51 @@ function sumMonthlyAmountsInYear(monthlyMap, year, startMonth, endMonth) {
   return total;
 }
 
+function sortCashflowIncomeScenarios(scenarios = []) {
+  return [...scenarios]
+    .filter((scenario) => parseMonth(scenario?.startMonth))
+    .sort((a, b) => compareMonth(a.startMonth, b.startMonth));
+}
+
+function calculateScenarioMonthlyIncomeAtMonth(scenario, month) {
+  const target = parseMonth(month);
+  const start = parseMonth(scenario?.startMonth);
+  if (!target || !start || compareMonth(month, scenario.startMonth) < 0) return 0;
+  const baseMonthlyTakeHome = Math.max(Number(scenario?.monthlyTakeHome) || 0, 0);
+  if (baseMonthlyTakeHome <= 0) return 0;
+
+  const elapsedMonths = (target.year - start.year) * 12 + (target.monthIndex - start.monthIndex);
+  const elapsedYears = Math.floor(Math.max(elapsedMonths, 0) / 12);
+  const annualMaintenanceRate = Math.max(
+    parseRateInput(scenario?.annualIncomeMaintenanceRate, DEFAULT_CASHFLOW_INCOME_MAINTENANCE_RATE),
+    0
+  );
+  return baseMonthlyTakeHome * ((annualMaintenanceRate / 100) ** elapsedYears);
+}
+
+function resolveMonthlyIncomeAmount({
+  month,
+  defaultMonthlyIncome = 0,
+  defaultIncomeGrowthFactor = 1,
+  incomeSettings,
+}) {
+  if (!parseMonth(month)) return 0;
+
+  const retirementMonth = parseMonth(incomeSettings?.retirementMonth) ? incomeSettings.retirementMonth : "";
+  const isAfterCurrentWorkStyle = retirementMonth && compareMonth(month, retirementMonth) > 0;
+  if (!isAfterCurrentWorkStyle) {
+    return defaultMonthlyIncome * defaultIncomeGrowthFactor;
+  }
+
+  const sortedScenarios = sortCashflowIncomeScenarios(incomeSettings?.scenarios || []);
+  const activeScenario = sortedScenarios.reduce((latest, scenario) => {
+    if (compareMonth(scenario.startMonth, month) > 0) return latest;
+    return scenario;
+  }, null);
+  if (!activeScenario) return 0;
+  return calculateScenarioMonthlyIncomeAtMonth(activeScenario, month);
+}
+
 function buildCashflowRowsUntilAge({
   settings,
   transactions,
@@ -3197,6 +3246,7 @@ function buildCashflowRowsUntilAge({
   });
 
   const inflationRate = parseRateInput(assumptions?.inflationRate) / 100;
+  const incomeSettings = loadCashflowIncomeSettings();
   const lifeEventByMonth = buildLifeEventTotalsByMonth(lifeEvents, settings.birthDate);
   const plannedExtraByMonth = buildPlannedExtraTotalsByMonth(transactions, averageStartMonth);
   const assetWithdrawalTransfersByMonth = buildAssetWithdrawalTransfersByMonth(settings);
@@ -3218,15 +3268,23 @@ function buildCashflowRowsUntilAge({
     const activeMonthsInYear = isReferenceYear ? (referenceDate.getMonth() + 1) : 12;
     const yearProgressRate = activeMonthsInYear / 12;
 
-    const annualIncome = Math.round(monthlyIncome * activeMonthsInYear * annualIncomeGrowthFactor);
+    const yearStartMonth = year === startYear ? cashflowStartMonth : formatMonth(year, 0);
+    const yearEndMonth = isReferenceYear ? referenceMonth : formatMonth(year, 11);
+    const activeMonths = getMonthRangeInclusive(yearStartMonth, yearEndMonth);
+    const annualIncome = Math.round(activeMonths.reduce((sum, month) => (
+      sum + resolveMonthlyIncomeAmount({
+        month,
+        defaultMonthlyIncome: monthlyIncome,
+        defaultIncomeGrowthFactor: annualIncomeGrowthFactor,
+        incomeSettings,
+      })
+    ), 0));
     const yearOffset = year - startYear;
     const annualRegularExpense = Math.round(monthlyRegularExpense * activeMonthsInYear * ((1 + inflationRate) ** yearOffset));
 
     const annualAssetFormationExpense = isReferenceYear
       ? Math.round(calculateAnnualAssetFormationExpense(settings, year) * yearProgressRate)
       : calculateAnnualAssetFormationExpense(settings, year);
-    const yearStartMonth = year === startYear ? cashflowStartMonth : formatMonth(year, 0);
-    const yearEndMonth = isReferenceYear ? referenceMonth : formatMonth(year, 11);
     const annualRecurringExpense = Math.round(
       calculateAnnualRecurringExpenseForYear(recurringExpenses, year, yearStartMonth, yearEndMonth)
     );
@@ -5418,6 +5476,7 @@ function init() {
     const settings = loadCashflowIncomeSettings();
     settings.retirementMonth = parseMonth(cashflowIncomeRetirementMonthInput.value) ? cashflowIncomeRetirementMonthInput.value : "";
     saveCashflowIncomeSettings(settings);
+    render();
   });
   cashflowIncomeScenarioAddButton?.addEventListener("click", addCashflowIncomeScenario);
   cashflowIncomeScenarioList?.addEventListener("click", (event) => {
@@ -5435,6 +5494,7 @@ function init() {
       target.dataset.incomeScenarioField,
       target.value
     );
+    render();
   });
   cashflowDownloadPdfButton?.addEventListener("click", downloadCashflowPdf);
   buildPrimaryMainPanels();
