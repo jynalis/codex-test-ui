@@ -1892,6 +1892,7 @@ button.plan-card-trigger {
 }
 
 .dashboard-asset-formation-chart {
+  position: relative;
   width: 100%;
   min-height: 286px;
   margin-left: -12px;
@@ -1942,11 +1943,37 @@ button.plan-card-trigger {
 
 .dashboard-bar-chart-bar {
   fill: #3f7fc4;
-  transition: fill 160ms ease;
+  transition: fill 120ms ease;
+  touch-action: pan-x pan-y;
 }
 
-.dashboard-bar-chart-bar:hover {
+.dashboard-bar-chart-bar:active {
   fill: #3573b7;
+}
+
+.dashboard-bar-chart-press-tooltip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgb(29 57 88 / 92%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+  white-space: nowrap;
+  z-index: 3;
+}
+
+.dashboard-bar-chart-press-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .dashboard-bar-chart-x-label {
