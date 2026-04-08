@@ -3084,6 +3084,16 @@ function calculateAverageMonthlyAmount(transactions, {
   return total / targetMonths;
 }
 
+function resolveCashflowAverageEndMonth(transactions, startMonth) {
+  if (!parseMonth(startMonth)) return "";
+  const nowMonth = todayISO().slice(0, 7);
+  const latestDataMonth = getLatestMonthFromTransactions(Array.isArray(transactions) ? transactions : []);
+  const candidates = [nowMonth, latestDataMonth].filter((month) => parseMonth(month));
+  if (candidates.length === 0) return startMonth;
+  const endMonth = candidates.sort(compareMonth).at(-1) || startMonth;
+  return compareMonth(endMonth, startMonth) < 0 ? startMonth : endMonth;
+}
+
 function getRecurringExpenseMonthsInYear(item, year) {
   const itemStart = parseMonth(item.startMonth);
   if (!itemStart) return 0;
@@ -3361,9 +3371,8 @@ function buildCashflowRowsUntilAge({
   const endYear = referenceYear;
   if (startYear > endYear) return [];
 
-  const nowMonth = todayISO().slice(0, 7);
   const averageStartMonth = cashflowStartMonth;
-  const averageEndMonth = subtractOneMonth(nowMonth);
+  const averageEndMonth = resolveCashflowAverageEndMonth(transactions, cashflowStartMonth);
   const cashflowStartDate = `${cashflowStartMonth}-01`;
   const currentAge = resolveAgeAtDate(settings.birthDate, cashflowStartDate) ?? calculateAge(settings.birthDate);
 
