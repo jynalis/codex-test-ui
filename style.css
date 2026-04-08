@@ -3394,6 +3394,13 @@ body.is-keyboard-open .floating-top-button {
   background: linear-gradient(180deg, #fbfeff 0%, #f0f8fc 100%);
 }
 
+.cashflow-expense-settings {
+  border: 1px solid #bad6e4;
+  border-radius: 12px;
+  padding: 12px;
+  background: linear-gradient(180deg, #fbfeff 0%, #f0f8fc 100%);
+}
+
 .cashflow-income-settings-form {
   display: grid;
   gap: 10px;
@@ -3636,6 +3643,10 @@ body.is-keyboard-open .floating-top-button {
     padding: 10px;
   }
 
+  .cashflow-expense-settings {
+    padding: 10px;
+  }
+
   .cashflow-income-core-grid,
   .cashflow-income-scenario-grid {
     grid-template-columns: 1fr;
@@ -3645,7 +3656,8 @@ body.is-keyboard-open .floating-top-button {
     align-items: stretch;
   }
 
-  #cashflow-income-scenario-add {
+  #cashflow-income-scenario-add,
+  #cashflow-expense-scenario-add {
     width: auto;
     min-height: 40px;
     white-space: nowrap;
