@@ -542,8 +542,17 @@
                 </div>
               </section>
               <section id="cashflow-sub-panel-expense-settings" class="cashflow-sub-panel" role="tabpanel" aria-labelledby="cashflow-sub-tab-expense-settings" data-cashflow-sub-panel="expense-settings" hidden>
-                <div class="cashflow-sub-placeholder">
-                  <p>将来の生活費の変化をここで設定します。</p>
+                <div class="cashflow-expense-settings asset-main-first-content">
+                  <form id="cashflow-expense-settings-form" class="cashflow-income-settings-form" autocomplete="off">
+                    <div class="cashflow-income-scenarios">
+                      <div class="cashflow-income-scenarios-header">
+                        <p class="cashflow-income-scenarios-title">支出シナリオ</p>
+                        <button type="button" id="cashflow-expense-scenario-add" class="small">シナリオを追加</button>
+                      </div>
+                      <p class="cashflow-income-scenario-note">定期支出・資産形成支出を除く生活費を設定</p>
+                      <div id="cashflow-expense-scenario-list" class="cashflow-income-scenario-list"></div>
+                    </div>
+                  </form>
                 </div>
               </section>
               <section id="cashflow-sub-panel-cf" class="cashflow-sub-panel is-active" role="tabpanel" aria-labelledby="cashflow-sub-tab-cf" data-cashflow-sub-panel="cf">

@@ -4,6 +4,7 @@ const RECURRING_EXPENSES_KEY = "kakeibo_recurring_expenses_v1";
 const LIFE_EVENTS_KEY = "kakeibo_life_events_v1";
 const CASHFLOW_ASSUMPTIONS_KEY = "kakeibo_cashflow_assumptions_v1";
 const CASHFLOW_INCOME_SETTINGS_KEY = "kakeibo_cashflow_income_settings_v1";
+const CASHFLOW_EXPENSE_SETTINGS_KEY = "kakeibo_cashflow_expense_settings_v1";
 
 const form = document.getElementById("transaction-form");
 const dateInput = document.getElementById("date");
@@ -111,6 +112,8 @@ const cashflowInflationRateInput = document.getElementById("cashflow-inflation-r
 const cashflowIncomeRetirementMonthInput = document.getElementById("cashflow-income-retirement-month");
 const cashflowIncomeScenarioList = document.getElementById("cashflow-income-scenario-list");
 const cashflowIncomeScenarioAddButton = document.getElementById("cashflow-income-scenario-add");
+const cashflowExpenseScenarioList = document.getElementById("cashflow-expense-scenario-list");
+const cashflowExpenseScenarioAddButton = document.getElementById("cashflow-expense-scenario-add");
 const cashflowTableWrap = document.getElementById("cashflow-table-wrap");
 const cashflowDownloadPdfButton = document.getElementById("cashflow-download-pdf-button");
 const cashflowSubTabs = Array.from(document.querySelectorAll("[data-cashflow-sub-tab]"));
@@ -191,6 +194,10 @@ const MAX_CASHFLOW_INCOME_SCENARIOS = 5;
 const DEFAULT_CASHFLOW_INCOME_MAINTENANCE_RATE = 100;
 const DEFAULT_CASHFLOW_INCOME_SETTINGS = {
   retirementMonth: "",
+  scenarios: [],
+};
+const MAX_CASHFLOW_EXPENSE_SCENARIOS = 5;
+const DEFAULT_CASHFLOW_EXPENSE_SETTINGS = {
   scenarios: [],
 };
 
@@ -1115,6 +1122,41 @@ function saveCashflowIncomeSettings(settings) {
   localStorage.setItem(CASHFLOW_INCOME_SETTINGS_KEY, JSON.stringify(normalized));
 }
 
+function normalizeCashflowExpenseScenario(item) {
+  return {
+    id: typeof item?.id === "string" && item.id ? item.id : crypto.randomUUID(),
+    startMonth: parseMonth(item?.startMonth) ? item.startMonth : "",
+    monthlyExpense: Math.max(parseAmountInput(String(item?.monthlyExpense ?? "")), 0),
+  };
+}
+
+function loadCashflowExpenseSettings() {
+  const raw = localStorage.getItem(CASHFLOW_EXPENSE_SETTINGS_KEY);
+  if (!raw) return { ...DEFAULT_CASHFLOW_EXPENSE_SETTINGS };
+  try {
+    const data = JSON.parse(raw);
+    const scenarios = Array.isArray(data?.scenarios)
+      ? data.scenarios
+          .map((item) => normalizeCashflowExpenseScenario(item))
+          .slice(0, MAX_CASHFLOW_EXPENSE_SCENARIOS)
+      : [];
+    return { scenarios };
+  } catch {
+    return { ...DEFAULT_CASHFLOW_EXPENSE_SETTINGS };
+  }
+}
+
+function saveCashflowExpenseSettings(settings) {
+  const normalized = {
+    scenarios: Array.isArray(settings?.scenarios)
+      ? settings.scenarios
+          .map((item) => normalizeCashflowExpenseScenario(item))
+          .slice(0, MAX_CASHFLOW_EXPENSE_SCENARIOS)
+      : [],
+  };
+  localStorage.setItem(CASHFLOW_EXPENSE_SETTINGS_KEY, JSON.stringify(normalized));
+}
+
 function updateCashflowIncomeSettingsInputs(settings) {
   if (!cashflowIncomeRetirementMonthInput) return;
   if (document.activeElement !== cashflowIncomeRetirementMonthInput) {
@@ -1168,6 +1210,53 @@ function renderCashflowIncomeScenarioList(scenarios = []) {
   }
 
   cashflowIncomeScenarioAddButton.disabled = scenarios.length >= MAX_CASHFLOW_INCOME_SCENARIOS;
+}
+
+function updateCashflowExpenseSettingsInputs(settings) {
+  renderCashflowExpenseScenarioList(settings?.scenarios || []);
+}
+
+function renderCashflowExpenseScenarioList(scenarios = []) {
+  if (!cashflowExpenseScenarioList || !cashflowExpenseScenarioAddButton) return;
+  cashflowExpenseScenarioList.innerHTML = "";
+
+  if (!Array.isArray(scenarios) || scenarios.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "cashflow-income-scenario-empty";
+    empty.textContent = "シナリオは未設定です。必要な分だけ追加できます。";
+    cashflowExpenseScenarioList.appendChild(empty);
+  } else {
+    scenarios.forEach((scenario, index) => {
+      const block = document.createElement("section");
+      block.className = "cashflow-income-scenario";
+      block.dataset.scenarioId = scenario.id;
+
+      const canDelete = index > 0;
+      block.innerHTML = `
+        <div class="cashflow-income-scenario-header">
+          <p class="cashflow-income-scenario-title">シナリオ${index + 1}</p>
+          ${canDelete ? '<button type="button" class="small danger" data-expense-scenario-action="remove">削除</button>' : ""}
+        </div>
+        <div class="cashflow-income-scenario-grid">
+          <label>
+            開始年月
+            <input type="month" value="${scenario.startMonth || ""}" data-expense-scenario-field="startMonth" />
+          </label>
+          <label>
+            通常支出月額
+            <input type="text" inputmode="numeric" value="${formatAmountInputValue(String(scenario.monthlyExpense || ""))}" placeholder="例）180,000" data-expense-scenario-field="monthlyExpense" />
+          </label>
+        </div>
+      `;
+      cashflowExpenseScenarioList.appendChild(block);
+      const monthlyInput = block.querySelector('[data-expense-scenario-field="monthlyExpense"]');
+      if (monthlyInput) {
+        setupFormattedAmountInput(monthlyInput);
+      }
+    });
+  }
+
+  cashflowExpenseScenarioAddButton.disabled = scenarios.length >= MAX_CASHFLOW_EXPENSE_SCENARIOS;
 }
 
 function updateCashflowAssumptionInputs(assumptions) {
@@ -1224,6 +1313,37 @@ function updateCashflowIncomeScenarioField(scenarioId, fieldName, value) {
     return;
   }
   saveCashflowIncomeSettings(settings);
+}
+
+function addCashflowExpenseScenario() {
+  const settings = loadCashflowExpenseSettings();
+  if (settings.scenarios.length >= MAX_CASHFLOW_EXPENSE_SCENARIOS) return;
+  settings.scenarios.push(normalizeCashflowExpenseScenario({}));
+  saveCashflowExpenseSettings(settings);
+  render();
+}
+
+function removeCashflowExpenseScenarioById(scenarioId) {
+  if (!scenarioId) return;
+  const settings = loadCashflowExpenseSettings();
+  settings.scenarios = settings.scenarios.filter((scenario) => scenario.id !== scenarioId);
+  saveCashflowExpenseSettings(settings);
+  render();
+}
+
+function updateCashflowExpenseScenarioField(scenarioId, fieldName, value) {
+  if (!scenarioId || !fieldName) return;
+  const settings = loadCashflowExpenseSettings();
+  const scenario = settings.scenarios.find((item) => item.id === scenarioId);
+  if (!scenario) return;
+  if (fieldName === "startMonth") {
+    scenario.startMonth = parseMonth(value) ? value : "";
+  } else if (fieldName === "monthlyExpense") {
+    scenario.monthlyExpense = parseAmountInput(String(value ?? ""));
+  } else {
+    return;
+  }
+  saveCashflowExpenseSettings(settings);
 }
 
 function resolveAnnualIncomeTransitionFactor(assumptions, age) {
@@ -4528,6 +4648,7 @@ function render() {
   }
   const assumptions = loadCashflowAssumptions();
   const cashflowIncomeSettings = loadCashflowIncomeSettings();
+  const cashflowExpenseSettings = loadCashflowExpenseSettings();
   const dataMonths = getMonthsWithData(transactions);
   syncViewFilterOptions(historyViewFilterControls, historyViewState, dataMonths);
   syncViewFilterOptions(
@@ -4573,6 +4694,7 @@ function render() {
   setProfileFormMode(isBasicEditingMode());
   updateCashflowAssumptionInputs(assumptions);
   updateCashflowIncomeSettingsInputs(cashflowIncomeSettings);
+  updateCashflowExpenseSettingsInputs(cashflowExpenseSettings);
 
   const historyItems = buildTransactionHistoryItems(transactions, autoTransactions, currentHistoryMonth);
   const nowMonth = todayISO().slice(0, 7);
@@ -5492,6 +5614,24 @@ function init() {
     updateCashflowIncomeScenarioField(
       scenarioBlock?.dataset.scenarioId || "",
       target.dataset.incomeScenarioField,
+      target.value
+    );
+    render();
+  });
+  cashflowExpenseScenarioAddButton?.addEventListener("click", addCashflowExpenseScenario);
+  cashflowExpenseScenarioList?.addEventListener("click", (event) => {
+    const button = event.target.closest('button[data-expense-scenario-action="remove"]');
+    if (!button) return;
+    const scenarioBlock = button.closest("[data-scenario-id]");
+    removeCashflowExpenseScenarioById(scenarioBlock?.dataset.scenarioId || "");
+  });
+  cashflowExpenseScenarioList?.addEventListener("input", (event) => {
+    const target = event.target.closest("[data-expense-scenario-field]");
+    if (!target) return;
+    const scenarioBlock = target.closest("[data-scenario-id]");
+    updateCashflowExpenseScenarioField(
+      scenarioBlock?.dataset.scenarioId || "",
+      target.dataset.expenseScenarioField,
       target.value
     );
     render();
