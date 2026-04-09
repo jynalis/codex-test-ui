@@ -317,6 +317,24 @@ function restoreInputMenuViewportPosition({ force = false } = {}) {
   scrollToElementWithOffset(anchor, { behavior: "auto" });
 }
 
+function isIPhoneSafari() {
+  const ua = window.navigator.userAgent || "";
+  const isIPhone = /iPhone/i.test(ua);
+  const isSafariEngine = /Safari/i.test(ua) && !/(CriOS|FxiOS|EdgiOS|OPiOS|YaBrowser)/i.test(ua);
+  return isIPhone && isSafariEngine;
+}
+
+function resolveKeyboardOverlayInset({ keyboardOpen = false } = {}) {
+  if (!keyboardOpen) return 20;
+  const visualViewport = window.visualViewport;
+  const viewportTop = visualViewport?.offsetTop ?? 0;
+  const viewportHeight = visualViewport?.height ?? window.innerHeight ?? 0;
+  const layoutHeight = window.innerHeight || viewportHeight || 0;
+  const keyboardOccludedHeight = Math.max(0, layoutHeight - (viewportTop + viewportHeight));
+  const safariAccessoryInset = isIPhoneSafari() ? 44 : 0;
+  return Math.max(16, keyboardOccludedHeight + safariAccessoryInset);
+}
+
 function ensureEditableFieldInViewport(target, { prioritizeBottomEdge = false } = {}) {
   if (!isEditableField(target)) return;
   if (activePrimaryMainTab !== "input") return;
@@ -327,10 +345,11 @@ function ensureEditableFieldInViewport(target, { prioritizeBottomEdge = false } 
 
   const topOffset = getViewportTopOffset();
   const keyboardOpen = document.body?.classList.contains("is-keyboard-open");
-  const bottomSafeInset = keyboardOpen ? 8 : 20;
+  const bottomSafeInset = resolveKeyboardOverlayInset({ keyboardOpen });
   const targetRect = target.getBoundingClientRect();
   const label = target.closest(".field, .stacked-field, .plan-form-row, .life-event-form-grid > label");
   const labelRect = label?.getBoundingClientRect() || targetRect;
+  const visibleFieldBottom = Math.max(targetRect.bottom, labelRect.bottom);
   const preferredTop = viewportTop + topOffset + 8;
   const preferredBottom = viewportTop + viewportHeight - bottomSafeInset;
   const effectiveBottom = prioritizeBottomEdge ? preferredBottom : preferredBottom - Math.min(36, Math.max(0, (preferredBottom - preferredTop) * 0.1));
@@ -338,8 +357,8 @@ function ensureEditableFieldInViewport(target, { prioritizeBottomEdge = false } 
   let delta = 0;
   if (labelRect.top < preferredTop) {
     delta = labelRect.top - preferredTop;
-  } else if (targetRect.bottom > effectiveBottom) {
-    delta = targetRect.bottom - effectiveBottom;
+  } else if (visibleFieldBottom > effectiveBottom) {
+    delta = visibleFieldBottom - effectiveBottom;
   }
   if (Math.abs(delta) < 1) return;
   const nextY = window.scrollY + delta;
@@ -406,6 +425,9 @@ function setupKeyboardLayoutStability() {
     window.requestAnimationFrame(() => {
       ensureEditableFieldInViewport(nextTarget, { prioritizeBottomEdge: true });
     });
+    window.setTimeout(() => {
+      ensureEditableFieldInViewport(nextTarget, { prioritizeBottomEdge: true });
+    }, 140);
   }, true);
   document.addEventListener("focusout", (event) => {
     const blurredElement = event.target;
