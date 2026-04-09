@@ -463,6 +463,14 @@ function setupKeyboardLayoutStability() {
   const visualViewport = window.visualViewport;
   const resolveViewportHeight = () => visualViewport?.height || window.innerHeight || 0;
   baselineVisualViewportHeight = Math.max(baselineVisualViewportHeight, resolveViewportHeight());
+  let wasKeyboardOpen = false;
+
+  const clampScrollToDocumentBounds = () => {
+    const maxScrollableY = Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
+    if (window.scrollY > maxScrollableY + 1) {
+      window.scrollTo({ top: maxScrollableY, behavior: "auto" });
+    }
+  };
 
   const updateKeyboardState = () => {
     const activeElement = document.activeElement;
@@ -475,12 +483,11 @@ function setupKeyboardLayoutStability() {
     body.classList.toggle("is-input-focused", hasFocusedEditable);
     root.classList.toggle("is-input-focused", hasFocusedEditable);
     body.classList.toggle("is-keyboard-open", isKeyboardOpen);
-    if (!isKeyboardOpen) {
-      const maxScrollableY = Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
-      if (window.scrollY > maxScrollableY + 1) {
-        window.scrollTo({ top: maxScrollableY, behavior: "auto" });
-      }
+
+    if (wasKeyboardOpen && !isKeyboardOpen) {
+      clampScrollToDocumentBounds();
     }
+    wasKeyboardOpen = isKeyboardOpen;
   };
 
   const scheduleUpdate = () => window.requestAnimationFrame(updateKeyboardState);
