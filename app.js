@@ -121,8 +121,19 @@ const cashflowSubPanels = Array.from(document.querySelectorAll("[data-cashflow-s
 const accordionCloseTimers = new WeakMap();
 const accordionCollapseWaiters = new WeakMap();
 const NAV_CLOSE_FAR_DISTANCE = 520;
+const KEYBOARD_BASE_BOTTOM_MARGIN = 28;
+const KEYBOARD_BOTTOM_FIELD_MARGIN = 78;
+const KEYBOARD_SCROLL_SETTLE_EPSILON = 3;
+const KEYBOARD_SCROLL_MIN_STEP = 2;
+const KEYBOARD_BOTTOM_FIELD_THRESHOLD = 220;
 let mobileUpdateScrollToken = 0;
 let baselineVisualViewportHeight = 0;
+const keyboardFocusScrollState = {
+  target: null,
+  rafId: 0,
+  timeoutId: 0,
+  settledTargetY: null,
+};
 
 let latestAssetForecastSettings = null;
 let assetForecastDirty = true;
@@ -335,7 +346,16 @@ function resolveKeyboardOverlayInset({ keyboardOpen = false } = {}) {
   return Math.max(16, keyboardOccludedHeight + safariAccessoryInset);
 }
 
-function ensureEditableFieldInViewport(target, { prioritizeBottomEdge = false } = {}) {
+function isBottomAreaField(target) {
+  if (!(target instanceof HTMLElement)) return false;
+  const form = target.closest("form");
+  if (!(form instanceof HTMLElement)) return false;
+  const formRect = form.getBoundingClientRect();
+  const fieldRect = target.getBoundingClientRect();
+  return formRect.bottom - fieldRect.bottom <= KEYBOARD_BOTTOM_FIELD_THRESHOLD;
+}
+
+function ensureEditableFieldInViewport(target, { prioritizeBottomEdge = false, force = false } = {}) {
   if (!isEditableField(target)) return;
   if (activePrimaryMainTab !== "input") return;
   const visualViewport = window.visualViewport;
@@ -346,13 +366,17 @@ function ensureEditableFieldInViewport(target, { prioritizeBottomEdge = false } 
   const topOffset = getViewportTopOffset();
   const keyboardOpen = document.body?.classList.contains("is-keyboard-open");
   const bottomSafeInset = resolveKeyboardOverlayInset({ keyboardOpen });
+  const isBottomField = isBottomAreaField(target);
+  const bottomMargin = prioritizeBottomEdge
+    ? (isBottomField ? KEYBOARD_BOTTOM_FIELD_MARGIN : KEYBOARD_BASE_BOTTOM_MARGIN)
+    : KEYBOARD_BASE_BOTTOM_MARGIN;
   const targetRect = target.getBoundingClientRect();
   const label = target.closest(".field, .stacked-field, .plan-form-row, .life-event-form-grid > label");
   const labelRect = label?.getBoundingClientRect() || targetRect;
   const visibleFieldBottom = Math.max(targetRect.bottom, labelRect.bottom);
   const preferredTop = viewportTop + topOffset + 8;
-  const preferredBottom = viewportTop + viewportHeight - bottomSafeInset;
-  const effectiveBottom = prioritizeBottomEdge ? preferredBottom : preferredBottom - Math.min(36, Math.max(0, (preferredBottom - preferredTop) * 0.1));
+  const preferredBottom = viewportTop + viewportHeight - bottomSafeInset - bottomMargin;
+  const effectiveBottom = prioritizeBottomEdge ? preferredBottom : preferredBottom - Math.min(24, Math.max(0, (preferredBottom - preferredTop) * 0.08));
 
   let delta = 0;
   if (labelRect.top < preferredTop) {
@@ -360,12 +384,46 @@ function ensureEditableFieldInViewport(target, { prioritizeBottomEdge = false } 
   } else if (visibleFieldBottom > effectiveBottom) {
     delta = visibleFieldBottom - effectiveBottom;
   }
-  if (Math.abs(delta) < 1) return;
+  if (Math.abs(delta) < KEYBOARD_SCROLL_MIN_STEP) return;
   const nextY = window.scrollY + delta;
   const maxScrollableY = Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
   const clampedY = Math.min(Math.max(nextY, 0), maxScrollableY);
-  if (Math.abs(clampedY - window.scrollY) < 1) return;
+  if (Math.abs(clampedY - window.scrollY) < KEYBOARD_SCROLL_MIN_STEP) {
+    keyboardFocusScrollState.settledTargetY = clampedY;
+    return;
+  }
+  if (!force && keyboardFocusScrollState.target === target && keyboardFocusScrollState.settledTargetY !== null) {
+    if (Math.abs(keyboardFocusScrollState.settledTargetY - clampedY) <= KEYBOARD_SCROLL_SETTLE_EPSILON) {
+      return;
+    }
+  }
   window.scrollTo({ top: clampedY, behavior: "auto" });
+  keyboardFocusScrollState.target = target;
+  keyboardFocusScrollState.settledTargetY = clampedY;
+}
+
+function scheduleEnsureEditableFieldInViewport(target, options = {}, { delay = 0, force = false } = {}) {
+  if (!isEditableField(target)) return;
+  if (keyboardFocusScrollState.rafId) {
+    window.cancelAnimationFrame(keyboardFocusScrollState.rafId);
+    keyboardFocusScrollState.rafId = 0;
+  }
+  if (keyboardFocusScrollState.timeoutId) {
+    window.clearTimeout(keyboardFocusScrollState.timeoutId);
+    keyboardFocusScrollState.timeoutId = 0;
+  }
+  const run = () => {
+    keyboardFocusScrollState.rafId = 0;
+    ensureEditableFieldInViewport(target, { ...options, force });
+  };
+  if (delay > 0) {
+    keyboardFocusScrollState.timeoutId = window.setTimeout(() => {
+      keyboardFocusScrollState.timeoutId = 0;
+      keyboardFocusScrollState.rafId = window.requestAnimationFrame(run);
+    }, delay);
+    return;
+  }
+  keyboardFocusScrollState.rafId = window.requestAnimationFrame(run);
 }
 
 function closeKeyboardAndReflowInputLayout({ restoreScroll = false, forceScrollRestore = false } = {}) {
@@ -422,12 +480,10 @@ function setupKeyboardLayoutStability() {
     if (activePrimaryMainTab !== "input") return;
     scheduleUpdate();
     const nextTarget = event.target;
-    window.requestAnimationFrame(() => {
-      ensureEditableFieldInViewport(nextTarget, { prioritizeBottomEdge: true });
-    });
-    window.setTimeout(() => {
-      ensureEditableFieldInViewport(nextTarget, { prioritizeBottomEdge: true });
-    }, 140);
+    keyboardFocusScrollState.target = nextTarget;
+    keyboardFocusScrollState.settledTargetY = null;
+    scheduleEnsureEditableFieldInViewport(nextTarget, { prioritizeBottomEdge: true }, { force: true });
+    scheduleEnsureEditableFieldInViewport(nextTarget, { prioritizeBottomEdge: true }, { delay: 120, force: true });
   }, true);
   document.addEventListener("focusout", (event) => {
     const blurredElement = event.target;
@@ -435,11 +491,15 @@ function setupKeyboardLayoutStability() {
     if (!(blurredElement instanceof HTMLElement) || activePrimaryMainTab !== "input") return;
     const wasEditable = isEditableField(blurredElement);
     const movedToEditable = isEditableField(document.activeElement);
+    if (!movedToEditable) {
+      keyboardFocusScrollState.target = null;
+      keyboardFocusScrollState.settledTargetY = null;
+    }
     if (!wasEditable || movedToEditable) return;
     window.setTimeout(() => {
       const nextActiveElement = document.activeElement;
       if (isEditableField(nextActiveElement)) {
-        ensureEditableFieldInViewport(nextActiveElement, { prioritizeBottomEdge: true });
+        scheduleEnsureEditableFieldInViewport(nextActiveElement, { prioritizeBottomEdge: true }, { force: true });
       }
     }, 120);
   }, true);
@@ -450,12 +510,18 @@ function setupKeyboardLayoutStability() {
   window.addEventListener("resize", scheduleUpdate);
   visualViewport?.addEventListener("resize", () => {
     scheduleUpdate();
-    window.requestAnimationFrame(() => {
-      if (activePrimaryMainTab !== "input") return;
-      ensureEditableFieldInViewport(document.activeElement, { prioritizeBottomEdge: true });
-    });
+    if (activePrimaryMainTab !== "input") return;
+    const activeElement = document.activeElement;
+    if (!isEditableField(activeElement)) return;
+    scheduleEnsureEditableFieldInViewport(activeElement, { prioritizeBottomEdge: true });
   });
-  visualViewport?.addEventListener("scroll", scheduleUpdate);
+  visualViewport?.addEventListener("scroll", () => {
+    scheduleUpdate();
+    if (activePrimaryMainTab !== "input") return;
+    const activeElement = document.activeElement;
+    if (!isEditableField(activeElement)) return;
+    scheduleEnsureEditableFieldInViewport(activeElement, { prioritizeBottomEdge: true });
+  });
   updateKeyboardState();
 }
 const numberWithComma = new Intl.NumberFormat("ja-JP");
