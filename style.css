@@ -261,6 +261,22 @@ header p {
   white-space: nowrap;
 }
 
+.primary-main-tab[data-primary-main-tab="dashboard"] {
+  order: 1;
+}
+
+.primary-main-tab[data-primary-main-tab="input"] {
+  order: 2;
+}
+
+.primary-main-tab[data-primary-main-tab="assets"] {
+  order: 3;
+}
+
+.primary-main-tab[data-primary-main-tab="start"] {
+  order: 4;
+}
+
 .primary-main-tab.is-active {
   color: #fff;
   border-color: #2d4980;
