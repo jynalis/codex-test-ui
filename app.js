@@ -1047,7 +1047,9 @@ function updateMemoPreviewByInputId(inputId) {
   const preview = trigger.querySelector("[data-memo-preview]");
   if (!(input instanceof HTMLInputElement) || !(preview instanceof HTMLElement)) return;
   const placeholder = trigger.dataset.memoPlaceholder || "任意";
-  preview.textContent = resolveMemoPreviewText(input.value, placeholder);
+  const trimmedValue = input.value.trim();
+  preview.textContent = resolveMemoPreviewText(trimmedValue, placeholder);
+  preview.classList.toggle("is-placeholder", !trimmedValue);
 }
 
 function closeMemoModal({ keepDraft = false } = {}) {
