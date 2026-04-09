@@ -5,6 +5,16 @@ const LIFE_EVENTS_KEY = "kakeibo_life_events_v1";
 const CASHFLOW_ASSUMPTIONS_KEY = "kakeibo_cashflow_assumptions_v1";
 const CASHFLOW_INCOME_SETTINGS_KEY = "kakeibo_cashflow_income_settings_v1";
 const CASHFLOW_EXPENSE_SETTINGS_KEY = "kakeibo_cashflow_expense_settings_v1";
+const BACKUP_SCHEMA_VERSION = 1;
+const BACKUP_STORAGE_KEYS = [
+  SETTINGS_KEY,
+  STORAGE_KEY,
+  RECURRING_EXPENSES_KEY,
+  LIFE_EVENTS_KEY,
+  CASHFLOW_ASSUMPTIONS_KEY,
+  CASHFLOW_INCOME_SETTINGS_KEY,
+  CASHFLOW_EXPENSE_SETTINGS_KEY,
+];
 
 const form = document.getElementById("transaction-form");
 const dateInput = document.getElementById("date");
@@ -37,6 +47,9 @@ const birthDateInput = document.getElementById("birth-date");
 const profileBasicSaveButton = document.getElementById("profile-basic-save-button");
 const profileSubmitButton = document.getElementById("profile-submit-button") || profileForm?.querySelector('button[type="submit"]');
 const profileCancelButton = document.getElementById("profile-cancel-button");
+const profileBackupExportButton = document.getElementById("profile-backup-export-button");
+const profileBackupImportButton = document.getElementById("profile-backup-import-button");
+const profileBackupFileInput = document.getElementById("profile-backup-file-input");
 const basicEditStatus = document.getElementById("basic-edit-status");
 const planList = document.getElementById("plan-list");
 const planEditorList = document.getElementById("plan-editor-list");
@@ -889,6 +902,132 @@ function loadSettings() {
 
 function saveSettings(settings) {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+
+function parseBackupStorageEntry(entry) {
+  if (!entry || typeof entry !== "object") return null;
+  if (entry.present !== true) return null;
+  if (entry.format === "json") {
+    return JSON.stringify(entry.value ?? null);
+  }
+  if (entry.format === "string") {
+    return String(entry.value ?? "");
+  }
+  return null;
+}
+
+function buildBackupPayload() {
+  const storage = BACKUP_STORAGE_KEYS.reduce((acc, key) => {
+    const raw = localStorage.getItem(key);
+    if (raw === null) {
+      acc[key] = { present: false };
+      return acc;
+    }
+    try {
+      acc[key] = {
+        present: true,
+        format: "json",
+        value: JSON.parse(raw),
+      };
+    } catch {
+      acc[key] = {
+        present: true,
+        format: "string",
+        value: raw,
+      };
+    }
+    return acc;
+  }, {});
+
+  return {
+    schemaVersion: BACKUP_SCHEMA_VERSION,
+    appId: "kakeibo",
+    exportedAt: new Date().toISOString(),
+    storage,
+  };
+}
+
+function formatBackupTimestampForFilename(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+  return `${year}${month}${day}-${hours}${minutes}${seconds}`;
+}
+
+function downloadBackupFile() {
+  try {
+    const backupPayload = buildBackupPayload();
+    const backupJson = JSON.stringify(backupPayload, null, 2);
+    const blob = new Blob([backupJson], { type: "application/json" });
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = `kakeibo-backup-${formatBackupTimestampForFilename(new Date())}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(downloadUrl);
+  } catch (error) {
+    console.error(error);
+    window.alert("バックアップ保存に失敗しました。時間をおいて再度お試しください。");
+  }
+}
+
+function applyBackupPayload(payload) {
+  const storage = payload?.storage;
+  if (!storage || typeof storage !== "object") {
+    throw new Error("バックアップ形式が不正です。");
+  }
+
+  BACKUP_STORAGE_KEYS.forEach((key) => {
+    const nextValue = parseBackupStorageEntry(storage[key]);
+    if (nextValue === null) {
+      localStorage.removeItem(key);
+      return;
+    }
+    localStorage.setItem(key, nextValue);
+  });
+}
+
+function importBackupFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const text = typeof reader.result === "string" ? reader.result : "";
+      const payload = JSON.parse(text);
+      if (!payload || typeof payload !== "object") {
+        throw new Error("バックアップファイルの読み取りに失敗しました。");
+      }
+      const schemaVersion = Number(payload.schemaVersion);
+      if (!Number.isInteger(schemaVersion) || schemaVersion <= 0) {
+        throw new Error("バックアップのバージョン情報が見つかりません。");
+      }
+      if (!window.confirm("バックアップを読み込むと現在の保存データは上書きされます。続行しますか？")) {
+        return;
+      }
+      applyBackupPayload(payload);
+      render();
+      window.alert("バックアップを読み込みました。");
+    } catch (error) {
+      console.error(error);
+      window.alert(`バックアップ読込に失敗しました。${error instanceof Error ? error.message : ""}`.trim());
+    } finally {
+      if (profileBackupFileInput) {
+        profileBackupFileInput.value = "";
+      }
+    }
+  };
+  reader.onerror = () => {
+    window.alert("バックアップファイルの読み取りに失敗しました。");
+    if (profileBackupFileInput) {
+      profileBackupFileInput.value = "";
+    }
+  };
+  reader.readAsText(file);
 }
 
 function normalizeRecurringExpense(item) {
@@ -6042,6 +6181,13 @@ function init() {
   profileBasicSaveButton?.addEventListener("click", saveBasicProfileSettings);
   profileSubmitButton?.addEventListener("click", saveAssetFormationSettings);
   profileCancelButton?.addEventListener("click", cancelProfileEdit);
+  profileBackupExportButton?.addEventListener("click", downloadBackupFile);
+  profileBackupImportButton?.addEventListener("click", () => profileBackupFileInput?.click());
+  profileBackupFileInput?.addEventListener("change", (event) => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) return;
+    importBackupFile(input.files?.[0]);
+  });
   recurringForm.addEventListener("submit", addRecurringExpense);
   recurringCancelButton?.addEventListener("click", cancelRecurringExpenseEdit);
   lifeEventForm?.addEventListener("submit", addLifeEvent);

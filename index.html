@@ -286,6 +286,15 @@
                 <div class="full profile-form-actions profile-basic-settings-actions">
                   <button type="button" id="profile-basic-save-button" class="profile-save-settings-button">設定を保存</button>
                 </div>
+                <section class="full profile-form-section profile-backup-section" aria-labelledby="profile-backup-heading">
+                  <h3 id="profile-backup-heading" class="profile-form-section-heading">データのバックアップ</h3>
+                  <p class="profile-plan-note">URL変更や端末変更に備えて、現在の入力データをJSONで保存・復元できます。</p>
+                  <div class="profile-form-actions profile-basic-settings-actions profile-backup-actions">
+                    <button type="button" id="profile-backup-export-button" class="ghost">バックアップ保存</button>
+                    <button type="button" id="profile-backup-import-button" class="ghost">バックアップ読込</button>
+                    <input type="file" id="profile-backup-file-input" accept="application/json,.json" hidden />
+                  </div>
+                </section>
                 <section class="full profile-form-section profile-plan-register-section" aria-labelledby="profile-plan-register-heading">
                   <h3 id="profile-plan-register-heading" class="profile-form-section-heading">資産形成を登録</h3>
                   <p id="basic-edit-status" class="recurring-edit-status full" aria-live="polite" hidden>
