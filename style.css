@@ -213,6 +213,7 @@ header p {
   background-image: none;
   border-top: 1px solid #bdcceb;
   box-shadow: 0 -8px 22px rgb(20 41 74 / 16%);
+  touch-action: pan-y;
 }
 
 .primary-main-tabbar::before {
@@ -256,7 +257,6 @@ header p {
   text-align: center;
   cursor: pointer;
   pointer-events: auto;
-  touch-action: manipulation;
   transition: background 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   white-space: nowrap;
 }
