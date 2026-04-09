@@ -118,6 +118,13 @@ const cashflowTableWrap = document.getElementById("cashflow-table-wrap");
 const cashflowDownloadPdfButton = document.getElementById("cashflow-download-pdf-button");
 const cashflowSubTabs = Array.from(document.querySelectorAll("[data-cashflow-sub-tab]"));
 const cashflowSubPanels = Array.from(document.querySelectorAll("[data-cashflow-sub-panel]"));
+const memoModal = document.getElementById("memo-modal");
+const memoModalTitle = document.getElementById("memo-modal-title");
+const memoModalInput = document.getElementById("memo-modal-input");
+const memoModalSaveButton = document.getElementById("memo-modal-save");
+const memoModalCancelButton = document.getElementById("memo-modal-cancel");
+const memoModalCloseControls = Array.from(document.querySelectorAll("[data-memo-modal-close]"));
+const memoTriggerButtons = Array.from(document.querySelectorAll("[data-memo-trigger]"));
 const accordionCloseTimers = new WeakMap();
 const accordionCollapseWaiters = new WeakMap();
 const NAV_CLOSE_FAR_DISTANCE = 520;
@@ -151,6 +158,7 @@ let activeIncomeMainTab = "expense-balance";
 let activeInputMainTab = "basic";
 let activePrimaryMainTab = "dashboard";
 let activeCashflowSubTab = "cf";
+let activeMemoDraft = null;
 const activeInputSubTabs = {
   basic: "register",
   recurring: "register",
@@ -300,7 +308,7 @@ function isEditableField(element) {
   if (element.isContentEditable) return true;
   if (element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement) return true;
   if (!(element instanceof HTMLInputElement)) return false;
-  const blockedTypes = new Set(["button", "checkbox", "radio", "range", "color", "file", "image", "submit", "reset"]);
+  const blockedTypes = new Set(["button", "checkbox", "radio", "range", "color", "file", "image", "submit", "reset", "hidden"]);
   return !blockedTypes.has(element.type);
 }
 
@@ -914,8 +922,10 @@ function resetRecurringFormFields() {
   recurringAmountInput.value = "";
   recurringEndMonthInput.value = "";
   recurringMemoInput.value = "";
+  updateMemoPreviewByInputId("recurring-memo");
   recurringStartMonthInput.value = resolveViewMonthFromState() || todayISO().slice(0, 7);
   recurringEditingId = null;
+  closeMemoModal();
   setRecurringFormMode(false);
 }
 
@@ -1022,6 +1032,94 @@ function setTransactionFormMode(isEditing, editingType = "expense") {
   if (transactionCancelButton) {
     transactionCancelButton.hidden = !isEditing;
   }
+}
+
+function resolveMemoPreviewText(value, placeholder = "任意") {
+  const text = typeof value === "string" ? value.trim() : "";
+  if (!text) return placeholder;
+  return text.length > 24 ? `${text.slice(0, 24)}…` : text;
+}
+
+function updateMemoPreviewByInputId(inputId) {
+  const trigger = memoTriggerButtons.find((button) => button.dataset.memoTarget === inputId);
+  if (!trigger) return;
+  const input = document.getElementById(inputId);
+  const preview = trigger.querySelector("[data-memo-preview]");
+  if (!(input instanceof HTMLInputElement) || !(preview instanceof HTMLElement)) return;
+  const placeholder = trigger.dataset.memoPlaceholder || "任意";
+  preview.textContent = resolveMemoPreviewText(input.value, placeholder);
+}
+
+function closeMemoModal({ keepDraft = false } = {}) {
+  if (!memoModal) return;
+  memoModal.hidden = true;
+  document.body.classList.remove("is-memo-modal-open");
+  if (!keepDraft) {
+    activeMemoDraft = null;
+  }
+}
+
+function saveMemoModalValue() {
+  if (!activeMemoDraft || !(memoModalInput instanceof HTMLInputElement)) {
+    closeMemoModal();
+    return;
+  }
+  const targetInput = document.getElementById(activeMemoDraft.targetId);
+  if (!(targetInput instanceof HTMLInputElement)) {
+    closeMemoModal();
+    return;
+  }
+  targetInput.value = memoModalInput.value.trim();
+  updateMemoPreviewByInputId(activeMemoDraft.targetId);
+  closeMemoModal();
+}
+
+function openMemoModalFromTrigger(trigger) {
+  if (!(trigger instanceof HTMLElement)) return;
+  const targetId = trigger.dataset.memoTarget;
+  if (!targetId || !(memoModal instanceof HTMLElement) || !(memoModalInput instanceof HTMLInputElement)) return;
+  const targetInput = document.getElementById(targetId);
+  if (!(targetInput instanceof HTMLInputElement)) return;
+  const title = trigger.dataset.memoTitle || "メモを入力";
+  const placeholder = trigger.dataset.memoPlaceholder || "任意";
+  const maxLength = Math.max(Number(trigger.dataset.memoMaxlength) || 120, 1);
+  activeMemoDraft = { targetId };
+  memoModalTitle.textContent = title;
+  memoModalInput.placeholder = placeholder;
+  memoModalInput.maxLength = maxLength;
+  memoModalInput.value = targetInput.value || "";
+  memoModal.hidden = false;
+  document.body.classList.add("is-memo-modal-open");
+  window.requestAnimationFrame(() => {
+    memoModalInput.focus({ preventScroll: true });
+    memoModalInput.setSelectionRange(memoModalInput.value.length, memoModalInput.value.length);
+  });
+}
+
+function setupMemoCompactInputs() {
+  memoTriggerButtons.forEach((trigger) => {
+    trigger.addEventListener("click", () => openMemoModalFromTrigger(trigger));
+    const targetId = trigger.dataset.memoTarget;
+    if (targetId) {
+      updateMemoPreviewByInputId(targetId);
+    }
+  });
+  memoModalSaveButton?.addEventListener("click", saveMemoModalValue);
+  memoModalCancelButton?.addEventListener("click", () => closeMemoModal());
+  memoModalCloseControls.forEach((control) => {
+    control.addEventListener("click", () => closeMemoModal());
+  });
+  memoModalInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      saveMemoModalValue();
+      return;
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeMemoModal();
+    }
+  });
 }
 
 function scrollToEditFormStart(primaryTarget, fallbackTarget) {
@@ -1133,6 +1231,9 @@ function resetTransactionFormFields(options = {}) {
   typeInput.value = "expense";
   syncCategoryOptions();
   amountInput.value = "";
+  memoInput.value = "";
+  updateMemoPreviewByInputId("memo");
+  closeMemoModal();
   setTransactionFormMode(false);
 }
 
@@ -1147,6 +1248,7 @@ function startTransactionEdit(id) {
   categoryInput.value = transaction.category;
   amountInput.value = numberWithComma.format(transaction.amount);
   memoInput.value = transaction.memo || "";
+  updateMemoPreviewByInputId("memo");
   setTransactionFormMode(true, transaction.type);
   setPrimaryMainTab("input");
   setInputMainTab("monthly");
@@ -1169,6 +1271,7 @@ function startRecurringExpenseEdit(id) {
   recurringStartMonthInput.value = recurringExpense.startMonth;
   recurringEndMonthInput.value = recurringExpense.endMonth || "";
   recurringMemoInput.value = recurringExpense.memo || "";
+  updateMemoPreviewByInputId("recurring-memo");
   setRecurringFormMode(true);
   scrollToEditFormStart(recurringSection, recurringForm);
 }
@@ -1614,6 +1717,9 @@ function resetLifeEventFormFields() {
   }
   syncLifeEventCategoryOptions();
   lifeEventAmountInput.value = "";
+  lifeEventMemoInput.value = "";
+  updateMemoPreviewByInputId("life-event-memo");
+  closeMemoModal();
   updateLifeEventAgePreview();
   setLifeEventError("");
   setLifeEventFormMode(false);
@@ -1632,6 +1738,7 @@ function startLifeEventEdit(id) {
   lifeEventCategoryInput.value = normalizeLegacyLifeEventCategory(lifeEvent.category);
   lifeEventAmountInput.value = numberWithComma.format(lifeEvent.amount);
   lifeEventMemoInput.value = lifeEvent.memo || "";
+  updateMemoPreviewByInputId("life-event-memo");
   updateLifeEventAgePreview();
   setLifeEventError("");
   setLifeEventFormMode(true);
@@ -5908,6 +6015,7 @@ function init() {
   syncRecurringCategoryOptions();
   syncRecurringDayOptions();
   syncLifeEventCategoryOptions();
+  setupMemoCompactInputs();
   setTransactionFormMode(false);
   resetRecurringFormFields();
   resetLifeEventFormFields();

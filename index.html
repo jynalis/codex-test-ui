@@ -345,9 +345,23 @@
                 終了月（任意）
                 <input id="recurring-end-month" type="month" />
               </label>
-              <label class="full">
+              <label class="full memo-inline-field">
                 メモ（任意）
-                <input id="recurring-memo" type="text" maxlength="60" placeholder="任意" />
+                <input id="recurring-memo" type="hidden" value="" />
+                <button
+                  type="button"
+                  id="recurring-memo-trigger"
+                  class="memo-compact-trigger"
+                  data-memo-trigger
+                  data-memo-target="recurring-memo"
+                  data-memo-title="定期支出メモ"
+                  data-memo-placeholder="任意"
+                  data-memo-maxlength="60"
+                  aria-label="定期支出メモを入力"
+                >
+                  <span class="memo-compact-trigger-label">メモ</span>
+                  <span id="recurring-memo-preview" class="memo-compact-trigger-value" data-memo-preview>任意</span>
+                </button>
               </label>
               <div class="full recurring-form-actions">
                 <button type="submit" id="recurring-submit-button">追加</button>
@@ -392,9 +406,23 @@
                       金額 (円)
                       <input id="amount" type="text" inputmode="numeric" autocomplete="off" placeholder="例: 50,000" required />
                     </label>
-                    <label class="full">
+                    <label class="full memo-inline-field">
                       メモ
-                      <input id="memo" type="text" placeholder="任意" maxlength="50" />
+                      <input id="memo" type="hidden" value="" />
+                      <button
+                        type="button"
+                        id="memo-trigger"
+                        class="memo-compact-trigger"
+                        data-memo-trigger
+                        data-memo-target="memo"
+                        data-memo-title="毎月収支メモ"
+                        data-memo-placeholder="メモを入力"
+                        data-memo-maxlength="50"
+                        aria-label="毎月収支メモを入力"
+                      >
+                        <span class="memo-compact-trigger-label">メモ</span>
+                        <span id="memo-preview" class="memo-compact-trigger-value" data-memo-preview>メモを入力</span>
+                      </button>
                     </label>
                     <div class="full transaction-form-actions">
                       <button type="submit" id="transaction-submit-button">追加する</button>
@@ -486,9 +514,23 @@
                     金額 (円)
                     <input id="life-event-amount" type="text" inputmode="numeric" placeholder="例: 1,500,000" required />
                   </label>
-                  <label class="full">
+                  <label class="full memo-inline-field">
                     メモ（任意）
-                    <input id="life-event-memo" type="text" maxlength="120" placeholder="任意" />
+                    <input id="life-event-memo" type="hidden" value="" />
+                    <button
+                      type="button"
+                      id="life-event-memo-trigger"
+                      class="memo-compact-trigger"
+                      data-memo-trigger
+                      data-memo-target="life-event-memo"
+                      data-memo-title="ライフイベントメモ"
+                      data-memo-placeholder="任意"
+                      data-memo-maxlength="120"
+                      aria-label="ライフイベントメモを入力"
+                    >
+                      <span class="memo-compact-trigger-label">メモ</span>
+                      <span id="life-event-memo-preview" class="memo-compact-trigger-value" data-memo-preview>任意</span>
+                    </button>
                   </label>
                   <div class="full life-event-form-actions">
                     <button type="submit" id="life-event-submit-button">追加</button>
@@ -604,6 +646,25 @@
       <span class="floating-top-button-icon" aria-hidden="true">↑</span>
       <span class="floating-top-button-label">TOP</span>
     </button>
+
+    <div id="memo-modal" class="memo-modal" hidden>
+      <div class="memo-modal-backdrop" data-memo-modal-close></div>
+      <section class="memo-modal-sheet" role="dialog" aria-modal="true" aria-labelledby="memo-modal-title">
+        <h2 id="memo-modal-title" class="memo-modal-title">メモを入力</h2>
+        <input
+          id="memo-modal-input"
+          class="memo-modal-input"
+          type="text"
+          inputmode="text"
+          maxlength="120"
+          placeholder="メモを入力"
+        />
+        <div class="memo-modal-actions">
+          <button type="button" id="memo-modal-cancel" class="ghost">キャンセル</button>
+          <button type="button" id="memo-modal-save">保存</button>
+        </div>
+      </section>
+    </div>
 
     <template id="transaction-item-template">
       <li class="item">

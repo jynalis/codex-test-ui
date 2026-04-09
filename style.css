@@ -2151,6 +2151,53 @@ button.plan-card-trigger {
   flex: 1;
 }
 
+.memo-inline-field {
+  gap: 7px;
+}
+
+.memo-compact-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #c7d6e8;
+  border-radius: 10px;
+  background: #fff;
+  color: #2b4260;
+  box-shadow: none;
+}
+
+.memo-compact-trigger:hover {
+  filter: none;
+  transform: none;
+  box-shadow: none;
+  border-color: #adc4dc;
+}
+
+.memo-compact-trigger:active {
+  transform: none;
+}
+
+.memo-compact-trigger-label {
+  font-weight: 700;
+  color: #2e4768;
+  font-size: 0.84rem;
+}
+
+.memo-compact-trigger-value {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  color: #4a5f79;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .transaction-edit-status {
   margin: 0;
   padding: 10px 12px;
@@ -2671,6 +2718,53 @@ button.ghost {
   font-size: 0.7rem;
   letter-spacing: 0.03em;
   line-height: 1;
+}
+
+.memo-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+}
+
+.memo-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(4 16 32 / 42%);
+}
+
+.memo-modal-sheet {
+  position: relative;
+  width: min(94vw, 430px);
+  margin: max(12vh, env(safe-area-inset-top, 0px) + 20px) auto 0;
+  padding: 14px 14px 12px;
+  border-radius: 14px;
+  border: 1px solid #c3d5eb;
+  background: #fff;
+  box-shadow: 0 16px 30px rgb(7 25 52 / 24%);
+  display: grid;
+  gap: 10px;
+}
+
+.memo-modal-title {
+  font-size: 1rem;
+  color: #163150;
+}
+
+.memo-modal-input {
+  min-height: 44px;
+}
+
+.memo-modal-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.memo-modal-actions > button {
+  flex: 1;
+}
+
+body.is-memo-modal-open {
+  overflow: hidden;
 }
 
 body.is-keyboard-open .primary-main-tabbar,
