@@ -2158,7 +2158,7 @@ button.plan-card-trigger {
 .memo-compact-trigger {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 10px;
   width: 100%;
   min-height: 44px;
@@ -2190,12 +2190,17 @@ button.plan-card-trigger {
 .memo-compact-trigger-value {
   flex: 1;
   min-width: 0;
-  text-align: right;
+  text-align: left;
   color: #4a5f79;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.memo-compact-trigger-value.is-placeholder {
+  color: #8b9bb0;
+  font-weight: 500;
 }
 
 .transaction-edit-status {
