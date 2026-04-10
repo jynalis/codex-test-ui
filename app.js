@@ -169,7 +169,7 @@ let basicEditingPlanId = null;
 let sharedYearMonthState = { year: "", month: "" };
 let historyViewState = { year: "", month: "" };
 let sharedAverageViewState = { averageMode: "month" };
-let dashboardAssetGrowthMetric = "assetFormationBalance";
+let dashboardAssetGrowthMetric = "endingBalance";
 let activeAssetMainTab = "formation";
 let activeIncomeMainTab = "expense-balance";
 let activeInputMainTab = "basic";
@@ -3190,10 +3190,10 @@ function calculateNiceYAxisStep(maxValue) {
   return Math.max(niceFraction * exponent, 1000000);
 }
 
-function renderDashboardAssetFormationChart(cashflowRows, metricKey = "assetFormationBalance") {
+function renderDashboardAssetFormationChart(cashflowRows, metricKey = "endingBalance") {
   if (!dashboardAssetFormationChart) return;
   dashboardAssetFormationChart.innerHTML = "";
-  const metric = DASHBOARD_ASSET_GROWTH_METRICS[metricKey] || DASHBOARD_ASSET_GROWTH_METRICS.assetFormationBalance;
+  const metric = DASHBOARD_ASSET_GROWTH_METRICS[metricKey] || DASHBOARD_ASSET_GROWTH_METRICS.endingBalance;
   const points = (Array.isArray(cashflowRows) ? cashflowRows : [])
     .map((row) => ({ year: row.year, age: row.age, amount: row[metricKey] }))
     .filter((row) => Number.isFinite(row.year) && Number.isFinite(row.age) && Number.isFinite(row.amount) && row.amount >= 0);
@@ -5975,7 +5975,7 @@ function resetInputTabState() {
 
 function resetDashboardTabState() {
   setIncomeMainTab("expense-balance");
-  dashboardAssetGrowthMetric = "assetFormationBalance";
+  dashboardAssetGrowthMetric = "endingBalance";
   updateDashboardAssetGrowthMetricToggleUI();
   render();
 }
