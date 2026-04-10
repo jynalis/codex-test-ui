@@ -1866,6 +1866,7 @@ button.plan-card-trigger {
   line-height: 1;
   padding: 9px 12px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .asset-growth-card__toggle-btn.is-active {
