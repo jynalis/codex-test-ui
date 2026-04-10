@@ -1288,9 +1288,26 @@ function resolveInputRegisterTopAnchor(groupName) {
       return recurringRegisterPanel || recurringForm || document.getElementById("section-recurring");
     case "life":
       return lifeRegisterPanel || lifeEventForm || document.getElementById("section-life-events");
+    case "monthly":
+      return form || document.getElementById("section-input");
     default:
       return null;
   }
+}
+
+function resolveInputSubTabTopAnchor(groupName, tabName = "register") {
+  if (!groupName) return null;
+  const sectionIds = INPUT_SUB_SECTION_IDS[groupName]?.[tabName];
+  if (Array.isArray(sectionIds)) {
+    for (const sectionId of sectionIds) {
+      const anchor = document.getElementById(sectionId);
+      if (anchor) return anchor;
+    }
+  }
+  if (tabName === "register") {
+    return resolveInputRegisterTopAnchor(groupName);
+  }
+  return null;
 }
 
 function scrollTargetIntoTopOnce(target) {
@@ -5158,15 +5175,15 @@ function renderBasicRegisteredSummary(settings) {
 function handlePostSaveCompletion({
   groupName,
   nextSubTab = "register",
-  target = null,
   shouldSwitchSubTab = false,
 } = {}) {
+  const destinationSubTab = shouldSwitchSubTab ? nextSubTab : "register";
   closeKeyboardAndReflowInputLayout({ restoreScroll: false, forceScrollRestore: false });
   render();
   if (shouldSwitchSubTab && groupName) {
     setInputSubTab(groupName, nextSubTab);
   }
-  const scrollTarget = target || (groupName ? resolveInputRegisterTopAnchor(groupName) : null);
+  const scrollTarget = resolveInputSubTabTopAnchor(groupName, destinationSubTab);
   scrollTargetIntoTopOnce(scrollTarget);
 }
 
@@ -5193,9 +5210,6 @@ function saveBasicProfileSettings() {
   handlePostSaveCompletion({
     groupName: "basic",
     nextSubTab: wasEditing ? "register" : "registered",
-    target: wasEditing
-      ? (profileForm || document.getElementById("section-profile"))
-      : (basicRegisteredSummary || document.getElementById("input-sub-panel-basic-registered")),
     shouldSwitchSubTab: !wasEditing,
   });
 }
@@ -5219,9 +5233,6 @@ function saveAssetFormationSettings() {
   handlePostSaveCompletion({
     groupName: "basic",
     nextSubTab: wasEditing ? "register" : "registered",
-    target: wasEditing
-      ? (profileForm || document.getElementById("section-profile"))
-      : (basicRegisteredSummary || document.getElementById("input-sub-panel-basic-registered")),
     shouldSwitchSubTab: !wasEditing,
   });
 }
