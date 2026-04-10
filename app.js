@@ -302,6 +302,11 @@ const EXPENSE_COMPOSITION_ITEMS = [
 ];
 const EXPENSE_CHART_COLORS = ["#ff6b6b", "#ff922b", "#ffd43b", "#38d9a9", "#4dabf7", "#9775fa", "#f06595", "#74c0fc", "#2f9e44", "#5c7cfa", "#e64980", "#15aabf"];
 const DASHBOARD_ASSET_GROWTH_METRICS = {
+  endingBalance: {
+    label: "残高",
+    emptyText: "残高データがないため、グラフを表示できません。",
+    ariaLabel: "年ごとの残高棒グラフ",
+  },
   assetFormationBalance: {
     label: "資産形成額",
     emptyText: "資産形成額データがないため、グラフを表示できません。",
