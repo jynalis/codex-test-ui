@@ -169,7 +169,7 @@ let basicEditingPlanId = null;
 let sharedYearMonthState = { year: "", month: "" };
 let historyViewState = { year: "", month: "" };
 let sharedAverageViewState = { averageMode: "month" };
-let dashboardAssetGrowthMetric = "assetFormationBalance";
+let dashboardAssetGrowthMetric = "endingBalance";
 let activeAssetMainTab = "formation";
 let activeIncomeMainTab = "expense-balance";
 let activeInputMainTab = "basic";
@@ -302,13 +302,18 @@ const EXPENSE_COMPOSITION_ITEMS = [
 ];
 const EXPENSE_CHART_COLORS = ["#ff6b6b", "#ff922b", "#ffd43b", "#38d9a9", "#4dabf7", "#9775fa", "#f06595", "#74c0fc", "#2f9e44", "#5c7cfa", "#e64980", "#15aabf"];
 const DASHBOARD_ASSET_GROWTH_METRICS = {
+  endingBalance: {
+    label: "残高",
+    emptyText: "残高データがないため、グラフを表示できません。",
+    ariaLabel: "年ごとの残高棒グラフ",
+  },
   assetFormationBalance: {
     label: "資産形成額",
     emptyText: "資産形成額データがないため、グラフを表示できません。",
     ariaLabel: "年ごとの資産形成額棒グラフ",
   },
   financialAssetTotal: {
-    label: "金融資産合計",
+    label: "金融資産",
     emptyText: "金融資産合計データがないため、グラフを表示できません。",
     ariaLabel: "年ごとの金融資産合計棒グラフ",
   },
@@ -3185,10 +3190,10 @@ function calculateNiceYAxisStep(maxValue) {
   return Math.max(niceFraction * exponent, 1000000);
 }
 
-function renderDashboardAssetFormationChart(cashflowRows, metricKey = "assetFormationBalance") {
+function renderDashboardAssetFormationChart(cashflowRows, metricKey = "endingBalance") {
   if (!dashboardAssetFormationChart) return;
   dashboardAssetFormationChart.innerHTML = "";
-  const metric = DASHBOARD_ASSET_GROWTH_METRICS[metricKey] || DASHBOARD_ASSET_GROWTH_METRICS.assetFormationBalance;
+  const metric = DASHBOARD_ASSET_GROWTH_METRICS[metricKey] || DASHBOARD_ASSET_GROWTH_METRICS.endingBalance;
   const points = (Array.isArray(cashflowRows) ? cashflowRows : [])
     .map((row) => ({ year: row.year, age: row.age, amount: row[metricKey] }))
     .filter((row) => Number.isFinite(row.year) && Number.isFinite(row.age) && Number.isFinite(row.amount) && row.amount >= 0);
@@ -5970,7 +5975,7 @@ function resetInputTabState() {
 
 function resetDashboardTabState() {
   setIncomeMainTab("expense-balance");
-  dashboardAssetGrowthMetric = "assetFormationBalance";
+  dashboardAssetGrowthMetric = "endingBalance";
   updateDashboardAssetGrowthMetricToggleUI();
   render();
 }
