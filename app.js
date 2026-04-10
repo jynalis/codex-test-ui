@@ -154,6 +154,10 @@ const keyboardFocusScrollState = {
   timeoutId: 0,
   settledTargetY: null,
 };
+const memoModalFocusState = {
+  rafIds: [],
+  timeoutId: 0,
+};
 
 let latestAssetForecastSettings = null;
 let assetForecastDirty = true;
@@ -376,9 +380,16 @@ function isBottomAreaField(target) {
   return formRect.bottom - fieldRect.bottom <= KEYBOARD_BOTTOM_FIELD_THRESHOLD;
 }
 
+function isMemoModalFocusTarget(target = document.activeElement) {
+  if (!(memoModal instanceof HTMLElement) || memoModal.hidden) return false;
+  if (!(target instanceof Node)) return false;
+  return memoModal.contains(target);
+}
+
 function ensureEditableFieldInViewport(target, { prioritizeBottomEdge = false, force = false } = {}) {
   if (!isEditableField(target)) return;
   if (activePrimaryMainTab !== "input") return;
+  if (isMemoModalFocusTarget(target)) return;
   const visualViewport = window.visualViewport;
   const viewportTop = visualViewport?.offsetTop ?? 0;
   const viewportHeight = visualViewport?.height ?? window.innerHeight ?? 0;
@@ -508,6 +519,7 @@ function setupKeyboardLayoutStability() {
     if (activePrimaryMainTab !== "input") return;
     scheduleUpdate();
     const nextTarget = event.target;
+    if (isMemoModalFocusTarget(nextTarget)) return;
     keyboardFocusScrollState.target = nextTarget;
     keyboardFocusScrollState.settledTargetY = null;
     scheduleEnsureEditableFieldInViewport(nextTarget, { prioritizeBottomEdge: true }, { force: true });
@@ -541,6 +553,7 @@ function setupKeyboardLayoutStability() {
     if (activePrimaryMainTab !== "input") return;
     const activeElement = document.activeElement;
     if (!isEditableField(activeElement)) return;
+    if (isMemoModalFocusTarget(activeElement)) return;
     scheduleEnsureEditableFieldInViewport(activeElement, { prioritizeBottomEdge: true });
   });
   visualViewport?.addEventListener("scroll", () => {
@@ -548,6 +561,7 @@ function setupKeyboardLayoutStability() {
     if (activePrimaryMainTab !== "input") return;
     const activeElement = document.activeElement;
     if (!isEditableField(activeElement)) return;
+    if (isMemoModalFocusTarget(activeElement)) return;
     scheduleEnsureEditableFieldInViewport(activeElement, { prioritizeBottomEdge: true });
   });
   updateKeyboardState();
@@ -1199,6 +1213,12 @@ function updateMemoPreviewByInputId(inputId) {
 }
 
 function closeMemoModal({ keepDraft = false } = {}) {
+  memoModalFocusState.rafIds.forEach((rafId) => window.cancelAnimationFrame(rafId));
+  memoModalFocusState.rafIds = [];
+  if (memoModalFocusState.timeoutId) {
+    window.clearTimeout(memoModalFocusState.timeoutId);
+    memoModalFocusState.timeoutId = 0;
+  }
   if (!memoModal) return;
   memoModal.hidden = true;
   document.body.classList.remove("is-memo-modal-open");
@@ -1238,10 +1258,29 @@ function openMemoModalFromTrigger(trigger) {
   memoModalInput.value = targetInput.value || "";
   memoModal.hidden = false;
   document.body.classList.add("is-memo-modal-open");
-  window.requestAnimationFrame(() => {
+  memoModalFocusState.rafIds.forEach((rafId) => window.cancelAnimationFrame(rafId));
+  memoModalFocusState.rafIds = [];
+  if (memoModalFocusState.timeoutId) {
+    window.clearTimeout(memoModalFocusState.timeoutId);
+    memoModalFocusState.timeoutId = 0;
+  }
+  const focusInput = () => {
+    if (!(memoModalInput instanceof HTMLInputElement) || memoModal.hidden) return;
     memoModalInput.focus({ preventScroll: true });
     memoModalInput.setSelectionRange(memoModalInput.value.length, memoModalInput.value.length);
+  };
+  const firstRaf = window.requestAnimationFrame(() => {
+    const secondRaf = window.requestAnimationFrame(() => {
+      focusInput();
+      memoModalFocusState.timeoutId = window.setTimeout(() => {
+        memoModalFocusState.timeoutId = 0;
+        focusInput();
+      }, 80);
+      memoModalFocusState.rafIds = [];
+    });
+    memoModalFocusState.rafIds = [secondRaf];
   });
+  memoModalFocusState.rafIds = [firstRaf];
 }
 
 function setupMemoCompactInputs() {
