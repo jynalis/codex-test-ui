@@ -1293,20 +1293,18 @@ function resolveInputRegisterTopAnchor(groupName) {
   }
 }
 
-function scrollInputRegisterTopStable(groupName) {
-  const target = resolveInputRegisterTopAnchor(groupName);
+function scrollTargetIntoTopOnce(target) {
   if (!target) return;
   ++mobileUpdateScrollToken;
   window.requestAnimationFrame(() => {
     window.requestAnimationFrame(() => {
       scrollToElementWithOffset(target, { behavior: "auto" });
-      window.setTimeout(() => {
-        window.requestAnimationFrame(() => {
-          scrollToElementWithOffset(target, { behavior: "auto" });
-        });
-      }, 80);
     });
   });
+}
+
+function scrollInputRegisterTopStable(groupName) {
+  scrollTargetIntoTopOnce(resolveInputRegisterTopAnchor(groupName));
 }
 
 function isVerticallyScrollable(element) {
@@ -1823,22 +1821,12 @@ function resetProfileFormFields() {
 
 function scrollToBasicRegisterStart() {
   const target = profileForm || document.getElementById("section-profile");
-  if (!target) return;
-  window.requestAnimationFrame(() => {
-    window.requestAnimationFrame(() => {
-      scrollToElementWithOffset(target, { behavior: "auto" });
-    });
-  });
+  scrollTargetIntoTopOnce(target);
 }
 
 function scrollToBasicRegisteredTop() {
   const target = basicRegisteredSummary || document.getElementById("input-sub-panel-basic-registered");
-  if (!target) return;
-  window.requestAnimationFrame(() => {
-    window.requestAnimationFrame(() => {
-      scrollToElementWithOffset(target, { behavior: "auto" });
-    });
-  });
+  scrollTargetIntoTopOnce(target);
 }
 
 function cancelProfileEdit() {
@@ -2523,8 +2511,7 @@ function addLifeEvent(event) {
   }
 
   resetLifeEventFormFields();
-  render();
-  closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
+  handlePostSaveCompletion({ groupName: "life" });
 }
 
 function cancelLifeEventEdit() {
@@ -5168,6 +5155,21 @@ function renderBasicRegisteredSummary(settings) {
   `;
 }
 
+function handlePostSaveCompletion({
+  groupName,
+  nextSubTab = "register",
+  target = null,
+  shouldSwitchSubTab = false,
+} = {}) {
+  closeKeyboardAndReflowInputLayout({ restoreScroll: false, forceScrollRestore: false });
+  render();
+  if (shouldSwitchSubTab && groupName) {
+    setInputSubTab(groupName, nextSubTab);
+  }
+  const scrollTarget = target || (groupName ? resolveInputRegisterTopAnchor(groupName) : null);
+  scrollTargetIntoTopOnce(scrollTarget);
+}
+
 function saveBasicProfileSettings() {
   const wasEditing = isBasicEditingMode();
   const existingSettings = loadSettings();
@@ -5188,11 +5190,14 @@ function saveBasicProfileSettings() {
   }
 
   saveSettings(settings);
-  closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
-  render();
-  if (wasEditing) return;
-  setInputSubTab("basic", "registered");
-  scrollToBasicRegisteredTop();
+  handlePostSaveCompletion({
+    groupName: "basic",
+    nextSubTab: wasEditing ? "register" : "registered",
+    target: wasEditing
+      ? (profileForm || document.getElementById("section-profile"))
+      : (basicRegisteredSummary || document.getElementById("input-sub-panel-basic-registered")),
+    shouldSwitchSubTab: !wasEditing,
+  });
 }
 
 function saveAssetFormationSettings() {
@@ -5211,11 +5216,14 @@ function saveAssetFormationSettings() {
 
   saveSettings(settings);
   resetProfileRegisterForm();
-  closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
-  render();
-  if (wasEditing) return;
-  setInputSubTab("basic", "registered");
-  scrollToBasicRegisteredTop();
+  handlePostSaveCompletion({
+    groupName: "basic",
+    nextSubTab: wasEditing ? "register" : "registered",
+    target: wasEditing
+      ? (profileForm || document.getElementById("section-profile"))
+      : (basicRegisteredSummary || document.getElementById("input-sub-panel-basic-registered")),
+    shouldSwitchSubTab: !wasEditing,
+  });
 }
 
 function render() {
@@ -5393,8 +5401,7 @@ function addTransaction(event) {
     resetTransactionFormFields({ date });
   }
 
-  render();
-  closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
+  handlePostSaveCompletion({ groupName: "monthly" });
 }
 
 function addRecurringExpense(event) {
@@ -5439,8 +5446,7 @@ function addRecurringExpense(event) {
   }
 
   resetRecurringFormFields();
-  render();
-  closeKeyboardAndReflowInputLayout({ restoreScroll: true, forceScrollRestore: true });
+  handlePostSaveCompletion({ groupName: "recurring" });
 }
 
 function cancelRecurringExpenseEdit() {
