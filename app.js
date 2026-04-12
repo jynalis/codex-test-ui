@@ -177,6 +177,8 @@ let activeCashflowSubTab = "cf";
 let activeMemoDraft = null;
 const yearSelectUIMap = new WeakMap();
 let activeYearSelectUI = null;
+const YEAR_SELECT_VIEWPORT_MARGIN_TOP = 16;
+const YEAR_SELECT_VIEWPORT_MARGIN_BOTTOM = 20;
 const activeInputSubTabs = {
   basic: "register",
   recurring: "register",
@@ -865,6 +867,40 @@ function openYearSelectMenu(selectElement) {
   if (selectedOption instanceof HTMLElement) {
     selectedOption.scrollIntoView({ block: "nearest" });
   }
+  requestAnimationFrame(() => {
+    adjustViewportForYearSelectMenu(ui);
+  });
+}
+
+function adjustViewportForYearSelectMenu(ui) {
+  if (!ui?.trigger || !ui?.menu || ui.menu.hidden) return;
+  const viewportHeight = window.visualViewport?.height || window.innerHeight;
+  const currentScrollY = window.scrollY;
+  const triggerRect = ui.trigger.getBoundingClientRect();
+  const menuRect = ui.menu.getBoundingClientRect();
+  if (viewportHeight <= 0 || triggerRect.height <= 0 || menuRect.height <= 0) return;
+
+  const viewportTop = currentScrollY;
+  const viewportBottom = viewportTop + viewportHeight;
+  const triggerTop = currentScrollY + triggerRect.top;
+  const menuBottom = currentScrollY + menuRect.bottom;
+
+  let targetScrollY = currentScrollY;
+  const overflowBottom = menuBottom + YEAR_SELECT_VIEWPORT_MARGIN_BOTTOM - viewportBottom;
+  if (overflowBottom > 0) {
+    targetScrollY += overflowBottom;
+  }
+
+  const triggerTopAfterScroll = triggerTop - targetScrollY;
+  if (triggerTopAfterScroll < YEAR_SELECT_VIEWPORT_MARGIN_TOP) {
+    targetScrollY = Math.max(0, triggerTop - YEAR_SELECT_VIEWPORT_MARGIN_TOP);
+  }
+
+  if (Math.abs(targetScrollY - currentScrollY) < 2) return;
+  window.scrollTo({
+    top: targetScrollY,
+    behavior: "smooth",
+  });
 }
 
 function syncYearSelectUI(selectElement) {

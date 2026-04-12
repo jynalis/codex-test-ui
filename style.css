@@ -624,7 +624,7 @@ header p {
 }
 
 .input-sub-switch[data-input-sub-switch="monthly"] {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr) minmax(0, 1.15fr);
   gap: 6px;
   padding: 6px;
   border-radius: 14px;
@@ -2398,7 +2398,7 @@ button.ghost {
   color: #1e3958;
   text-align: left;
   box-shadow: none;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .year-select-option:hover {
@@ -3248,8 +3248,8 @@ body.is-keyboard-open .floating-top-button {
 
   .input-sub-switch[data-input-sub-switch="monthly"] .input-sub-tab {
     min-height: 38px;
-    padding: 6px 2px;
-    font-size: 0.72rem;
+    padding: 6px 3px;
+    font-size: 0.68rem;
     letter-spacing: 0;
   }
 
