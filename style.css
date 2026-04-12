@@ -1,20 +1,20 @@
 :root {
   color-scheme: light;
   font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
-  --bg: #dbe4f3;
+  --bg: #e9f2ff;
   --card: #ffffff;
   --text: #162133;
   --muted: #556377;
   --heading-strong: #081a34;
   --label-strong: #24364d;
   --support-text: #5c6f85;
-  --income: #0ca678;
-  --expense: #c92a2a;
-  --primary: #1b365f;
-  --primary-strong: #10243f;
+  --income: #159b75;
+  --expense: #bc4a5d;
+  --primary: #2558a8;
+  --primary-strong: #173a6d;
   --border: #d6e0ec;
   --shadow-soft: 0 20px 40px rgb(15 23 42 / 12%);
-  --shadow-card: 0 12px 28px rgb(15 23 42 / 10%);
+  --shadow-card: 0 14px 30px rgb(15 23 42 / 9%);
   --ring: rgb(27 54 95 / 18%);
   --hero-bg: linear-gradient(165deg, #f5f9ff 0%, #dfefff 52%, #f7fbff 100%);
   --profile-bg: linear-gradient(180deg, #fafdff 0%, #f2f7ff 100%);
@@ -55,6 +55,28 @@ body {
     radial-gradient(circle at 100% 0%, rgb(155 181 219 / 25%) 0%, transparent 44%),
     linear-gradient(180deg, #edf2fb 0%, #e2eaf6 40%, #dbe5f3 100%);
   color: var(--text);
+}
+
+.ui-icon-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.ui-icon {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  flex: 0 0 auto;
+}
+
+.tab-label,
+.title-with-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.36em;
 }
 
 @supports (min-height: 100dvh) {
@@ -244,11 +266,11 @@ header p {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 46px;
-  border-radius: 11px;
-  border: 1px solid #a9bada;
-  background: #f8faff;
-  color: #2f4463;
+  min-height: 50px;
+  border-radius: 13px;
+  border: 1px solid #b9cae9;
+  background: linear-gradient(180deg, #fdfefe 0%, #edf4ff 100%);
+  color: #2d4f84;
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0;
@@ -279,9 +301,18 @@ header p {
 
 .primary-main-tab.is-active {
   color: #fff;
-  border-color: #2d4980;
-  background: linear-gradient(180deg, #3d5f9f 0%, #2a477c 100%);
-  box-shadow: 0 10px 18px rgb(29 53 94 / 30%);
+  border-color: #245192;
+  background: linear-gradient(180deg, #3b79cb 0%, #29579a 100%);
+  box-shadow: 0 12px 18px rgb(29 74 130 / 32%);
+}
+
+.primary-main-tab .tab-label {
+  flex-direction: column;
+  gap: 4px;
+}
+
+.primary-main-tab .ui-icon {
+  font-size: 1.08rem;
 }
 
 .primary-main-panels {
@@ -400,6 +431,12 @@ header p {
   letter-spacing: 0.01em;
   cursor: pointer;
   transition: background 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.asset-main-tab .tab-label,
+.input-main-tab .tab-label,
+.cashflow-sub-tab .tab-label {
+  gap: 0.4em;
 }
 
 .asset-main-tab.is-active {
@@ -955,6 +992,11 @@ header p {
   box-shadow: 0 6px 14px rgb(15 23 42 / 10%);
 }
 
+.section-heading h2 .ui-icon,
+.dashboard-header h2 .ui-icon {
+  font-size: 1.04em;
+}
+
 .section-tone-input .section-heading h2,
 .section-tone-input .section-header h2 {
   border-left-color: #be7c15;
@@ -1062,7 +1104,12 @@ button {
   background: linear-gradient(160deg, #1d426f 0%, #16355b 100%);
   color: #fff;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 800;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45em;
   box-shadow: 0 6px 12px rgb(15 23 42 / 16%);
   transition:
     transform 0.15s ease,
@@ -1711,7 +1758,7 @@ button.plan-card-trigger {
   border-radius: 16px;
   padding: 14px 12px;
   display: grid;
-  gap: 8px;
+  gap: 7px;
   box-shadow: 0 8px 18px rgb(15 23 42 / 10%);
   min-height: 116px;
 }
@@ -1740,10 +1787,27 @@ button.plan-card-trigger {
 }
 
 .dashboard-card span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: #365271;
   font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.04em;
+}
+
+.dashboard-card-helper {
+  color: #506783;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.dashboard-card.is-empty::after {
+  content: "まだ入力前です";
+  color: #5b718d;
+  font-size: 0.7rem;
+  font-weight: 700;
 }
 
 .dashboard-card strong {
@@ -1797,6 +1861,11 @@ button.plan-card-trigger {
   line-height: 1.15;
 }
 
+.dashboard-card-balance .dashboard-card-helper,
+.dashboard-card-future .dashboard-card-helper {
+  color: rgb(241 246 255 / 90%);
+}
+
 .dashboard-card-expense {
   background: linear-gradient(160deg, #fff5f6 0%, #ffe9eb 100%);
   border-color: #e6b8c0;
@@ -1811,11 +1880,11 @@ button.plan-card-trigger {
 }
 
 .dashboard-chart-card {
-  margin-top: 14px;
+  margin-top: 16px;
   border: 1px solid #9db6d1;
   background: linear-gradient(170deg, #f9fcff 0%, #ebf2fb 100%);
   border-radius: 14px;
-  padding: 12px 12px 10px;
+  padding: 14px 12px 12px;
   display: grid;
   gap: 10px;
 }
@@ -1826,6 +1895,9 @@ button.plan-card-trigger {
 }
 
 .dashboard-chart-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   color: #11365e;
   font-size: 0.92rem;
   font-weight: 800;
@@ -2234,7 +2306,8 @@ button.plan-card-trigger {
 button.ghost {
   border: 1px solid #b5c7d9;
   color: #295377;
-  background: #fff;
+  background: linear-gradient(180deg, #fff 0%, #edf4ff 100%);
+  box-shadow: 0 4px 10px rgb(49 84 126 / 12%);
 }
 
 .recurring-child-accordions {
@@ -2657,6 +2730,10 @@ button.ghost {
 .chart-empty {
   color: var(--muted);
   font-size: 0.9rem;
+  border: 1px dashed #b8cce3;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fafdff 0%, #f1f7ff 100%);
+  padding: 12px;
 }
 
 .asset-composition h3 {
@@ -3000,6 +3077,14 @@ body.is-keyboard-open .floating-top-button {
     font-size: 0.67rem;
     border-radius: 10px;
     word-break: keep-all;
+  }
+
+  .primary-main-tab .tab-label {
+    gap: 2px;
+  }
+
+  .primary-main-tab .ui-icon {
+    font-size: 0.95rem;
   }
 
   .accordion-section {

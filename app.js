@@ -3426,11 +3426,25 @@ function renderDashboard({
   manualTransactionCount,
   monthCount,
 }) {
+  const assumptions = loadCashflowAssumptions();
+  const age65AssetFormationBalance = calculateAssetFormationBalanceAtAge({
+    settings,
+    transactions,
+    recurringExpenses,
+    lifeEvents,
+    assumptions,
+    targetAge: TARGET_AGE_SECONDARY,
+  });
+  const dashboardCardState = [
+    { selector: ".dashboard-card-balance", value: summary.endingBalance },
+    { selector: ".dashboard-card-future", value: age65AssetFormationBalance },
+    { selector: ".dashboard-card-income", value: summary.income },
+    { selector: ".dashboard-card-expense", value: summary.expense },
+  ];
   const normalizedMonthlySavingTotal = Math.max(Number(chipMonthlySavingTotal) || 0, 0);
   if (assetGrowthMonthlyChip) {
     assetGrowthMonthlyChip.textContent = `毎月の積立額: ¥${numberWithComma.format(normalizedMonthlySavingTotal)}`;
   }
-  const assumptions = loadCashflowAssumptions();
   const cashflowRows = buildCashflowRowsUntilAge({
     settings,
     transactions,
@@ -3442,14 +3456,14 @@ function renderDashboard({
   dashboardIncomeTotal.textContent = yen.format(summary.income);
   dashboardExpenseTotal.textContent = yen.format(summary.expense);
   dashboardBalanceTotal.textContent = yen.format(summary.endingBalance);
-  const age65AssetFormationBalance = calculateAssetFormationBalanceAtAge({
-    settings,
-    transactions,
-    recurringExpenses,
-    lifeEvents,
-    assumptions,
-    targetAge: TARGET_AGE_SECONDARY,
-  });
+  const cardRoot = document.getElementById("section-home");
+  if (cardRoot) {
+    dashboardCardState.forEach(({ selector, value }) => {
+      const card = cardRoot.querySelector(selector);
+      if (!card) return;
+      card.classList.toggle("is-empty", Number(value) === 0);
+    });
+  }
   if (dashboardAge65Total) {
     dashboardAge65Total.textContent = yen.format(age65AssetFormationBalance);
   }
