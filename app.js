@@ -5270,10 +5270,6 @@ function renderBasicRegisteredSummary(settings) {
   if (!basicRegisteredSummary) return;
   const birthLabel = settings?.birthDate || "未設定";
   const entryStartMonthLabel = settings?.entryStartMonth || "未設定";
-  const planCount = Array.isArray(settings?.plans) ? settings.plans.length : 0;
-  if (basicRegisteredPlanCount) {
-    basicRegisteredPlanCount.textContent = `資産形成プラン ${planCount}件`;
-  }
   basicRegisteredSummary.innerHTML = `
     <section class="registered-summary-card">
       <h3>基本情報の登録状況</h3>
@@ -5281,7 +5277,7 @@ function renderBasicRegisteredSummary(settings) {
         <div><dt>記入開始月</dt><dd>${entryStartMonthLabel}</dd></div>
         <div><dt>生年月日</dt><dd>${birthLabel}</dd></div>
       </dl>
-      <p class="registered-summary-note">登録済データの確認・修正・削除は、この「登録済」画面で行えます。</p>
+      <p class="registered-summary-note">資産形成プランの確認・修正・保存は「資産形成」タブで行えます。</p>
     </section>
   `;
 }
