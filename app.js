@@ -3424,7 +3424,7 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "endingBal
     rect.setAttribute("width", String(barWidth));
     rect.setAttribute("height", String(barHeight));
     rect.setAttribute("rx", "4");
-    rect.setAttribute("class", "dashboard-bar-chart-bar");
+    rect.setAttribute("class", `dashboard-bar-chart-bar${amount < 0 ? " is-negative" : ""}`);
     rect.setAttribute("tabindex", "0");
     rect.setAttribute("role", "button");
     rect.setAttribute("aria-label", `${point.age}歳 ${numberWithComma.format(amount)}円`);

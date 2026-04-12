@@ -1953,6 +1953,14 @@ button.plan-card-trigger {
   fill: #3573b7;
 }
 
+.dashboard-bar-chart-bar.is-negative {
+  fill: #d74a4a;
+}
+
+.dashboard-bar-chart-bar.is-negative:active {
+  fill: #bf3f3f;
+}
+
 .dashboard-bar-chart-press-tooltip {
   position: absolute;
   left: 0;
