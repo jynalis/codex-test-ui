@@ -109,6 +109,7 @@ const dashboardAssetGraphTabs = Array.from(document.querySelectorAll("[data-dash
 const dashboardAssetGraphPanels = Array.from(document.querySelectorAll("[data-dashboard-asset-graph-panel]"));
 const dashboardCurrentAssetForecast = document.getElementById("dashboard-current-asset-forecast");
 const dashboardAge65AssetForecast = document.getElementById("dashboard-age65-asset-forecast");
+const dashboardWithdrawAssetForecast = document.getElementById("dashboard-withdraw-asset-forecast");
 const dashboardAssetFormationChart = document.getElementById("dashboard-asset-formation-chart");
 const assetGrowthMonthlyChip = document.getElementById("asset-growth-monthly-chip");
 const assetGrowthMetricToggle = document.getElementById("asset-growth-metric-toggle");
@@ -4609,11 +4610,12 @@ function buildAssetOutlookAtAge({
 }
 
 function renderAssetForecast(settings) {
-  if (!assetForecast || !assetWithdrawForecast || !dashboardCurrentAssetForecast || !dashboardAge65AssetForecast) return;
+  if (!assetForecast || !assetWithdrawForecast || !dashboardCurrentAssetForecast || !dashboardAge65AssetForecast || !dashboardWithdrawAssetForecast) return;
   const dashboardCurrentAssetContainer = document.createElement("div");
   assetForecast.innerHTML = "";
   dashboardCurrentAssetForecast.innerHTML = "";
   dashboardAge65AssetForecast.innerHTML = "";
+  dashboardWithdrawAssetForecast.innerHTML = "";
   assetWithdrawForecast.innerHTML = "";
   if (!settings.birthDate || settings.plans.length === 0) {
     const emptyMessage = '<p class="chart-empty">生年月日と積立設定を保存すると、現時点と65歳時点の資産試算が表示されます。</p>';
@@ -4621,6 +4623,7 @@ function renderAssetForecast(settings) {
     dashboardCurrentAssetContainer.innerHTML = emptyMessage;
     dashboardCurrentAssetForecast.innerHTML = emptyMessage;
     dashboardAge65AssetForecast.innerHTML = emptyMessage;
+    dashboardWithdrawAssetForecast.innerHTML = emptyMessage;
     assetWithdrawForecast.innerHTML = emptyMessage;
     return;
   }
@@ -4726,6 +4729,7 @@ function renderAssetForecast(settings) {
     : `<p class="chart-empty">${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}の契約はありません。</p>`}
     </section>
   `;
+  dashboardWithdrawAssetForecast.innerHTML = assetWithdrawForecast.innerHTML;
 
   const chartSection = dashboardCurrentAssetContainer.querySelector(".asset-composition");
   if (!chartSection) {
