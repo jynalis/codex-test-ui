@@ -2328,7 +2328,7 @@ button.ghost {
 
 .shared-view-filters[data-shared-view-filter="dashboard"] {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 0.58fr) minmax(0, 1fr);
   gap: 8px;
 }
 
@@ -3096,8 +3096,8 @@ body.is-keyboard-open .floating-top-button {
   }
 
   .shared-view-filters[data-shared-view-filter="dashboard"] {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
+    grid-template-columns: minmax(0, 0.58fr) minmax(0, 1fr);
+    gap: 6px;
   }
 
   .shared-view-filters[data-shared-view-filter="dashboard"] select,

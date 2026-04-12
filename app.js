@@ -810,6 +810,13 @@ function resolveViewMonthFromState(state) {
   return formatMonth(year, month - 1);
 }
 
+function clampMonthToEntryStart(month, settings, transactions) {
+  if (!parseMonth(month)) return "";
+  const entryStartMonth = resolveEntryStartMonth(settings, transactions);
+  if (!parseMonth(entryStartMonth)) return month;
+  return compareMonth(month, entryStartMonth) < 0 ? entryStartMonth : month;
+}
+
 function resolveSharedYearRange(settings, transactions) {
   const currentYear = Number(todayISO().slice(0, 4));
   const resolvedEntryStartMonth = resolveEntryStartMonth(settings, transactions);
@@ -5341,8 +5348,23 @@ function render() {
     year: dashboardViewFilterControls.year?.value || sharedYearMonthState.year,
     month: dashboardViewFilterControls.month?.value || sharedYearMonthState.month,
   };
+  const resolvedSharedMonth = resolveViewMonthFromState(sharedYearMonthState);
+  const boundedSharedMonth = clampMonthToEntryStart(resolvedSharedMonth, settings, transactions);
+  if (parseMonth(boundedSharedMonth) && boundedSharedMonth !== resolvedSharedMonth) {
+    const boundedParsed = parseMonth(boundedSharedMonth);
+    sharedYearMonthState = {
+      year: String(boundedParsed.year),
+      month: String(boundedParsed.monthIndex + 1).padStart(2, "0"),
+    };
+    if (dashboardViewFilterControls.year) dashboardViewFilterControls.year.value = sharedYearMonthState.year;
+    if (dashboardViewFilterControls.month) dashboardViewFilterControls.month.value = sharedYearMonthState.month;
+    if (expenseViewFilterControls.year) expenseViewFilterControls.year.value = sharedYearMonthState.year;
+    if (expenseViewFilterControls.month) expenseViewFilterControls.month.value = sharedYearMonthState.month;
+    if (historyViewFilterControls.year) historyViewFilterControls.year.value = sharedYearMonthState.year;
+    if (historyViewFilterControls.month) historyViewFilterControls.month.value = sharedYearMonthState.month;
+  }
   syncViewFilterOptions(historyViewFilterControls, sharedYearMonthState, sharedYearOptions);
-  syncDashboardYearMonthPicker();
+  syncDashboardYearMonthPicker(settings, transactions);
   const currentHistoryMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
   const currentDashboardMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
   const currentExpenseMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
@@ -6164,12 +6186,18 @@ function setupDashboardCardNavigation() {
   });
 }
 
-function syncDashboardYearMonthPicker() {
+function syncDashboardYearMonthPicker(settings, transactions) {
   if (!dashboardYearMonthPicker) return;
+  const entryStartMonth = resolveEntryStartMonth(settings, transactions);
+  if (parseMonth(entryStartMonth)) {
+    dashboardYearMonthPicker.min = entryStartMonth;
+  } else {
+    dashboardYearMonthPicker.removeAttribute("min");
+  }
   const year = dashboardViewFilterControls.year?.value || sharedYearMonthState.year;
   const month = dashboardViewFilterControls.month?.value || sharedYearMonthState.month;
-  if (/^\d{4}$/.test(year) && /^\d{2}$/.test(month)) {
-    dashboardYearMonthPicker.value = `${year}-${month}`;
+  if (/^\d{4}$/.test(year) && /^\d{2}$/.test(month) && parseMonth(`${year}-${month}`)) {
+    dashboardYearMonthPicker.value = clampMonthToEntryStart(`${year}-${month}`, settings, transactions);
   }
   const isAverageMode = dashboardViewFilterControls.mode?.value === "average";
   dashboardYearMonthPicker.disabled = Boolean(isAverageMode);
@@ -6177,7 +6205,13 @@ function syncDashboardYearMonthPicker() {
 
 function handleDashboardYearMonthPickerChange() {
   if (!dashboardYearMonthPicker) return;
-  const parsed = parseMonth(dashboardYearMonthPicker.value);
+  const settings = loadSettings();
+  const transactions = loadTransactions();
+  const boundedMonth = clampMonthToEntryStart(dashboardYearMonthPicker.value, settings, transactions);
+  if (boundedMonth) {
+    dashboardYearMonthPicker.value = boundedMonth;
+  }
+  const parsed = parseMonth(boundedMonth);
   if (!parsed) return;
   sharedYearMonthState = {
     year: String(parsed.year),
