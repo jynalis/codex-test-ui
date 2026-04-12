@@ -2326,6 +2326,25 @@ button.ghost {
   min-width: 0;
 }
 
+.year-month-wheel-picker {
+  flex: 1 1 170px;
+  min-width: 0;
+  appearance: auto;
+  -webkit-appearance: auto;
+}
+
+.legacy-year-month-select {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 .history-filters {
   margin-bottom: 8px;
 }
@@ -3063,12 +3082,14 @@ body.is-keyboard-open .floating-top-button {
   .shared-view-filters[data-shared-view-filter="dashboard"],
   .shared-view-filters[data-shared-view-filter="expense"] {
     display: grid;
-    grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.14fr) minmax(0, 0.92fr);
+    grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.2fr);
     gap: 6px;
   }
 
   .shared-view-filters[data-shared-view-filter="dashboard"] select,
-  .shared-view-filters[data-shared-view-filter="expense"] select {
+  .shared-view-filters[data-shared-view-filter="dashboard"] .year-month-wheel-picker,
+  .shared-view-filters[data-shared-view-filter="expense"] select,
+  .shared-view-filters[data-shared-view-filter="expense"] .year-month-wheel-picker {
     width: 100%;
     min-width: 0;
   }
@@ -3177,7 +3198,8 @@ body.is-keyboard-open .floating-top-button {
     gap: 6px;
   }
 
-  .monthly-subpanel-shell .shared-view-filters select {
+  .monthly-subpanel-shell .shared-view-filters select,
+  .monthly-subpanel-shell .shared-view-filters .year-month-wheel-picker {
     min-height: 40px;
     padding-inline: 9px;
   }
