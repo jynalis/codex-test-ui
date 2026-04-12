@@ -4610,13 +4610,13 @@ function buildAssetOutlookAtAge({
 }
 
 function renderAssetForecast(settings) {
-  if (!assetForecast || !assetWithdrawForecast || !dashboardCurrentAssetForecast || !dashboardAge65AssetForecast || !dashboardWithdrawAssetForecast) return;
+  if (!assetForecast || !dashboardCurrentAssetForecast || !dashboardAge65AssetForecast || !dashboardWithdrawAssetForecast) return;
   const dashboardCurrentAssetContainer = document.createElement("div");
   assetForecast.innerHTML = "";
   dashboardCurrentAssetForecast.innerHTML = "";
   dashboardAge65AssetForecast.innerHTML = "";
   dashboardWithdrawAssetForecast.innerHTML = "";
-  assetWithdrawForecast.innerHTML = "";
+  if (assetWithdrawForecast) assetWithdrawForecast.innerHTML = "";
   if (!settings.birthDate || settings.plans.length === 0) {
     const emptyMessage = '<p class="chart-empty">生年月日と積立設定を保存すると、現時点と65歳時点の資産試算が表示されます。</p>';
     assetForecast.innerHTML = emptyMessage;
@@ -4624,7 +4624,7 @@ function renderAssetForecast(settings) {
     dashboardCurrentAssetForecast.innerHTML = emptyMessage;
     dashboardAge65AssetForecast.innerHTML = emptyMessage;
     dashboardWithdrawAssetForecast.innerHTML = emptyMessage;
-    assetWithdrawForecast.innerHTML = emptyMessage;
+    if (assetWithdrawForecast) assetWithdrawForecast.innerHTML = emptyMessage;
     return;
   }
 
@@ -4720,7 +4720,7 @@ function renderAssetForecast(settings) {
       <p class="section-description">現在入力されている資産形成の契約（積立・一括入金）の実績をもとに算出しています（基準日: ${currentAssetBaseDate}）。</p>
     </section>
   `;
-  assetWithdrawForecast.innerHTML = `
+  const withdrawForecastHtml = `
     <section class="asset-withdraw-layout asset-outlook">
       <p class="section-description">取崩し予定を設定した契約のみ表示します。取崩年月の変更は「基本情報・資産形成設定」で行えます。</p>
       <h4 class="asset-withdraw-heading">${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}</h4>
@@ -4729,7 +4729,10 @@ function renderAssetForecast(settings) {
     : `<p class="chart-empty">${createAssetOutlookWithdrawTitle(TARGET_AGE_SECONDARY)}の契約はありません。</p>`}
     </section>
   `;
-  dashboardWithdrawAssetForecast.innerHTML = assetWithdrawForecast.innerHTML;
+  dashboardWithdrawAssetForecast.innerHTML = withdrawForecastHtml;
+  if (assetWithdrawForecast) {
+    assetWithdrawForecast.innerHTML = withdrawForecastHtml;
+  }
 
   const chartSection = dashboardCurrentAssetContainer.querySelector(".asset-composition");
   if (!chartSection) {
