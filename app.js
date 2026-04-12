@@ -47,12 +47,18 @@ const birthDateInput = document.getElementById("birth-date");
 const profileBasicSaveButton = document.getElementById("profile-basic-save-button");
 const profileSubmitButton = document.getElementById("profile-submit-button") || profileForm?.querySelector('button[type="submit"]');
 const profileCancelButton = document.getElementById("profile-cancel-button");
+const assetProfileSubmitButton = document.getElementById("asset-profile-submit-button");
+const assetProfileCancelButton = document.getElementById("asset-profile-cancel-button");
 const profileBackupExportButton = document.getElementById("profile-backup-export-button");
 const profileBackupImportButton = document.getElementById("profile-backup-import-button");
 const profileBackupFileInput = document.getElementById("profile-backup-file-input");
 const basicEditStatus = document.getElementById("basic-edit-status");
+const assetBasicEditStatus = document.getElementById("asset-basic-edit-status");
 const planList = document.getElementById("plan-list");
 const planEditorList = document.getElementById("plan-editor-list");
+const assetPlanEditorList = document.getElementById("asset-plan-editor-list");
+const planEditorLists = [planEditorList, assetPlanEditorList].filter(Boolean);
+const profileEditStatusNodes = [basicEditStatus, assetBasicEditStatus].filter(Boolean);
 const basicRegisteredSummary = document.getElementById("basic-registered-summary");
 const basicRegisteredPlanCount = document.getElementById("basic-registered-plan-count");
 const assetForecast = document.getElementById("asset-forecast");
@@ -1895,11 +1901,17 @@ function setProfileFormMode(isEditing) {
   if (profileSubmitButton) {
     profileSubmitButton.textContent = isEditing ? "更新" : "設定を保存";
   }
-  if (basicEditStatus) {
-    basicEditStatus.hidden = !isEditing;
+  if (assetProfileSubmitButton) {
+    assetProfileSubmitButton.textContent = isEditing ? "更新" : "設定を保存";
   }
+  profileEditStatusNodes.forEach((node) => {
+    node.hidden = !isEditing;
+  });
   if (profileCancelButton) {
     profileCancelButton.hidden = !isEditing;
+  }
+  if (assetProfileCancelButton) {
+    assetProfileCancelButton.hidden = !isEditing;
   }
 }
 
@@ -1924,10 +1936,10 @@ function resetProfileRegisterForm() {
   }
   entryStartMonthInput.value = initialState.entryStartMonth;
   birthDateInput.value = initialState.birthDate;
-  if (planEditorList) {
-    planEditorList.innerHTML = "";
-    renderPlans(loadSettings());
-  }
+  planEditorLists.forEach((editorList) => {
+    editorList.innerHTML = "";
+  });
+  renderPlans(loadSettings());
   setProfileFormMode(false);
 }
 
@@ -5127,19 +5139,20 @@ function formatPlanAnnualReturn(value) {
 }
 
 function startPlanEdit(planId) {
-  if (!planId || !planEditorList) return;
+  if (!planId || planEditorLists.length === 0) return;
   const settings = loadSettings();
   const targetPlan = Array.isArray(settings?.plans) ? settings.plans.find((plan) => plan.id === planId) : null;
   if (!targetPlan) return;
   basicEditingPlanId = targetPlan.id;
-  planEditorList.innerHTML = "";
-  const targetBlock = createPlanBlock(targetPlan);
-  planEditorList.appendChild(targetBlock);
+  planEditorLists.forEach((editorList) => {
+    editorList.innerHTML = "";
+    editorList.appendChild(createPlanBlock(targetPlan));
+  });
   setProfileFormMode(true);
   setPrimaryMainTab("input");
   setInputMainTab("basic");
   setInputSubTab("basic", "register", { keepBasicEditingState: true });
-  scrollToEditFormStart(basicEditStatus || profileForm, planEditorList);
+  scrollToEditFormStart(basicEditStatus || profileForm, planEditorList || assetPlanEditorList);
 }
 
 function deletePlanById(planId) {
@@ -5210,9 +5223,9 @@ function renderRegisteredPlans(settings) {
   });
 }
 
-function collectPlansFromForm() {
-  if (!planEditorList) return [];
-  return Array.from(planEditorList.querySelectorAll(".plan-item"))
+function collectPlansFromForm(editorList = planEditorList || assetPlanEditorList) {
+  if (!editorList) return [];
+  return Array.from(editorList.querySelectorAll(".plan-item"))
     .map((block) => {
       const lumpSums = Array.from(block.querySelectorAll(".lump-list .history-row"))
         .map((row) => ({
@@ -5246,9 +5259,11 @@ function collectPlansFromForm() {
 }
 
 function renderPlans(settings) {
-  if (!planEditorList) return;
-  if (planEditorList.querySelector(".plan-item")) return;
-  planEditorList.replaceChildren(createPlanBlock());
+  if (planEditorLists.length === 0) return;
+  planEditorLists.forEach((editorList) => {
+    if (editorList.querySelector(".plan-item")) return;
+    editorList.replaceChildren(createPlanBlock());
+  });
 }
 
 function renderBasicRegisteredSummary(settings) {
@@ -5313,11 +5328,11 @@ function saveBasicProfileSettings() {
   });
 }
 
-function saveAssetFormationSettings() {
+function saveAssetFormationSettings(editorList = planEditorList || assetPlanEditorList) {
   const wasEditing = isBasicEditingMode();
   const existingSettings = loadSettings();
   const existingPlans = Array.isArray(existingSettings?.plans) ? existingSettings.plans : [];
-  const editedPlans = collectPlansFromForm();
+  const editedPlans = collectPlansFromForm(editorList);
   const editedPlanIds = new Set(editedPlans.map((plan) => plan.id));
   const untouchedPlans = existingPlans.filter((plan) => !editedPlanIds.has(plan.id));
   const settings = {
@@ -6267,8 +6282,10 @@ function init() {
 
   profileForm.addEventListener("submit", (event) => event.preventDefault());
   profileBasicSaveButton?.addEventListener("click", saveBasicProfileSettings);
-  profileSubmitButton?.addEventListener("click", saveAssetFormationSettings);
+  profileSubmitButton?.addEventListener("click", () => saveAssetFormationSettings(planEditorList || assetPlanEditorList));
   profileCancelButton?.addEventListener("click", cancelProfileEdit);
+  assetProfileSubmitButton?.addEventListener("click", () => saveAssetFormationSettings(assetPlanEditorList || planEditorList));
+  assetProfileCancelButton?.addEventListener("click", cancelProfileEdit);
   profileBackupExportButton?.addEventListener("click", downloadBackupFile);
   profileBackupImportButton?.addEventListener("click", () => profileBackupFileInput?.click());
   profileBackupFileInput?.addEventListener("change", (event) => {
