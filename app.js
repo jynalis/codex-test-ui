@@ -809,61 +809,98 @@ function resolveViewMonthFromState(state) {
   return formatMonth(year, month - 1);
 }
 
-function resolveSharedYearRange(settings, transactions) {
-  const currentYear = Number(todayISO().slice(0, 4));
+function resolveSharedViewMonthBounds(settings, transactions, options = {}) {
   const resolvedEntryStartMonth = resolveEntryStartMonth(settings, transactions);
-  const parsedEntryStartMonth = parseMonth(resolvedEntryStartMonth);
-  const startYear = parsedEntryStartMonth?.year ?? currentYear;
-
-  const simulationEndYear = resolveRetirementReferenceYear(settings?.birthDate);
-  const fallbackEndYear = Math.max(startYear + 40, currentYear + 20);
-  const endYear = Number.isInteger(simulationEndYear)
-    ? Math.max(simulationEndYear, startYear)
-    : fallbackEndYear;
-
-  return { startYear, endYear };
+  const fallbackMaxMonth = getLatestMonthFromTransactions(transactions) || todayISO().slice(0, 7);
+  const requestedMaxMonth = parseMonth(options?.maxMonth) ? options.maxMonth : fallbackMaxMonth;
+  const minMonth = parseMonth(resolvedEntryStartMonth) ? resolvedEntryStartMonth : todayISO().slice(0, 7);
+  const maxMonth = compareMonth(requestedMaxMonth, minMonth) < 0 ? minMonth : requestedMaxMonth;
+  const parsedMin = parseMonth(minMonth);
+  const parsedMax = parseMonth(maxMonth);
+  return {
+    minMonth,
+    maxMonth,
+    minYear: parsedMin?.year ?? Number(todayISO().slice(0, 4)),
+    maxYear: parsedMax?.year ?? Number(todayISO().slice(0, 4)),
+    minMonthIndex: parsedMin?.monthIndex ?? 0,
+    maxMonthIndex: parsedMax?.monthIndex ?? 11,
+  };
 }
 
-function buildSharedYearOptions(settings, transactions) {
-  const { startYear, endYear } = resolveSharedYearRange(settings, transactions);
+function buildYearOptionsForBounds(bounds, options = {}) {
   const years = [];
-  for (let year = endYear; year >= startYear; year -= 1) {
+  if (!Number.isInteger(bounds?.minYear) || !Number.isInteger(bounds?.maxYear)) return years;
+  const { prioritizeCurrentYear = false } = options;
+  for (let year = bounds.maxYear; year >= bounds.minYear; year -= 1) {
     years.push(year);
   }
-  return years;
+  if (!prioritizeCurrentYear) return years;
+  const currentYear = Number(todayISO().slice(0, 4));
+  if (!years.includes(currentYear)) return years;
+  return [currentYear, ...years.filter((year) => year !== currentYear)];
 }
 
-function syncViewFilterOptions(controls, state, availableYears, options = {}) {
+function buildMonthOptionsForYear(year, bounds) {
+  if (!Number.isInteger(year)) return [];
+  let startMonth = 1;
+  let endMonth = 12;
+  if (year === bounds.minYear) {
+    startMonth = Math.max(startMonth, (bounds.minMonthIndex ?? 0) + 1);
+  }
+  if (year === bounds.maxYear) {
+    endMonth = Math.min(endMonth, (bounds.maxMonthIndex ?? 11) + 1);
+  }
+  if (startMonth > endMonth) return [];
+  return Array.from({ length: endMonth - startMonth + 1 }, (_, index) => startMonth + index);
+}
+
+function clampYearMonthToBounds(state, bounds) {
+  const fallbackMonth = bounds.maxMonth || bounds.minMonth || todayISO().slice(0, 7);
+  const selectedMonth = resolveViewMonthFromState(state) || fallbackMonth;
+  const clampedMonth = compareMonth(selectedMonth, bounds.minMonth) < 0
+    ? bounds.minMonth
+    : compareMonth(selectedMonth, bounds.maxMonth) > 0
+      ? bounds.maxMonth
+      : selectedMonth;
+  const parsed = parseMonth(clampedMonth) || parseMonth(fallbackMonth);
+  return {
+    year: String(parsed?.year ?? Number(todayISO().slice(0, 4))),
+    month: String((parsed?.monthIndex ?? 0) + 1).padStart(2, "0"),
+  };
+}
+
+function syncViewFilterOptions(controls, state, bounds, options = {}) {
   if (!controls?.year || !controls.month) return;
-  const { includeAverageMode = false } = options;
-  const yearSet = new Set(Array.isArray(availableYears) ? availableYears.filter(Number.isInteger) : []);
+  const { includeAverageMode = false, prioritizeCurrentYear = false } = options;
+  const normalized = clampYearMonthToBounds(state, bounds);
+  state.year = normalized.year;
+  state.month = normalized.month;
+  const years = buildYearOptionsForBounds(bounds, { prioritizeCurrentYear });
   const selectedYear = Number(state.year);
-  if (Number.isInteger(selectedYear)) {
-    yearSet.add(selectedYear);
-  }
-  if (yearSet.size === 0) {
-    yearSet.add(Number(state.year) || Number(todayISO().slice(0, 4)));
-  }
-  const years = Array.from(yearSet).sort((a, b) => b - a);
-  if (!Number.isInteger(selectedYear)) {
-    state.year = String(years[0]);
-  }
-  if (!/^\d{2}$/.test(state.month)) {
-    state.month = todayISO().slice(5, 7);
-  }
+  if (years.length === 0) return;
 
   if (controls.mode) {
     controls.mode.value = includeAverageMode && state.averageMode === "average" ? "average" : "month";
   }
 
   controls.year.innerHTML = years.map((year) => `<option value="${year}">${year}年</option>`).join("");
-  controls.year.value = state.year;
+  controls.year.value = years.includes(selectedYear) ? state.year : String(years[0]);
+  if (controls.year.value !== state.year) {
+    state.year = controls.year.value;
+  }
 
-  controls.month.innerHTML = Array.from({ length: 12 }, (_, index) => {
-    const value = String(index + 1).padStart(2, "0");
-    return `<option value="${value}">${index + 1}月</option>`;
+  const monthCandidates = buildMonthOptionsForYear(Number(state.year), bounds);
+  controls.month.innerHTML = monthCandidates.map((month) => {
+    const value = String(month).padStart(2, "0");
+    return `<option value="${value}">${month}月</option>`;
   }).join("");
-  controls.month.value = state.month;
+  const hasSelectedMonth = monthCandidates.includes(Number(state.month));
+  controls.month.value = hasSelectedMonth
+    ? state.month
+    : String(monthCandidates[0] || 1).padStart(2, "0");
+  if (controls.month.value !== state.month) {
+    state.month = controls.month.value;
+  }
 
   const isAverage = includeAverageMode && state.averageMode === "average";
   controls.year.disabled = isAverage;
@@ -5322,25 +5359,25 @@ function render() {
   const assumptions = loadCashflowAssumptions();
   const cashflowIncomeSettings = loadCashflowIncomeSettings();
   const cashflowExpenseSettings = loadCashflowExpenseSettings();
-  const sharedYearOptions = buildSharedYearOptions(settings, transactions);
-  syncViewFilterOptions(historyViewFilterControls, sharedYearMonthState, sharedYearOptions);
+  const sharedViewMonthBounds = resolveSharedViewMonthBounds(settings, transactions);
+  syncViewFilterOptions(historyViewFilterControls, sharedYearMonthState, sharedViewMonthBounds);
   syncViewFilterOptions(
     dashboardViewFilterControls,
     { ...sharedYearMonthState, averageMode: sharedAverageViewState.averageMode },
-    sharedYearOptions,
-    { includeAverageMode: true }
+    sharedViewMonthBounds,
+    { includeAverageMode: true, prioritizeCurrentYear: true }
   );
   syncViewFilterOptions(
     expenseViewFilterControls,
     { ...sharedYearMonthState, averageMode: sharedAverageViewState.averageMode },
-    sharedYearOptions,
+    sharedViewMonthBounds,
     { includeAverageMode: true }
   );
   sharedYearMonthState = {
     year: dashboardViewFilterControls.year?.value || sharedYearMonthState.year,
     month: dashboardViewFilterControls.month?.value || sharedYearMonthState.month,
   };
-  syncViewFilterOptions(historyViewFilterControls, sharedYearMonthState, sharedYearOptions);
+  syncViewFilterOptions(historyViewFilterControls, sharedYearMonthState, sharedViewMonthBounds);
   const currentHistoryMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
   const currentDashboardMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
   const currentExpenseMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
