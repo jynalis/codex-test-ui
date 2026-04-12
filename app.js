@@ -62,7 +62,6 @@ const profileEditStatusNodes = [basicEditStatus, assetBasicEditStatus].filter(Bo
 const basicRegisteredSummary = document.getElementById("basic-registered-summary");
 const basicRegisteredPlanCount = document.getElementById("basic-registered-plan-count");
 const assetForecast = document.getElementById("asset-forecast");
-const assetCurrentForecast = document.getElementById("asset-current-forecast");
 const assetWithdrawForecast = document.getElementById("asset-withdraw-forecast");
 const recurringForm = document.getElementById("recurring-form");
 const recurringCategoryInput = document.getElementById("recurring-category");
@@ -4610,16 +4609,16 @@ function buildAssetOutlookAtAge({
 }
 
 function renderAssetForecast(settings) {
-  if (!assetForecast || !assetCurrentForecast || !assetWithdrawForecast || !dashboardCurrentAssetForecast || !dashboardAge65AssetForecast) return;
+  if (!assetForecast || !assetWithdrawForecast || !dashboardCurrentAssetForecast || !dashboardAge65AssetForecast) return;
+  const dashboardCurrentAssetContainer = document.createElement("div");
   assetForecast.innerHTML = "";
-  assetCurrentForecast.innerHTML = "";
   dashboardCurrentAssetForecast.innerHTML = "";
   dashboardAge65AssetForecast.innerHTML = "";
   assetWithdrawForecast.innerHTML = "";
   if (!settings.birthDate || settings.plans.length === 0) {
     const emptyMessage = '<p class="chart-empty">生年月日と積立設定を保存すると、現時点と65歳時点の資産試算が表示されます。</p>';
     assetForecast.innerHTML = emptyMessage;
-    assetCurrentForecast.innerHTML = emptyMessage;
+    dashboardCurrentAssetContainer.innerHTML = emptyMessage;
     dashboardCurrentAssetForecast.innerHTML = emptyMessage;
     dashboardAge65AssetForecast.innerHTML = emptyMessage;
     assetWithdrawForecast.innerHTML = emptyMessage;
@@ -4712,7 +4711,7 @@ function renderAssetForecast(settings) {
     </section>
   `;
 
-  assetCurrentForecast.innerHTML = `
+  dashboardCurrentAssetContainer.innerHTML = `
     <section class="chart asset-composition">
       <h4>現状資産の構成比</h4>
       <p class="section-description">現在入力されている資産形成の契約（積立・一括入金）の実績をもとに算出しています（基準日: ${currentAssetBaseDate}）。</p>
@@ -4728,7 +4727,7 @@ function renderAssetForecast(settings) {
     </section>
   `;
 
-  const chartSection = assetCurrentForecast.querySelector(".asset-composition");
+  const chartSection = dashboardCurrentAssetContainer.querySelector(".asset-composition");
   if (!chartSection) {
     return;
   }
@@ -4742,10 +4741,9 @@ function renderAssetForecast(settings) {
     empty.className = "chart-empty";
     empty.textContent = "データがありません";
     chartSection.appendChild(empty);
-    dashboardCurrentAssetForecast.innerHTML = assetCurrentForecast.innerHTML;
+    dashboardCurrentAssetForecast.innerHTML = dashboardCurrentAssetContainer.innerHTML;
     dashboardAge65AssetForecast.innerHTML = assetForecast.innerHTML;
     assetForecast.innerHTML = "";
-    assetCurrentForecast.innerHTML = "";
     return;
   }
 
@@ -4770,10 +4768,9 @@ function renderAssetForecast(settings) {
     empty.textContent = `${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の評価対象となる契約はありません。`;
     const typeHeading = formationChartSection.querySelector(".asset-type-breakdown-heading");
     typeHeading?.insertAdjacentElement("beforebegin", empty);
-    dashboardCurrentAssetForecast.innerHTML = assetCurrentForecast.innerHTML;
+    dashboardCurrentAssetForecast.innerHTML = dashboardCurrentAssetContainer.innerHTML;
     dashboardAge65AssetForecast.innerHTML = assetForecast.innerHTML;
     assetForecast.innerHTML = "";
-    assetCurrentForecast.innerHTML = "";
     return;
   }
 
@@ -4794,13 +4791,12 @@ function renderAssetForecast(settings) {
   }
 
   if (dashboardCurrentAssetForecast) {
-    dashboardCurrentAssetForecast.innerHTML = assetCurrentForecast.innerHTML;
+    dashboardCurrentAssetForecast.innerHTML = dashboardCurrentAssetContainer.innerHTML;
   }
   if (dashboardAge65AssetForecast) {
     dashboardAge65AssetForecast.innerHTML = assetForecast.innerHTML;
   }
   assetForecast.innerHTML = "";
-  assetCurrentForecast.innerHTML = "";
 }
 
 function setDashboardAssetGraphTab(tabName = "current-assets") {
