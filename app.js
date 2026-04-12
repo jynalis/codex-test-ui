@@ -106,6 +106,10 @@ const dashboardExpenseTotal = document.getElementById("dashboard-expense-total")
 const dashboardBalanceTotal = document.getElementById("dashboard-balance-total");
 const dashboardAge65Total = document.getElementById("dashboard-age65-total");
 const dashboardDiagnosisComment = document.getElementById("dashboard-diagnosis-comment");
+const dashboardAssetGraphTabs = Array.from(document.querySelectorAll("[data-dashboard-asset-graph-tab]"));
+const dashboardAssetGraphPanels = Array.from(document.querySelectorAll("[data-dashboard-asset-graph-panel]"));
+const dashboardCurrentAssetForecast = document.getElementById("dashboard-current-asset-forecast");
+const dashboardAge65AssetForecast = document.getElementById("dashboard-age65-asset-forecast");
 const dashboardAssetFormationChart = document.getElementById("dashboard-asset-formation-chart");
 const assetGrowthMonthlyChip = document.getElementById("asset-growth-monthly-chip");
 const assetGrowthMetricToggle = document.getElementById("asset-growth-metric-toggle");
@@ -176,6 +180,7 @@ let basicEditingPlanId = null;
 let sharedYearMonthState = { year: "", month: "" };
 let sharedAverageViewState = { averageMode: "month" };
 let dashboardAssetGrowthMetric = "endingBalance";
+let activeDashboardAssetGraphTab = "current-assets";
 let activeAssetMainTab = "formation";
 let activeIncomeMainTab = "expense-balance";
 let activeInputMainTab = "basic";
@@ -4605,14 +4610,18 @@ function buildAssetOutlookAtAge({
 }
 
 function renderAssetForecast(settings) {
-  if (!assetForecast || !assetCurrentForecast || !assetWithdrawForecast) return;
+  if (!assetForecast || !assetCurrentForecast || !assetWithdrawForecast || !dashboardCurrentAssetForecast || !dashboardAge65AssetForecast) return;
   assetForecast.innerHTML = "";
   assetCurrentForecast.innerHTML = "";
+  dashboardCurrentAssetForecast.innerHTML = "";
+  dashboardAge65AssetForecast.innerHTML = "";
   assetWithdrawForecast.innerHTML = "";
   if (!settings.birthDate || settings.plans.length === 0) {
     const emptyMessage = '<p class="chart-empty">生年月日と積立設定を保存すると、現時点と65歳時点の資産試算が表示されます。</p>';
     assetForecast.innerHTML = emptyMessage;
     assetCurrentForecast.innerHTML = emptyMessage;
+    dashboardCurrentAssetForecast.innerHTML = emptyMessage;
+    dashboardAge65AssetForecast.innerHTML = emptyMessage;
     assetWithdrawForecast.innerHTML = emptyMessage;
     return;
   }
@@ -4733,6 +4742,10 @@ function renderAssetForecast(settings) {
     empty.className = "chart-empty";
     empty.textContent = "データがありません";
     chartSection.appendChild(empty);
+    dashboardCurrentAssetForecast.innerHTML = assetCurrentForecast.innerHTML;
+    dashboardAge65AssetForecast.innerHTML = assetForecast.innerHTML;
+    assetForecast.innerHTML = "";
+    assetCurrentForecast.innerHTML = "";
     return;
   }
 
@@ -4757,6 +4770,10 @@ function renderAssetForecast(settings) {
     empty.textContent = `${createAssetOutlookPointLabel(TARGET_AGE_SECONDARY)}の評価対象となる契約はありません。`;
     const typeHeading = formationChartSection.querySelector(".asset-type-breakdown-heading");
     typeHeading?.insertAdjacentElement("beforebegin", empty);
+    dashboardCurrentAssetForecast.innerHTML = assetCurrentForecast.innerHTML;
+    dashboardAge65AssetForecast.innerHTML = assetForecast.innerHTML;
+    assetForecast.innerHTML = "";
+    assetCurrentForecast.innerHTML = "";
     return;
   }
 
@@ -4775,6 +4792,36 @@ function renderAssetForecast(settings) {
     formationChartSection.appendChild(formationPieWrap);
     formationChartSection.appendChild(formationLegend);
   }
+
+  if (dashboardCurrentAssetForecast) {
+    dashboardCurrentAssetForecast.innerHTML = assetCurrentForecast.innerHTML;
+  }
+  if (dashboardAge65AssetForecast) {
+    dashboardAge65AssetForecast.innerHTML = assetForecast.innerHTML;
+  }
+  assetForecast.innerHTML = "";
+  assetCurrentForecast.innerHTML = "";
+}
+
+function setDashboardAssetGraphTab(tabName = "current-assets") {
+  if (dashboardAssetGraphTabs.length === 0 || dashboardAssetGraphPanels.length === 0) return;
+  const requestedTab = tabName || "current-assets";
+  const hasRequestedTab = dashboardAssetGraphTabs.some((button) => button.dataset.dashboardAssetGraphTab === requestedTab);
+  const nextTab = hasRequestedTab ? requestedTab : "current-assets";
+  activeDashboardAssetGraphTab = nextTab;
+
+  dashboardAssetGraphTabs.forEach((button) => {
+    const isActive = button.dataset.dashboardAssetGraphTab === nextTab;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    button.tabIndex = isActive ? 0 : -1;
+  });
+
+  dashboardAssetGraphPanels.forEach((panel) => {
+    const isActive = panel.dataset.dashboardAssetGraphPanel === nextTab;
+    panel.classList.toggle("is-active", isActive);
+    panel.hidden = !isActive;
+  });
 }
 
 function setAssetMainTab(tabName = "formation") {
@@ -5604,6 +5651,13 @@ function isAssetsSectionExpanded() {
   return !parentPanel.hidden;
 }
 
+function isDashboardSectionExpanded() {
+  if (!dashboardSection) return false;
+  const parentPanel = dashboardSection.closest("[data-primary-main-panel]");
+  if (!parentPanel) return true;
+  return !parentPanel.hidden;
+}
+
 function markAssetForecastDirty(settings) {
   latestAssetForecastSettings = settings;
   assetForecastDirty = true;
@@ -5622,12 +5676,12 @@ function clearAssetForecastDOM() {
 function queueAssetForecastRender(force = false) {
   if (!assetForecast || !latestAssetForecastSettings) return;
   if (!force && !assetForecastDirty) return;
-  if (!isAssetsSectionExpanded()) return;
+  if (!isAssetsSectionExpanded() && !isDashboardSectionExpanded()) return;
   if (assetForecastRenderRafId) return;
 
   assetForecastRenderRafId = window.requestAnimationFrame(() => {
     assetForecastRenderRafId = 0;
-    if (!isAssetsSectionExpanded()) return;
+    if (!isAssetsSectionExpanded() && !isDashboardSectionExpanded()) return;
     renderAssetForecast(latestAssetForecastSettings);
     assetForecastDirty = false;
   });
@@ -6056,6 +6110,7 @@ function resetDashboardTabState() {
   setIncomeMainTab("expense-balance");
   dashboardAssetGrowthMetric = "endingBalance";
   updateDashboardAssetGrowthMetricToggleUI();
+  setDashboardAssetGraphTab("current-assets");
   render();
 }
 
@@ -6226,6 +6281,14 @@ function setupDashboardCardNavigation() {
   });
 }
 
+function setupDashboardAssetGraphTabs() {
+  dashboardAssetGraphTabs.forEach((button) => {
+    button.addEventListener("click", () => {
+      setDashboardAssetGraphTab(button.dataset.dashboardAssetGraphTab || "current-assets");
+    });
+  });
+}
+
 function handleDashboardViewFilterChange() {
   const nextAverageMode = dashboardViewFilterControls.mode?.value === "average" ? "average" : "month";
   sharedAverageViewState = { averageMode: nextAverageMode };
@@ -6386,6 +6449,8 @@ function init() {
   setupChildAccordions();
   setupFloatingTopButton();
   setupDashboardCardNavigation();
+  setupDashboardAssetGraphTabs();
+  setDashboardAssetGraphTab("current-assets");
   assetGrowthMetricToggle?.addEventListener("click", handleAssetGrowthMetricToggleClick);
 
   render();
