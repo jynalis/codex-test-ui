@@ -2069,6 +2069,10 @@ button.plan-card-trigger {
   display: block;
 }
 
+.dashboard-asset-graph-panel[hidden] {
+  display: none;
+}
+
 .asset-forecast {
   display: grid;
   gap: 14px;
