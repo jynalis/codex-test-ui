@@ -117,17 +117,17 @@
               </div>
               <div class="input-main-tabbar">
                 <div class="input-main-tabs" role="tablist" aria-label="入力タブの表示切替">
-                  <button type="button" id="input-main-tab-basic" class="input-main-tab is-active" role="tab" aria-selected="true" aria-controls="input-main-panel-basic" data-input-main-tab="basic">基本</button>
+                  <button type="button" id="input-main-tab-monthly" class="input-main-tab is-active" role="tab" aria-selected="true" aria-controls="input-main-panel-monthly" data-input-main-tab="monthly">毎月収支</button>
+                  <button type="button" id="input-main-tab-basic" class="input-main-tab" role="tab" aria-selected="false" aria-controls="input-main-panel-basic" data-input-main-tab="basic" tabindex="-1">基本</button>
                   <button type="button" id="input-main-tab-recurring" class="input-main-tab" role="tab" aria-selected="false" aria-controls="input-main-panel-recurring" data-input-main-tab="recurring" tabindex="-1">定期支出</button>
                   <button type="button" id="input-main-tab-life" class="input-main-tab" role="tab" aria-selected="false" aria-controls="input-main-panel-life" data-input-main-tab="life" tabindex="-1">ライフ</button>
-                  <button type="button" id="input-main-tab-monthly" class="input-main-tab" role="tab" aria-selected="false" aria-controls="input-main-panel-monthly" data-input-main-tab="monthly" tabindex="-1">毎月収支</button>
                 </div>
               </div>
               <div class="input-main-content">
-                <div id="input-main-panel-basic" class="input-main-panel is-active" role="tabpanel" aria-labelledby="input-main-tab-basic" data-input-main-panel="basic"></div>
+                <div id="input-main-panel-monthly" class="input-main-panel is-active" role="tabpanel" aria-labelledby="input-main-tab-monthly" data-input-main-panel="monthly"></div>
+                <div id="input-main-panel-basic" class="input-main-panel" role="tabpanel" aria-labelledby="input-main-tab-basic" data-input-main-panel="basic" hidden></div>
                 <div id="input-main-panel-recurring" class="input-main-panel" role="tabpanel" aria-labelledby="input-main-tab-recurring" data-input-main-panel="recurring" hidden></div>
                 <div id="input-main-panel-life" class="input-main-panel" role="tabpanel" aria-labelledby="input-main-tab-life" data-input-main-panel="life" hidden></div>
-                <div id="input-main-panel-monthly" class="input-main-panel" role="tabpanel" aria-labelledby="input-main-tab-monthly" data-input-main-panel="monthly" hidden></div>
               </div>
             </section>
           </section>

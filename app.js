@@ -183,7 +183,7 @@ let dashboardAssetGrowthMetric = "endingBalance";
 let activeDashboardAssetGraphTab = "current-assets";
 let activeAssetMainTab = "formation";
 let activeIncomeMainTab = "expense-balance";
-let activeInputMainTab = "basic";
+let activeInputMainTab = "monthly";
 let activePrimaryMainTab = "dashboard";
 let activeCashflowSubTab = "cf";
 let activeMemoDraft = null;
@@ -4957,11 +4957,11 @@ function setPrimaryMainTab(tabName = "dashboard") {
   }
 }
 
-function setInputMainTab(tabName = "basic") {
+function setInputMainTab(tabName = "monthly") {
   if (inputMainTabs.length === 0 || inputMainPanels.length === 0) return;
-  const requestedTab = tabName || "basic";
+  const requestedTab = tabName || "monthly";
   const hasRequestedTab = inputMainTabs.some((button) => button.dataset.inputMainTab === requestedTab);
-  const nextTab = hasRequestedTab ? requestedTab : "basic";
+  const nextTab = hasRequestedTab ? requestedTab : "monthly";
   activeInputMainTab = nextTab;
 
   inputMainTabs.forEach((button) => {
@@ -5105,7 +5105,7 @@ function setupInputMainTabs() {
   if (inputMainTabs.length === 0) return;
   inputMainTabs.forEach((button) => {
     button.addEventListener("click", () => {
-      setInputMainTab(button.dataset.inputMainTab || "basic");
+      setInputMainTab(button.dataset.inputMainTab || "monthly");
     });
   });
   setInputMainTab(activeInputMainTab);
@@ -6111,7 +6111,7 @@ function resetInputTabState() {
   resetRecurringFormFields();
   resetLifeEventFormFields();
   resetTransactionFormFields({ date: todayISO() });
-  setInputMainTab("basic");
+  setInputMainTab("monthly");
   Object.keys(activeInputSubTabs).forEach((groupName) => {
     setInputSubTab(groupName, "register");
   });
