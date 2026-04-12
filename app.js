@@ -27,6 +27,7 @@ const transactionCancelButton = document.getElementById("transaction-cancel-butt
 const transactionEditStatus = document.getElementById("transaction-edit-status");
 const plannedHistoryBlock = document.getElementById("planned-history-block");
 const historyViewFilterControls = {
+  mode: document.getElementById("history-view-mode"),
   year: document.getElementById("history-year-filter"),
   month: document.getElementById("history-month-filter"),
 };
@@ -175,6 +176,9 @@ let activeInputMainTab = "basic";
 let activePrimaryMainTab = "dashboard";
 let activeCashflowSubTab = "cf";
 let activeMemoDraft = null;
+const wheelPickerStateMap = new WeakMap();
+const WHEEL_PICKER_ITEM_HEIGHT = 36;
+const WHEEL_PICKER_SCROLL_END_MS = 88;
 const activeInputSubTabs = {
   basic: "register",
   recurring: "register",
@@ -868,6 +872,137 @@ function syncViewFilterOptions(controls, state, availableYears, options = {}) {
   const isAverage = includeAverageMode && state.averageMode === "average";
   controls.year.disabled = isAverage;
   controls.month.disabled = isAverage;
+  syncWheelPickerFromSelect(controls.mode);
+  syncWheelPickerFromSelect(controls.year);
+  syncWheelPickerFromSelect(controls.month);
+}
+
+function getWheelPickerItemValue(option) {
+  return option?.value ?? "";
+}
+
+function buildWheelPickerItemsHTML(selectElement) {
+  const options = Array.from(selectElement?.options ?? []);
+  const itemHTML = options
+    .map((option) => `<div class="wheel-picker__item" data-wheel-value="${getWheelPickerItemValue(option)}">${option.textContent}</div>`)
+    .join("");
+  return `<div class="wheel-picker__spacer" aria-hidden="true"></div>${itemHTML}<div class="wheel-picker__spacer" aria-hidden="true"></div>`;
+}
+
+function ensureWheelPicker(selectElement) {
+  if (!selectElement) return null;
+  const existing = wheelPickerStateMap.get(selectElement);
+  if (existing) return existing;
+
+  const picker = document.createElement("div");
+  picker.className = "wheel-picker";
+  picker.setAttribute("role", "listbox");
+  picker.setAttribute("aria-label", selectElement.getAttribute("aria-label") || "");
+  picker.tabIndex = 0;
+
+  const viewport = document.createElement("div");
+  viewport.className = "wheel-picker__viewport";
+  const list = document.createElement("div");
+  list.className = "wheel-picker__list";
+  const focusLine = document.createElement("div");
+  focusLine.className = "wheel-picker__focus-line";
+  focusLine.setAttribute("aria-hidden", "true");
+
+  viewport.appendChild(list);
+  picker.append(viewport, focusLine);
+  selectElement.classList.add("wheel-picker-native-select");
+  selectElement.insertAdjacentElement("afterend", picker);
+
+  const state = {
+    picker,
+    viewport,
+    list,
+    suppressScrollChange: false,
+    scrollTimer: 0,
+  };
+
+  const applyByIndex = (index, { emitChange = true } = {}) => {
+    const options = Array.from(selectElement.options);
+    if (options.length === 0) return;
+    const boundedIndex = Math.max(0, Math.min(index, options.length - 1));
+    const option = options[boundedIndex];
+    if (!option) return;
+    if (selectElement.value !== option.value) {
+      selectElement.value = option.value;
+      if (emitChange) {
+        selectElement.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    }
+    state.suppressScrollChange = true;
+    viewport.scrollTo({ top: boundedIndex * WHEEL_PICKER_ITEM_HEIGHT, behavior: "smooth" });
+    window.setTimeout(() => {
+      state.suppressScrollChange = false;
+      syncWheelPickerFromSelect(selectElement);
+    }, 120);
+  };
+
+  picker.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const item = target.closest(".wheel-picker__item");
+    if (!(item instanceof HTMLElement)) return;
+    const items = Array.from(list.querySelectorAll(".wheel-picker__item"));
+    const index = items.indexOf(item);
+    if (index >= 0) {
+      applyByIndex(index);
+    }
+  });
+
+  picker.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+    event.preventDefault();
+    const options = Array.from(selectElement.options);
+    const currentIndex = Math.max(0, options.findIndex((option) => option.value === selectElement.value));
+    const delta = event.key === "ArrowUp" ? -1 : 1;
+    applyByIndex(currentIndex + delta);
+  });
+
+  viewport.addEventListener("scroll", () => {
+    if (state.suppressScrollChange) return;
+    window.clearTimeout(state.scrollTimer);
+    state.scrollTimer = window.setTimeout(() => {
+      const options = Array.from(selectElement.options);
+      if (options.length === 0) return;
+      const nextIndex = Math.max(0, Math.min(Math.round(viewport.scrollTop / WHEEL_PICKER_ITEM_HEIGHT), options.length - 1));
+      const option = options[nextIndex];
+      if (!option) return;
+      if (selectElement.value !== option.value) {
+        selectElement.value = option.value;
+        selectElement.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      viewport.scrollTo({ top: nextIndex * WHEEL_PICKER_ITEM_HEIGHT, behavior: "smooth" });
+      syncWheelPickerFromSelect(selectElement);
+    }, WHEEL_PICKER_SCROLL_END_MS);
+  });
+
+  wheelPickerStateMap.set(selectElement, state);
+  return state;
+}
+
+function syncWheelPickerFromSelect(selectElement) {
+  if (!selectElement) return;
+  const state = ensureWheelPicker(selectElement);
+  if (!state) return;
+  const { picker, viewport, list } = state;
+  list.innerHTML = buildWheelPickerItemsHTML(selectElement);
+
+  const items = Array.from(list.querySelectorAll(".wheel-picker__item"));
+  const selectedIndex = Math.max(0, items.findIndex((item) => item.dataset.wheelValue === selectElement.value));
+  items.forEach((item, index) => {
+    const selected = index === selectedIndex;
+    item.classList.toggle("is-selected", selected);
+    item.setAttribute("aria-selected", String(selected));
+  });
+
+  picker.classList.toggle("is-disabled", Boolean(selectElement.disabled));
+  picker.setAttribute("aria-disabled", String(Boolean(selectElement.disabled)));
+  picker.tabIndex = selectElement.disabled ? -1 : 0;
+  viewport.scrollTop = selectedIndex * WHEEL_PICKER_ITEM_HEIGHT;
 }
 
 function normalizeMonthlyContributionHistory(plan) {
@@ -5323,7 +5458,12 @@ function render() {
   const cashflowIncomeSettings = loadCashflowIncomeSettings();
   const cashflowExpenseSettings = loadCashflowExpenseSettings();
   const sharedYearOptions = buildSharedYearOptions(settings, transactions);
-  syncViewFilterOptions(historyViewFilterControls, sharedYearMonthState, sharedYearOptions);
+  syncViewFilterOptions(
+    historyViewFilterControls,
+    { ...sharedYearMonthState, averageMode: sharedAverageViewState.averageMode },
+    sharedYearOptions,
+    { includeAverageMode: true }
+  );
   syncViewFilterOptions(
     dashboardViewFilterControls,
     { ...sharedYearMonthState, averageMode: sharedAverageViewState.averageMode },
@@ -5340,7 +5480,12 @@ function render() {
     year: dashboardViewFilterControls.year?.value || sharedYearMonthState.year,
     month: dashboardViewFilterControls.month?.value || sharedYearMonthState.month,
   };
-  syncViewFilterOptions(historyViewFilterControls, sharedYearMonthState, sharedYearOptions);
+  syncViewFilterOptions(
+    historyViewFilterControls,
+    { ...sharedYearMonthState, averageMode: sharedAverageViewState.averageMode },
+    sharedYearOptions,
+    { includeAverageMode: true }
+  );
   const currentHistoryMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
   const currentDashboardMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
   const currentExpenseMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
@@ -6183,6 +6328,8 @@ function handleExpenseViewFilterChange() {
 }
 
 function handleHistoryViewFilterChange() {
+  const nextAverageMode = historyViewFilterControls.mode?.value === "average" ? "average" : "month";
+  sharedAverageViewState = { averageMode: nextAverageMode };
   sharedYearMonthState = {
     year: historyViewFilterControls.year?.value || sharedYearMonthState.year,
     month: historyViewFilterControls.month?.value || sharedYearMonthState.month,
@@ -6191,6 +6338,7 @@ function handleHistoryViewFilterChange() {
 }
 
 function setupSharedViewFilters() {
+  historyViewFilterControls.mode?.addEventListener("change", handleHistoryViewFilterChange);
   dashboardViewFilterControls.mode?.addEventListener("change", handleDashboardViewFilterChange);
   dashboardViewFilterControls.year?.addEventListener("change", handleDashboardViewFilterChange);
   dashboardViewFilterControls.month?.addEventListener("change", handleDashboardViewFilterChange);
