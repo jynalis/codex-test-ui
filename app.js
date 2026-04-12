@@ -4821,6 +4821,7 @@ function setDashboardAssetGraphTab(tabName = "current-assets") {
     const isActive = panel.dataset.dashboardAssetGraphPanel === nextTab;
     panel.classList.toggle("is-active", isActive);
     panel.hidden = !isActive;
+    panel.style.display = isActive ? "" : "none";
   });
 }
 
@@ -4923,6 +4924,7 @@ function resolveInputSubTabBySectionId(sectionId = "") {
 
 function setPrimaryMainTab(tabName = "dashboard") {
   if (primaryMainTabs.length === 0 || primaryMainPanels.length === 0) return;
+  const previousTab = activePrimaryMainTab;
   const requestedTab = tabName || "dashboard";
   const hasRequestedTab = primaryMainTabs.some((button) => button.dataset.primaryMainTab === requestedTab);
   const nextTab = hasRequestedTab ? requestedTab : "dashboard";
@@ -4943,6 +4945,12 @@ function setPrimaryMainTab(tabName = "dashboard") {
 
   if (nextTab === "assets") {
     queueAssetForecastRender(true);
+  }
+
+  if (nextTab !== "dashboard") {
+    setDashboardAssetGraphTab("current-assets");
+  } else if (previousTab !== "dashboard") {
+    setDashboardAssetGraphTab("current-assets");
   }
 }
 
