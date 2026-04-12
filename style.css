@@ -1694,7 +1694,7 @@ button.plan-card-trigger {
 
 .dashboard-panel-inner {
   min-height: 0;
-  padding: 0 2px 4px;
+  padding: 0 0 4px;
 }
 
 .dashboard-grid {
@@ -2319,7 +2319,7 @@ button.ghost {
 
 .dashboard-panel-inner > .shared-view-filters[data-shared-view-filter="dashboard"] {
   margin-bottom: 12px;
-  padding: 0 12px;
+  padding: 0;
   box-sizing: border-box;
 }
 
