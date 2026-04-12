@@ -175,10 +175,6 @@ let activeInputMainTab = "basic";
 let activePrimaryMainTab = "dashboard";
 let activeCashflowSubTab = "cf";
 let activeMemoDraft = null;
-const yearSelectUIMap = new WeakMap();
-let activeYearSelectUI = null;
-const YEAR_SELECT_VIEWPORT_MARGIN_TOP = 16;
-const YEAR_SELECT_VIEWPORT_MARGIN_BOTTOM = 20;
 const activeInputSubTabs = {
   basic: "register",
   recurring: "register",
@@ -842,170 +838,6 @@ function buildYearOptionsForBounds(bounds, options = {}) {
   return years;
 }
 
-function closeYearSelectMenu(selectElement = null) {
-  const targetSelect = selectElement || activeYearSelectUI?.select;
-  if (!targetSelect) return;
-  const ui = yearSelectUIMap.get(targetSelect);
-  if (!ui) return;
-  ui.trigger.setAttribute("aria-expanded", "false");
-  ui.menu.hidden = true;
-  if (activeYearSelectUI?.select === targetSelect) {
-    activeYearSelectUI = null;
-  }
-}
-
-function openYearSelectMenu(selectElement) {
-  const ui = yearSelectUIMap.get(selectElement);
-  if (!ui || selectElement.disabled) return;
-  if (activeYearSelectUI && activeYearSelectUI.select !== selectElement) {
-    closeYearSelectMenu(activeYearSelectUI.select);
-  }
-  ui.trigger.setAttribute("aria-expanded", "true");
-  ui.menu.hidden = false;
-  activeYearSelectUI = ui;
-  const selectedOption = ui.menu.querySelector('[data-year-option][aria-selected="true"]');
-  if (selectedOption instanceof HTMLElement) {
-    selectedOption.scrollIntoView({ block: "nearest" });
-  }
-  requestAnimationFrame(() => {
-    adjustViewportForYearSelectMenu(ui);
-  });
-}
-
-function adjustViewportForYearSelectMenu(ui) {
-  if (!ui?.trigger || !ui?.menu || ui.menu.hidden) return;
-  const viewportHeight = window.visualViewport?.height || window.innerHeight;
-  const currentScrollY = window.scrollY;
-  const triggerRect = ui.trigger.getBoundingClientRect();
-  const menuRect = ui.menu.getBoundingClientRect();
-  if (viewportHeight <= 0 || triggerRect.height <= 0 || menuRect.height <= 0) return;
-
-  const viewportTop = currentScrollY;
-  const viewportBottom = viewportTop + viewportHeight;
-  const triggerTop = currentScrollY + triggerRect.top;
-  const menuBottom = currentScrollY + menuRect.bottom;
-
-  let targetScrollY = currentScrollY;
-  const overflowBottom = menuBottom + YEAR_SELECT_VIEWPORT_MARGIN_BOTTOM - viewportBottom;
-  if (overflowBottom > 0) {
-    targetScrollY += overflowBottom;
-  }
-
-  const triggerTopAfterScroll = triggerTop - targetScrollY;
-  if (triggerTopAfterScroll < YEAR_SELECT_VIEWPORT_MARGIN_TOP) {
-    targetScrollY = Math.max(0, triggerTop - YEAR_SELECT_VIEWPORT_MARGIN_TOP);
-  }
-
-  if (Math.abs(targetScrollY - currentScrollY) < 2) return;
-  window.scrollTo({
-    top: targetScrollY,
-    behavior: "smooth",
-  });
-}
-
-function syncYearSelectUI(selectElement) {
-  const ui = yearSelectUIMap.get(selectElement);
-  if (!ui) return;
-  const options = Array.from(selectElement.options);
-  const selectedValue = selectElement.value;
-  ui.menu.innerHTML = "";
-  options.forEach((option) => {
-    const row = document.createElement("button");
-    row.type = "button";
-    row.className = "year-select-option";
-    row.dataset.yearOption = "true";
-    row.dataset.value = option.value;
-    row.setAttribute("role", "option");
-    row.setAttribute("aria-selected", String(option.value === selectedValue));
-    row.textContent = option.textContent || "";
-    row.addEventListener("click", () => {
-      if (selectElement.value === option.value) {
-        closeYearSelectMenu(selectElement);
-        return;
-      }
-      selectElement.value = option.value;
-      closeYearSelectMenu(selectElement);
-      selectElement.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    ui.menu.appendChild(row);
-  });
-  const selectedOption = options.find((option) => option.value === selectedValue) || options[0];
-  ui.trigger.textContent = selectedOption?.textContent || "年を選択";
-  ui.trigger.disabled = selectElement.disabled;
-  ui.root.classList.toggle("is-disabled", selectElement.disabled);
-}
-
-function setupYearSelectControl(selectElement) {
-  if (!(selectElement instanceof HTMLSelectElement)) return;
-  if (yearSelectUIMap.has(selectElement)) return;
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "year-select";
-  selectElement.parentNode?.insertBefore(wrapper, selectElement);
-  wrapper.appendChild(selectElement);
-  selectElement.classList.add("year-select-native");
-
-  const trigger = document.createElement("button");
-  trigger.type = "button";
-  trigger.className = "year-select-trigger";
-  trigger.setAttribute("aria-haspopup", "listbox");
-  trigger.setAttribute("aria-expanded", "false");
-
-  const menu = document.createElement("div");
-  menu.className = "year-select-menu";
-  menu.setAttribute("role", "listbox");
-  menu.hidden = true;
-
-  wrapper.appendChild(trigger);
-  wrapper.appendChild(menu);
-
-  trigger.addEventListener("click", (event) => {
-    event.stopPropagation();
-    const expanded = trigger.getAttribute("aria-expanded") === "true";
-    if (expanded) {
-      closeYearSelectMenu(selectElement);
-    } else {
-      openYearSelectMenu(selectElement);
-    }
-  });
-
-  selectElement.addEventListener("change", () => {
-    syncYearSelectUI(selectElement);
-  });
-
-  yearSelectUIMap.set(selectElement, {
-    select: selectElement,
-    root: wrapper,
-    trigger,
-    menu,
-  });
-  syncYearSelectUI(selectElement);
-}
-
-function setupYearSelectControls() {
-  [historyViewFilterControls.year, dashboardViewFilterControls.year, expenseViewFilterControls.year]
-    .filter((element) => element instanceof HTMLSelectElement)
-    .forEach(setupYearSelectControl);
-
-  document.addEventListener("click", (event) => {
-    if (!(event.target instanceof Element)) {
-      closeYearSelectMenu();
-      return;
-    }
-    if (activeYearSelectUI?.root.contains(event.target)) return;
-    closeYearSelectMenu();
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
-    closeYearSelectMenu();
-  });
-
-  window.addEventListener("resize", () => {
-    closeYearSelectMenu();
-  });
-}
-
 function buildMonthOptionsForYear(year, bounds) {
   if (!Number.isInteger(year)) return [];
   let startMonth = 1;
@@ -1054,8 +886,6 @@ function syncViewFilterOptions(controls, state, bounds, options = {}) {
   if (controls.year.value !== state.year) {
     state.year = controls.year.value;
   }
-  syncYearSelectUI(controls.year);
-
   const monthCandidates = buildMonthOptionsForYear(Number(state.year), bounds);
   controls.month.innerHTML = monthCandidates.map((month) => {
     const value = String(month).padStart(2, "0");
@@ -6421,7 +6251,6 @@ function init() {
   syncRecurringCategoryOptions();
   syncRecurringDayOptions();
   syncLifeEventCategoryOptions();
-  setupYearSelectControls();
   setupMemoCompactInputs();
   setTransactionFormMode(false);
   resetRecurringFormFields();
