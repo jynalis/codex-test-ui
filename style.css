@@ -3148,7 +3148,7 @@ body.is-keyboard-open .floating-top-button {
 
   .dashboard-panel-inner > .shared-view-filters[data-shared-view-filter="dashboard"] {
     margin-bottom: 10px;
-    padding: 0 8px;
+    padding: 0;
   }
 
   .dashboard-card {
