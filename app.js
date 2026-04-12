@@ -3262,9 +3262,9 @@ function formatYenAsManYenLabel(value) {
   return `${numberWithComma.format(manYen)}万円`;
 }
 
-function calculateNiceYAxisStep(maxValue) {
-  if (!Number.isFinite(maxValue) || maxValue <= 0) return 1000000;
-  const roughStep = maxValue / 4;
+function calculateNiceYAxisStep(range) {
+  if (!Number.isFinite(range) || range <= 0) return 1000000;
+  const roughStep = range / 4;
   const exponent = 10 ** Math.floor(Math.log10(roughStep));
   const fraction = roughStep / exponent;
   let niceFraction = 1;
@@ -3285,13 +3285,13 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "endingBal
   dashboardAssetFormationChart.innerHTML = "";
   const metric = DASHBOARD_ASSET_GROWTH_METRICS[metricKey] || DASHBOARD_ASSET_GROWTH_METRICS.endingBalance;
   const points = (Array.isArray(cashflowRows) ? cashflowRows : [])
-    .map((row) => ({ year: row.year, age: row.age, amount: row[metricKey] }))
-    .filter((row) => Number.isFinite(row.year) && Number.isFinite(row.age) && Number.isFinite(row.amount) && row.amount >= 0);
+    .map((row) => ({ year: row.year, age: row.age, amount: Number(row?.[metricKey]) }))
+    .filter((row) => Number.isFinite(row.year) && Number.isFinite(row.age) && Number.isFinite(row.amount))
+    .sort((a, b) => (a.year - b.year) || (a.age - b.age));
   const labels = points.map((item) => item.year);
   const amounts = points.map((item) => item.amount);
 
-  const hasPositiveValue = amounts.some((value) => value > 0);
-  if (labels.length === 0 || labels.length !== amounts.length || !hasPositiveValue) {
+  if (labels.length === 0 || labels.length !== amounts.length) {
     const empty = document.createElement("p");
     empty.className = "chart-empty";
     empty.textContent = metric.emptyText;
@@ -3310,12 +3310,25 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "endingBal
   const scrollChartWidth = plotWidth + margin.right;
   const plotHeight = chartHeight - margin.top - margin.bottom;
   const maxAmount = Math.max(...amounts);
-  const yStep = calculateNiceYAxisStep(maxAmount);
-  const yMax = Math.max(yStep, Math.ceil(maxAmount / yStep) * yStep);
-  const yTickCount = Math.max(2, Math.ceil(yMax / yStep));
+  const minAmount = Math.min(...amounts);
+  const rawDomainMin = Math.min(minAmount, 0);
+  const rawDomainMax = Math.max(maxAmount, 0);
+  const hasFlatDomain = rawDomainMax === rawDomainMin;
+  const baseAbs = Math.max(Math.abs(rawDomainMin), Math.abs(rawDomainMax), 1);
+  const paddedDomainMin = hasFlatDomain ? rawDomainMin - baseAbs * 0.1 : rawDomainMin;
+  const paddedDomainMax = hasFlatDomain ? rawDomainMax + baseAbs * 0.1 : rawDomainMax;
+  const yStep = calculateNiceYAxisStep(paddedDomainMax - paddedDomainMin);
+  const yMin = Math.floor(paddedDomainMin / yStep) * yStep;
+  const yMax = Math.ceil(paddedDomainMax / yStep) * yStep;
+  const yRange = Math.max(yMax - yMin, yStep);
+  const yTickCount = Math.max(2, Math.ceil(yRange / yStep));
   const slotWidth = YEAR_SLOT_WIDTH_PX;
   const barWidth = BAR_WIDTH_PX;
   let selectedBarIndex = null;
+  const yPosition = (value) => {
+    const ratio = (value - yMin) / yRange;
+    return margin.top + plotHeight - (ratio * plotHeight);
+  };
 
   const svgNS = "http://www.w3.org/2000/svg";
   const hidePressedValue = () => {
@@ -3378,8 +3391,8 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "endingBal
   plotSvg.style.height = `${chartHeight}px`;
 
   for (let tick = 0; tick <= yTickCount; tick += 1) {
-    const value = tick * yStep;
-    const y = margin.top + plotHeight - (value / yMax) * plotHeight;
+    const value = yMin + tick * yStep;
+    const y = yPosition(value);
 
     const yLabel = document.createElementNS(svgNS, "text");
     yLabel.setAttribute("x", String(fixedAxisWidth - 8));
@@ -3401,8 +3414,10 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "endingBal
   points.forEach((point, index) => {
     const amount = point.amount;
     const xCenter = slotWidth * index + slotWidth / 2;
-    const barHeight = amount > 0 ? Math.max(1, (amount / yMax) * plotHeight) : 0;
-    const y = margin.top + plotHeight - barHeight;
+    const zeroY = yPosition(0);
+    const valueY = yPosition(amount);
+    const barHeight = Math.max(1, Math.abs(zeroY - valueY));
+    const y = amount >= 0 ? zeroY - barHeight : zeroY;
     const rect = document.createElementNS(svgNS, "rect");
     rect.setAttribute("x", String(xCenter - barWidth / 2));
     rect.setAttribute("y", String(y));
@@ -3454,8 +3469,8 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "endingBal
   const axisX = document.createElementNS(svgNS, "line");
   axisX.setAttribute("x1", "0");
   axisX.setAttribute("x2", String(plotWidth));
-  axisX.setAttribute("y1", String(margin.top + plotHeight));
-  axisX.setAttribute("y2", String(margin.top + plotHeight));
+  axisX.setAttribute("y1", String(yPosition(0)));
+  axisX.setAttribute("y2", String(yPosition(0)));
   axisX.setAttribute("class", "dashboard-bar-chart-axis");
   plotSvg.appendChild(axisX);
 
