@@ -145,7 +145,7 @@
         <ol class="start-guide-list">
           <li>
             <h3>1. 入力タブで「基本」を登録</h3>
-            <p>記入開始月・生年月日を設定し、資産形成プラン（NISA/iDeCo など）を登録します。</p>
+            <p>記入開始月・生年月日を設定し、JSONバックアップの保存/読込を確認します。</p>
           </li>
           <li>
             <h3>2. 定期支出とライフイベントを入力</h3>
@@ -274,14 +274,14 @@
             <div class="basic-sub-panel-body">
               <form id="profile-form" class="grid">
                 <section class="full profile-form-section profile-basic-settings-section" aria-labelledby="profile-basic-settings-heading">
-                  <h3 id="profile-basic-settings-heading" class="profile-form-section-heading">基本設定</h3>
+                  <h3 id="profile-basic-settings-heading" class="profile-form-section-heading">初期設定</h3>
                   <div class="profile-basic-settings-grid">
                     <label>
-                      記入開始月
+                      記入開始月を登録
                       <input type="month" id="entry-start-month" required />
                     </label>
                     <label>
-                      生年月日
+                      生年月日を登録
                       <input type="date" id="birth-date" required />
                     </label>
                   </div>
@@ -290,7 +290,7 @@
                   <button type="button" id="profile-basic-save-button" class="profile-save-settings-button">設定を保存</button>
                 </div>
                 <section class="full profile-form-section profile-backup-section" aria-labelledby="profile-backup-heading">
-                  <h3 id="profile-backup-heading" class="profile-form-section-heading">データのバックアップ</h3>
+                  <h3 id="profile-backup-heading" class="profile-form-section-heading">JSON</h3>
                   <p class="profile-plan-note">URL変更や端末変更に備えて、現在の入力データをJSONで保存・復元できます。</p>
                   <div class="profile-form-actions profile-basic-settings-actions profile-backup-actions">
                     <button type="button" id="profile-backup-export-button" class="ghost">バックアップ保存</button>
@@ -298,28 +298,12 @@
                     <input type="file" id="profile-backup-file-input" accept="application/json,.json" hidden />
                   </div>
                 </section>
-                <section class="full profile-form-section profile-plan-register-section" aria-labelledby="profile-plan-register-heading">
-                  <h3 id="profile-plan-register-heading" class="profile-form-section-heading">資産形成を登録</h3>
-                  <p id="basic-edit-status" class="recurring-edit-status full" aria-live="polite" hidden>
-                    資産形成を編集中
-                  </p>
-                  <div id="plan-editor-list" class="plan-editor-list" data-plan-editor-list></div>
-                </section>
-                <div class="full profile-form-actions">
-                  <button type="button" id="profile-submit-button" class="profile-save-settings-button">設定を保存</button>
-                  <button type="button" id="profile-cancel-button" class="ghost" hidden>キャンセル</button>
-                </div>
               </form>
             </div>
           </section>
           <section id="input-sub-panel-basic-registered" class="input-sub-panel" role="tabpanel" aria-labelledby="input-sub-tab-basic-registered" data-input-sub-panel="registered" hidden>
             <div class="basic-sub-panel-body">
               <div id="basic-registered-summary" class="input-registered-summary" aria-live="polite"></div>
-              <div class="basic-registered-plan-list-block">
-                <h3 id="basic-registered-plan-count" class="basic-registered-plan-count">資産形成プラン 0件</h3>
-                <p class="profile-plan-note">※同じ内容をライフイベントと資産形成の両方へ重複入力しないでください。</p>
-                <div id="plan-list" class="full plan-list"></div>
-              </div>
             </div>
           </section>
         </div>
