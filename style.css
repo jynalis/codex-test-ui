@@ -2326,6 +2326,35 @@ button.ghost {
   min-width: 0;
 }
 
+.shared-view-filters[data-shared-view-filter="dashboard"] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dashboard-filter-field {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.dashboard-filter-field > span {
+  font-size: 0.75rem;
+  color: #4b627b;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.dashboard-filter-field > select,
+.dashboard-filter-field > input[type="month"] {
+  width: 100%;
+  min-width: 0;
+}
+
+.dashboard-year-month-sync {
+  display: none;
+}
+
 .history-filters {
   margin-bottom: 8px;
 }
@@ -3060,14 +3089,19 @@ body.is-keyboard-open .floating-top-button {
     flex: 1;
   }
 
-  .shared-view-filters[data-shared-view-filter="dashboard"],
   .shared-view-filters[data-shared-view-filter="expense"] {
     display: grid;
     grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.14fr) minmax(0, 0.92fr);
     gap: 6px;
   }
 
+  .shared-view-filters[data-shared-view-filter="dashboard"] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
   .shared-view-filters[data-shared-view-filter="dashboard"] select,
+  .shared-view-filters[data-shared-view-filter="dashboard"] input[type="month"],
   .shared-view-filters[data-shared-view-filter="expense"] select {
     width: 100%;
     min-width: 0;
