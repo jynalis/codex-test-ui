@@ -35,6 +35,7 @@ const dashboardViewFilterControls = {
   year: document.getElementById("dashboard-year-filter"),
   month: document.getElementById("dashboard-month-filter"),
 };
+const dashboardYearMonthPicker = document.getElementById("dashboard-year-month-picker");
 const expenseViewFilterControls = {
   mode: document.getElementById("expense-view-mode"),
   year: document.getElementById("expense-year-filter"),
@@ -5341,6 +5342,7 @@ function render() {
     month: dashboardViewFilterControls.month?.value || sharedYearMonthState.month,
   };
   syncViewFilterOptions(historyViewFilterControls, sharedYearMonthState, sharedYearOptions);
+  syncDashboardYearMonthPicker();
   const currentHistoryMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
   const currentDashboardMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
   const currentExpenseMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
@@ -6162,6 +6164,28 @@ function setupDashboardCardNavigation() {
   });
 }
 
+function syncDashboardYearMonthPicker() {
+  if (!dashboardYearMonthPicker) return;
+  const year = dashboardViewFilterControls.year?.value || sharedYearMonthState.year;
+  const month = dashboardViewFilterControls.month?.value || sharedYearMonthState.month;
+  if (/^\d{4}$/.test(year) && /^\d{2}$/.test(month)) {
+    dashboardYearMonthPicker.value = `${year}-${month}`;
+  }
+  const isAverageMode = dashboardViewFilterControls.mode?.value === "average";
+  dashboardYearMonthPicker.disabled = Boolean(isAverageMode);
+}
+
+function handleDashboardYearMonthPickerChange() {
+  if (!dashboardYearMonthPicker) return;
+  const parsed = parseMonth(dashboardYearMonthPicker.value);
+  if (!parsed) return;
+  sharedYearMonthState = {
+    year: String(parsed.year),
+    month: String(parsed.monthIndex + 1).padStart(2, "0"),
+  };
+  render();
+}
+
 function handleDashboardViewFilterChange() {
   const nextAverageMode = dashboardViewFilterControls.mode?.value === "average" ? "average" : "month";
   sharedAverageViewState = { averageMode: nextAverageMode };
@@ -6194,6 +6218,7 @@ function setupSharedViewFilters() {
   dashboardViewFilterControls.mode?.addEventListener("change", handleDashboardViewFilterChange);
   dashboardViewFilterControls.year?.addEventListener("change", handleDashboardViewFilterChange);
   dashboardViewFilterControls.month?.addEventListener("change", handleDashboardViewFilterChange);
+  dashboardYearMonthPicker?.addEventListener("change", handleDashboardYearMonthPickerChange);
   expenseViewFilterControls.mode?.addEventListener("change", handleExpenseViewFilterChange);
   expenseViewFilterControls.year?.addEventListener("change", handleExpenseViewFilterChange);
   expenseViewFilterControls.month?.addEventListener("change", handleExpenseViewFilterChange);

@@ -177,12 +177,21 @@
         <div class="dashboard-panel" id="panel-home" role="region" aria-labelledby="trigger-home">
           <div class="dashboard-panel-inner">
             <div class="filters shared-view-filters" data-shared-view-filter="dashboard">
-              <select id="dashboard-view-mode" aria-label="ダッシュボード表示モード">
-                <option value="month">年月</option>
-                <option value="average">平均</option>
-              </select>
-              <select id="dashboard-year-filter" aria-label="ダッシュボード表示年"></select>
-              <select id="dashboard-month-filter" aria-label="ダッシュボード表示月"></select>
+              <label class="dashboard-filter-field" for="dashboard-view-mode">
+                <span>表示基準</span>
+                <select id="dashboard-view-mode" aria-label="ダッシュボード表示モード">
+                  <option value="month">単月</option>
+                  <option value="average">累計平均</option>
+                </select>
+              </label>
+              <label class="dashboard-filter-field" for="dashboard-year-month-picker">
+                <span>年月</span>
+                <input id="dashboard-year-month-picker" type="month" aria-label="ダッシュボード表示年月" />
+              </label>
+              <div class="dashboard-year-month-sync" aria-hidden="true">
+                <select id="dashboard-year-filter" aria-label="ダッシュボード表示年" tabindex="-1"></select>
+                <select id="dashboard-month-filter" aria-label="ダッシュボード表示月" tabindex="-1"></select>
+              </div>
             </div>
             <div class="dashboard-grid">
               <article
