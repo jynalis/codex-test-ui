@@ -2035,7 +2035,7 @@ button.plan-card-trigger {
 
 .dashboard-asset-graph-tabbar {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -3282,8 +3282,8 @@ body.is-keyboard-open .floating-top-button {
 
   .dashboard-asset-graph-tab {
     min-height: 40px;
-    font-size: 0.84rem;
-    padding-inline: 8px;
+    font-size: 0.8rem;
+    padding-inline: 6px;
   }
 
   .item {
