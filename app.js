@@ -3423,8 +3423,12 @@ function renderDashboardAssetFormationChart(cashflowRows, metricKey = "endingBal
     rect.setAttribute("y", String(y));
     rect.setAttribute("width", String(barWidth));
     rect.setAttribute("height", String(barHeight));
+    const isNegativeBar = amount < 0;
     rect.setAttribute("rx", "4");
-    rect.setAttribute("class", `dashboard-bar-chart-bar${amount < 0 ? " is-negative" : ""}`);
+    rect.classList.add("dashboard-bar-chart-bar");
+    if (isNegativeBar) {
+      rect.classList.add("is-negative");
+    }
     rect.setAttribute("tabindex", "0");
     rect.setAttribute("role", "button");
     rect.setAttribute("aria-label", `${point.age}歳 ${numberWithComma.format(amount)}円`);
