@@ -563,6 +563,9 @@ function setupKeyboardLayoutStability() {
   visualViewport?.addEventListener("scroll", () => {
     scheduleUpdate();
     if (activePrimaryMainTab !== "input") return;
+    // iPhone Safari fires frequent visualViewport scroll updates while the keyboard is shown.
+    // Forcing scroll correction on every update can fight native scrolling and cause visible jitter.
+    if (isIPhoneSafari()) return;
     const activeElement = document.activeElement;
     if (!isEditableField(activeElement)) return;
     if (isMemoModalFocusTarget(activeElement)) return;
