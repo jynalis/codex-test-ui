@@ -179,6 +179,7 @@ let activeMemoDraft = null;
 const wheelPickerStateMap = new WeakMap();
 const WHEEL_PICKER_ITEM_HEIGHT = 36;
 const WHEEL_PICKER_SCROLL_END_MS = 88;
+let activeWheelPickerSelect = null;
 const activeInputSubTabs = {
   basic: "register",
   recurring: "register",
@@ -894,6 +895,14 @@ function ensureWheelPicker(selectElement) {
   const existing = wheelPickerStateMap.get(selectElement);
   if (existing) return existing;
 
+  const trigger = document.createElement("button");
+  trigger.type = "button";
+  trigger.className = "wheel-picker-trigger";
+  trigger.setAttribute("aria-haspopup", "listbox");
+  trigger.setAttribute("aria-expanded", "false");
+  const field = document.createElement("div");
+  field.className = "wheel-picker-field";
+
   const picker = document.createElement("div");
   picker.className = "wheel-picker";
   picker.setAttribute("role", "listbox");
@@ -911,15 +920,44 @@ function ensureWheelPicker(selectElement) {
   viewport.appendChild(list);
   picker.append(viewport, focusLine);
   selectElement.classList.add("wheel-picker-native-select");
-  selectElement.insertAdjacentElement("afterend", picker);
+  selectElement.insertAdjacentElement("afterend", field);
+  field.append(trigger, picker);
 
   const state = {
+    selectElement,
+    trigger,
     picker,
     viewport,
     list,
     suppressScrollChange: false,
     scrollTimer: 0,
   };
+
+  const setPickerOpen = (open) => {
+    const canOpen = open && !selectElement.disabled;
+    picker.classList.toggle("is-open", canOpen);
+    trigger.classList.toggle("is-open", canOpen);
+    trigger.setAttribute("aria-expanded", String(canOpen));
+    if (canOpen) {
+      activeWheelPickerSelect = selectElement;
+      picker.focus();
+      syncWheelPickerFromSelect(selectElement);
+      return;
+    }
+    if (activeWheelPickerSelect === selectElement) {
+      activeWheelPickerSelect = null;
+    }
+  };
+
+  trigger.addEventListener("click", () => {
+    const isOpen = picker.classList.contains("is-open");
+    if (isOpen) {
+      setPickerOpen(false);
+      return;
+    }
+    closeAllWheelPickers(selectElement);
+    setPickerOpen(true);
+  });
 
   const applyByIndex = (index, { emitChange = true } = {}) => {
     const options = Array.from(selectElement.options);
@@ -950,10 +988,18 @@ function ensureWheelPicker(selectElement) {
     const index = items.indexOf(item);
     if (index >= 0) {
       applyByIndex(index);
+      setPickerOpen(false);
+      trigger.focus();
     }
   });
 
   picker.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setPickerOpen(false);
+      trigger.focus();
+      return;
+    }
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
     event.preventDefault();
     const options = Array.from(selectElement.options);
@@ -984,11 +1030,28 @@ function ensureWheelPicker(selectElement) {
   return state;
 }
 
+function closeAllWheelPickers(exceptSelect = null) {
+  const nativeSelects = Array.from(document.querySelectorAll(".wheel-picker-native-select"));
+  nativeSelects.forEach((selectNode) => {
+    if (!(selectNode instanceof HTMLSelectElement)) return;
+    const selectElement = selectNode;
+    if (selectElement === exceptSelect) return;
+    const state = wheelPickerStateMap.get(selectElement);
+    if (!state) return;
+    state.picker.classList.remove("is-open");
+    state.trigger.classList.remove("is-open");
+    state.trigger.setAttribute("aria-expanded", "false");
+    if (activeWheelPickerSelect === selectElement) {
+      activeWheelPickerSelect = null;
+    }
+  });
+}
+
 function syncWheelPickerFromSelect(selectElement) {
   if (!selectElement) return;
   const state = ensureWheelPicker(selectElement);
   if (!state) return;
-  const { picker, viewport, list } = state;
+  const { trigger, picker, viewport, list } = state;
   list.innerHTML = buildWheelPickerItemsHTML(selectElement);
 
   const items = Array.from(list.querySelectorAll(".wheel-picker__item"));
@@ -1002,8 +1065,27 @@ function syncWheelPickerFromSelect(selectElement) {
   picker.classList.toggle("is-disabled", Boolean(selectElement.disabled));
   picker.setAttribute("aria-disabled", String(Boolean(selectElement.disabled)));
   picker.tabIndex = selectElement.disabled ? -1 : 0;
+  trigger.disabled = Boolean(selectElement.disabled);
+  trigger.classList.toggle("is-disabled", Boolean(selectElement.disabled));
+  const selectedOption = selectElement.selectedOptions?.[0];
+  trigger.textContent = selectedOption?.textContent ?? "";
+  if (selectElement.disabled) {
+    picker.classList.remove("is-open");
+    trigger.classList.remove("is-open");
+    trigger.setAttribute("aria-expanded", "false");
+    if (activeWheelPickerSelect === selectElement) {
+      activeWheelPickerSelect = null;
+    }
+  }
   viewport.scrollTop = selectedIndex * WHEEL_PICKER_ITEM_HEIGHT;
 }
+
+document.addEventListener("pointerdown", (event) => {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  if (target.closest(".wheel-picker") || target.closest(".wheel-picker-trigger")) return;
+  closeAllWheelPickers();
+});
 
 function normalizeMonthlyContributionHistory(plan) {
   if (Array.isArray(plan.monthlyContributions) && plan.monthlyContributions.length > 0) {

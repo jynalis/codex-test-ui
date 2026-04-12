@@ -2318,6 +2318,8 @@ button.ghost {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   align-items: center;
+  position: relative;
+  isolation: isolate;
 }
 
 .dashboard-panel-inner > .shared-view-filters[data-shared-view-filter="dashboard"] {
@@ -2325,21 +2327,52 @@ button.ghost {
 }
 
 .shared-view-filters .wheel-picker-native-select {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  width: 1px;
-  height: 1px;
-  margin: 0;
-  padding: 0;
+  display: none;
 }
 
-.wheel-picker {
-  position: relative;
-  min-width: 0;
+.wheel-picker-trigger {
+  width: 100%;
+  min-height: 40px;
   border: 1px solid #c7d6e8;
   border-radius: 12px;
   background: #fff;
+  color: #193f68;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.2;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.wheel-picker-trigger.is-open {
+  border-color: #7fa7d8;
+}
+
+.wheel-picker-trigger.is-disabled {
+  color: #6f849e;
+}
+
+.wheel-picker-field {
+  position: relative;
+  min-width: 0;
+}
+
+.wheel-picker {
+  position: absolute;
+  z-index: 40;
+  inset: calc(100% + 4px) 0 auto;
+  margin-top: 4px;
+  display: none;
+  border: 1px solid #c7d6e8;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgb(26 51 84 / 18%);
+}
+
+.wheel-picker.is-open {
+  display: block;
+}
+.shared-view-filters .wheel-picker {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 72%);
 }
 
@@ -2375,6 +2408,7 @@ button.ghost {
 
 .wheel-picker__item.is-selected {
   color: #193f68;
+  font-weight: 900;
 }
 
 .wheel-picker__focus-line {
