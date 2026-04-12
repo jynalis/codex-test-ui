@@ -29,16 +29,19 @@ const plannedHistoryBlock = document.getElementById("planned-history-block");
 const historyViewFilterControls = {
   year: document.getElementById("history-year-filter"),
   month: document.getElementById("history-month-filter"),
+  picker: document.getElementById("history-year-month-picker"),
 };
 const dashboardViewFilterControls = {
   mode: document.getElementById("dashboard-view-mode"),
   year: document.getElementById("dashboard-year-filter"),
   month: document.getElementById("dashboard-month-filter"),
+  picker: document.getElementById("dashboard-year-month-picker"),
 };
 const expenseViewFilterControls = {
   mode: document.getElementById("expense-view-mode"),
   year: document.getElementById("expense-year-filter"),
   month: document.getElementById("expense-month-filter"),
+  picker: document.getElementById("expense-year-month-picker"),
 };
 
 const profileForm = document.getElementById("profile-form");
@@ -868,6 +871,24 @@ function syncViewFilterOptions(controls, state, availableYears, options = {}) {
   const isAverage = includeAverageMode && state.averageMode === "average";
   controls.year.disabled = isAverage;
   controls.month.disabled = isAverage;
+  if (controls.picker) {
+    const minimumYear = years.reduce((minYear, year) => Math.min(minYear, year), years[0]);
+    controls.picker.min = `${minimumYear}-01`;
+    controls.picker.value = `${state.year}-${state.month}`;
+    controls.picker.disabled = isAverage;
+  }
+}
+
+function applyYearMonthPickerValue(controls) {
+  if (!controls?.picker || !controls?.year || !controls?.month) return;
+  const parsed = parseMonth(controls.picker.value);
+  if (!parsed) return;
+  const nextYearValue = String(parsed.year);
+  if (!Array.from(controls.year.options).some((option) => option.value === nextYearValue)) {
+    controls.year.insertAdjacentHTML("afterbegin", `<option value="${nextYearValue}">${parsed.year}年</option>`);
+  }
+  controls.year.value = nextYearValue;
+  controls.month.value = String(parsed.monthIndex + 1).padStart(2, "0");
 }
 
 function normalizeMonthlyContributionHistory(plan) {
@@ -6163,6 +6184,7 @@ function setupDashboardCardNavigation() {
 }
 
 function handleDashboardViewFilterChange() {
+  applyYearMonthPickerValue(dashboardViewFilterControls);
   const nextAverageMode = dashboardViewFilterControls.mode?.value === "average" ? "average" : "month";
   sharedAverageViewState = { averageMode: nextAverageMode };
   sharedYearMonthState = {
@@ -6173,6 +6195,7 @@ function handleDashboardViewFilterChange() {
 }
 
 function handleExpenseViewFilterChange() {
+  applyYearMonthPickerValue(expenseViewFilterControls);
   const nextAverageMode = expenseViewFilterControls.mode?.value === "average" ? "average" : "month";
   sharedAverageViewState = { averageMode: nextAverageMode };
   sharedYearMonthState = {
@@ -6183,6 +6206,7 @@ function handleExpenseViewFilterChange() {
 }
 
 function handleHistoryViewFilterChange() {
+  applyYearMonthPickerValue(historyViewFilterControls);
   sharedYearMonthState = {
     year: historyViewFilterControls.year?.value || sharedYearMonthState.year,
     month: historyViewFilterControls.month?.value || sharedYearMonthState.month,
@@ -6194,11 +6218,14 @@ function setupSharedViewFilters() {
   dashboardViewFilterControls.mode?.addEventListener("change", handleDashboardViewFilterChange);
   dashboardViewFilterControls.year?.addEventListener("change", handleDashboardViewFilterChange);
   dashboardViewFilterControls.month?.addEventListener("change", handleDashboardViewFilterChange);
+  dashboardViewFilterControls.picker?.addEventListener("change", handleDashboardViewFilterChange);
   expenseViewFilterControls.mode?.addEventListener("change", handleExpenseViewFilterChange);
   expenseViewFilterControls.year?.addEventListener("change", handleExpenseViewFilterChange);
   expenseViewFilterControls.month?.addEventListener("change", handleExpenseViewFilterChange);
+  expenseViewFilterControls.picker?.addEventListener("change", handleExpenseViewFilterChange);
   historyViewFilterControls.year?.addEventListener("change", handleHistoryViewFilterChange);
   historyViewFilterControls.month?.addEventListener("change", handleHistoryViewFilterChange);
+  historyViewFilterControls.picker?.addEventListener("change", handleHistoryViewFilterChange);
 }
 
 function init() {
