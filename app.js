@@ -181,6 +181,20 @@ const activeInputSubTabs = {
   life: "register",
   monthly: "register",
 };
+const WHEEL_PICKER_TARGET_SELECT_IDS = [
+  "dashboard-view-mode",
+  "dashboard-year-filter",
+  "dashboard-month-filter",
+  "history-year-filter",
+  "history-month-filter",
+  "expense-view-mode",
+  "expense-year-filter",
+  "expense-month-filter",
+];
+let wheelPickerSheetElements = null;
+const wheelPickerBindings = new Map();
+let activeWheelPickerBinding = null;
+let activeWheelPickerPendingValue = "";
 
 const PRIMARY_MAIN_SECTION_IDS = {
   start: ["section-start"],
@@ -6201,6 +6215,188 @@ function setupSharedViewFilters() {
   historyViewFilterControls.month?.addEventListener("change", handleHistoryViewFilterChange);
 }
 
+function ensureWheelPickerSheet() {
+  if (wheelPickerSheetElements) return wheelPickerSheetElements;
+  const backdrop = document.createElement("div");
+  backdrop.className = "wheel-picker-sheet-backdrop";
+  backdrop.hidden = true;
+  backdrop.innerHTML = `
+    <div class="wheel-picker-sheet" role="dialog" aria-modal="true" aria-labelledby="wheel-picker-title">
+      <div class="wheel-picker-sheet-header">
+        <h3 id="wheel-picker-title" class="wheel-picker-sheet-title"></h3>
+        <button type="button" class="wheel-picker-close-button" data-wheel-picker-close>閉じる</button>
+      </div>
+      <div class="wheel-picker-scroll" data-wheel-picker-scroll></div>
+      <div class="wheel-picker-sheet-actions">
+        <button type="button" class="wheel-picker-cancel-button" data-wheel-picker-cancel>キャンセル</button>
+        <button type="button" class="wheel-picker-confirm-button" data-wheel-picker-confirm>決定</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  backdrop.addEventListener("click", (event) => {
+    if (event.target === backdrop || event.target.closest("[data-wheel-picker-close]")) {
+      closeWheelPickerSheet();
+    }
+  });
+  backdrop.querySelector("[data-wheel-picker-cancel]")?.addEventListener("click", closeWheelPickerSheet);
+  backdrop.querySelector("[data-wheel-picker-confirm]")?.addEventListener("click", commitWheelPickerValue);
+  wheelPickerSheetElements = {
+    backdrop,
+    title: backdrop.querySelector("#wheel-picker-title"),
+    scroll: backdrop.querySelector("[data-wheel-picker-scroll]"),
+  };
+  return wheelPickerSheetElements;
+}
+
+function getSelectDisplayLabel(select) {
+  if (!select) return "";
+  const selectedOption = select.selectedOptions?.[0];
+  if (selectedOption) return selectedOption.textContent || "";
+  const firstOption = select.options?.[0];
+  return firstOption?.textContent || "";
+}
+
+function syncWheelPickerTrigger(binding) {
+  if (!binding?.trigger || !binding?.select) return;
+  const label = getSelectDisplayLabel(binding.select);
+  binding.trigger.querySelector(".wheel-picker-trigger-label").textContent = label;
+  binding.trigger.disabled = binding.select.disabled;
+}
+
+function findClosestWheelItem(scrollElement) {
+  const buttons = Array.from(scrollElement.querySelectorAll(".wheel-picker-item"));
+  if (!buttons.length) return null;
+  const centerY = scrollElement.getBoundingClientRect().top + (scrollElement.clientHeight / 2);
+  return buttons.reduce((closest, button) => {
+    const rect = button.getBoundingClientRect();
+    const buttonCenter = rect.top + (rect.height / 2);
+    const distance = Math.abs(buttonCenter - centerY);
+    if (!closest || distance < closest.distance) return { button, distance };
+    return closest;
+  }, null)?.button || null;
+}
+
+function markActiveWheelItem(value) {
+  const sheet = ensureWheelPickerSheet();
+  const itemButtons = Array.from(sheet.scroll.querySelectorAll(".wheel-picker-item"));
+  itemButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.value === value);
+  });
+}
+
+function centerWheelItem(button, behavior = "smooth") {
+  const sheet = ensureWheelPickerSheet();
+  const scrollElement = sheet.scroll;
+  const targetTop = button.offsetTop - ((scrollElement.clientHeight - button.offsetHeight) / 2);
+  scrollElement.scrollTo({
+    top: Math.max(0, targetTop),
+    behavior,
+  });
+}
+
+function handleWheelScrollSelection() {
+  const sheet = ensureWheelPickerSheet();
+  const closest = findClosestWheelItem(sheet.scroll);
+  if (!closest) return;
+  activeWheelPickerPendingValue = closest.dataset.value || activeWheelPickerPendingValue;
+  markActiveWheelItem(activeWheelPickerPendingValue);
+}
+
+function openWheelPickerSheet(binding) {
+  const sheet = ensureWheelPickerSheet();
+  if (!binding?.select || binding.select.disabled) return;
+  activeWheelPickerBinding = binding;
+  activeWheelPickerPendingValue = binding.select.value;
+  sheet.title.textContent = binding.select.getAttribute("aria-label") || binding.select.id;
+  const optionsMarkup = Array.from(binding.select.options).map((option) => `
+    <button type="button" class="wheel-picker-item" data-value="${option.value}">
+      ${option.textContent}
+    </button>
+  `).join("");
+  sheet.scroll.innerHTML = `<div class="wheel-picker-spacer"></div>${optionsMarkup}<div class="wheel-picker-spacer"></div>`;
+  sheet.backdrop.hidden = false;
+  document.body.classList.add("wheel-picker-open");
+  markActiveWheelItem(activeWheelPickerPendingValue);
+  const selectedItem = sheet.scroll.querySelector(`.wheel-picker-item[data-value="${CSS.escape(activeWheelPickerPendingValue)}"]`);
+  if (selectedItem) {
+    centerWheelItem(selectedItem, "auto");
+  }
+}
+
+function closeWheelPickerSheet() {
+  const sheet = ensureWheelPickerSheet();
+  activeWheelPickerBinding = null;
+  activeWheelPickerPendingValue = "";
+  sheet.backdrop.hidden = true;
+  document.body.classList.remove("wheel-picker-open");
+}
+
+function commitWheelPickerValue() {
+  if (!activeWheelPickerBinding?.select) {
+    closeWheelPickerSheet();
+    return;
+  }
+  const select = activeWheelPickerBinding.select;
+  if (activeWheelPickerPendingValue && select.value !== activeWheelPickerPendingValue) {
+    select.value = activeWheelPickerPendingValue;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  closeWheelPickerSheet();
+}
+
+function setupWheelPickerForSelect(select) {
+  if (!select || wheelPickerBindings.has(select.id)) return;
+  const wrapper = document.createElement("div");
+  wrapper.className = "wheel-picker-inline";
+  const trigger = document.createElement("button");
+  trigger.type = "button";
+  trigger.className = "wheel-picker-trigger";
+  trigger.innerHTML = '<span class="wheel-picker-trigger-label"></span><span class="wheel-picker-trigger-icon">▾</span>';
+  wrapper.appendChild(trigger);
+  select.classList.add("wheel-picker-native");
+  select.setAttribute("tabindex", "-1");
+  select.setAttribute("aria-hidden", "true");
+  select.insertAdjacentElement("afterend", wrapper);
+  const binding = { select, wrapper, trigger, observer: null };
+  trigger.addEventListener("click", () => openWheelPickerSheet(binding));
+  select.addEventListener("change", () => syncWheelPickerTrigger(binding));
+  const observer = new MutationObserver(() => {
+    syncWheelPickerTrigger(binding);
+    if (activeWheelPickerBinding?.select === select) {
+      openWheelPickerSheet(binding);
+    }
+  });
+  observer.observe(select, {
+    childList: true,
+    attributes: true,
+    subtree: true,
+    attributeFilter: ["disabled", "label", "value", "selected"],
+  });
+  binding.observer = observer;
+  wheelPickerBindings.set(select.id, binding);
+  syncWheelPickerTrigger(binding);
+}
+
+function setupWheelPickers() {
+  WHEEL_PICKER_TARGET_SELECT_IDS.forEach((id) => {
+    const select = document.getElementById(id);
+    setupWheelPickerForSelect(select);
+  });
+  const sheet = ensureWheelPickerSheet();
+  sheet.scroll.addEventListener("scroll", () => {
+    window.clearTimeout(sheet.scrollSelectionTimer);
+    sheet.scrollSelectionTimer = window.setTimeout(handleWheelScrollSelection, 60);
+  });
+  sheet.scroll.addEventListener("click", (event) => {
+    const button = event.target.closest(".wheel-picker-item");
+    if (!button) return;
+    activeWheelPickerPendingValue = button.dataset.value || activeWheelPickerPendingValue;
+    markActiveWheelItem(activeWheelPickerPendingValue);
+    centerWheelItem(button, "smooth");
+  });
+}
+
 function init() {
   setupKeyboardLayoutStability();
   activePrimaryMainTab = "dashboard";
@@ -6227,6 +6423,7 @@ function init() {
   typeInput.addEventListener("change", syncCategoryOptions);
   transactionCancelButton?.addEventListener("click", cancelTransactionEdit);
   setupSharedViewFilters();
+  setupWheelPickers();
   setupFormattedAmountInput(amountInput);
   setupFormattedAmountInput(recurringAmountInput);
   setupFormattedAmountInput(lifeEventAmountInput);
