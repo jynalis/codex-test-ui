@@ -27,6 +27,7 @@ const transactionCancelButton = document.getElementById("transaction-cancel-butt
 const transactionEditStatus = document.getElementById("transaction-edit-status");
 const plannedHistoryBlock = document.getElementById("planned-history-block");
 const historyViewFilterControls = {
+  mode: document.getElementById("history-view-mode"),
   year: document.getElementById("history-year-filter"),
   month: document.getElementById("history-month-filter"),
 };

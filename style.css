@@ -2314,15 +2314,33 @@ button.ghost {
 }
 
 .shared-view-filters {
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
 }
 
 .dashboard-panel-inner > .shared-view-filters[data-shared-view-filter="dashboard"] {
   margin-bottom: 12px;
 }
 
+.shared-picker-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.shared-picker-label {
+  font-size: 0.72rem;
+  color: #48617b;
+  font-weight: 700;
+  line-height: 1.2;
+  padding-left: 2px;
+}
+
 .shared-view-filters select {
-  flex: 1 1 110px;
+  width: 100%;
   min-width: 0;
 }
 
@@ -3060,17 +3078,9 @@ body.is-keyboard-open .floating-top-button {
     flex: 1;
   }
 
-  .shared-view-filters[data-shared-view-filter="dashboard"],
-  .shared-view-filters[data-shared-view-filter="expense"] {
-    display: grid;
+  .shared-view-filters {
     grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.14fr) minmax(0, 0.92fr);
     gap: 6px;
-  }
-
-  .shared-view-filters[data-shared-view-filter="dashboard"] select,
-  .shared-view-filters[data-shared-view-filter="expense"] select {
-    width: 100%;
-    min-width: 0;
   }
 
   .plan-item {
