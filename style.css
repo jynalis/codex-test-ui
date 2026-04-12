@@ -2329,89 +2329,6 @@ button.ghost {
   font-size: 0.92rem;
 }
 
-.year-select {
-  position: relative;
-  flex: 1 1 110px;
-  min-width: 0;
-}
-
-.year-select-native {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.year-select-trigger {
-  width: 100%;
-  min-height: 42px;
-  border: 1px solid #c7d6e8;
-  border-radius: 10px;
-  padding: 10px 36px 10px 10px;
-  background: #fff;
-  color: var(--text);
-  text-align: left;
-  font-weight: 600;
-  box-shadow: none;
-  position: relative;
-}
-
-.year-select-trigger::after {
-  content: "▾";
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #4f6885;
-  pointer-events: none;
-}
-
-.year-select-trigger:hover,
-.year-select-trigger:active {
-  transform: none;
-  filter: none;
-  box-shadow: none;
-}
-
-.year-select-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  z-index: 30;
-  max-height: 252px;
-  overflow-y: auto;
-  border: 1px solid #bfd0e4;
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 14px 28px rgb(15 23 42 / 18%);
-  padding: 4px;
-}
-
-.year-select-option {
-  width: 100%;
-  min-height: 40px;
-  padding: 9px 10px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: #1e3958;
-  text-align: left;
-  box-shadow: none;
-  font-weight: 400;
-}
-
-.year-select-option:hover {
-  transform: none;
-  filter: none;
-  background: #edf4ff;
-}
-
-.year-select-option[aria-selected="true"] {
-  background: #dceaff;
-  color: #0f2f52;
-}
-
 .history-filters {
   margin-bottom: 8px;
 }
@@ -3154,9 +3071,7 @@ body.is-keyboard-open .floating-top-button {
   }
 
   .shared-view-filters[data-shared-view-filter="dashboard"] select,
-  .shared-view-filters[data-shared-view-filter="expense"] select,
-  .shared-view-filters[data-shared-view-filter="dashboard"] .year-select,
-  .shared-view-filters[data-shared-view-filter="expense"] .year-select {
+  .shared-view-filters[data-shared-view-filter="expense"] select {
     width: 100%;
     min-width: 0;
     font-size: 0.86rem;
@@ -3269,11 +3184,6 @@ body.is-keyboard-open .floating-top-button {
   .monthly-subpanel-shell .shared-view-filters select {
     min-height: 40px;
     padding-inline: 9px;
-  }
-
-  .monthly-subpanel-shell .shared-view-filters .year-select-trigger {
-    min-height: 40px;
-    padding-inline: 9px 34px;
   }
 
   .monthly-subpanel-shell .chart {
