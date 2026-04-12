@@ -584,14 +584,13 @@
             <p class="section-role-badge">将来の資産を確認</p>
             <h2>資産シミュレーション</h2>
             <p class="section-description">
-              資産形成・現状資産・キャッシュフロー・資産取崩を切り替えて確認できます。
+              資産形成・キャッシュフロー・資産取崩を切り替えて確認できます。
             </p>
           </div>
         </div>
         <div class="asset-main-tabbar">
           <div class="asset-main-tabs" role="tablist" aria-label="資産シミュレーションの表示切替">
             <button type="button" id="asset-main-tab-formation" class="asset-main-tab is-active" role="tab" aria-selected="true" aria-controls="asset-main-panel-formation" data-asset-main-tab="formation">資産形成</button>
-            <button type="button" id="asset-main-tab-current-assets" class="asset-main-tab" role="tab" aria-selected="false" aria-controls="asset-main-panel-current-assets" data-asset-main-tab="current-assets" tabindex="-1">現状資産</button>
             <button type="button" id="asset-main-tab-cashflow" class="asset-main-tab" role="tab" aria-selected="false" aria-controls="asset-main-panel-cashflow" data-asset-main-tab="cashflow" tabindex="-1">CF</button>
             <button type="button" id="asset-main-tab-withdraw" class="asset-main-tab" role="tab" aria-selected="false" aria-controls="asset-main-panel-withdraw" data-asset-main-tab="withdraw" tabindex="-1">資産取崩</button>
           </div>
@@ -621,9 +620,6 @@
               </div>
             </section>
             <div id="asset-forecast" class="asset-forecast asset-main-first-content"></div>
-          </div>
-          <div id="asset-main-panel-current-assets" class="asset-main-panel" role="tabpanel" aria-labelledby="asset-main-tab-current-assets" data-asset-main-panel="current-assets" hidden>
-            <div id="asset-current-forecast" class="asset-forecast asset-main-first-content"></div>
           </div>
           <div id="asset-main-panel-cashflow" class="asset-main-panel" role="tabpanel" aria-labelledby="asset-main-tab-cashflow" data-asset-main-panel="cashflow" hidden>
             <div class="asset-main-panel-body cashflow-panel-body">
