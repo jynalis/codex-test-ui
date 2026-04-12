@@ -1,0 +1,1 @@
+GitHub Pages rebuild trigger created on 2026-04-12 to refresh deployment after PR #140 revert.
