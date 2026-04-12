@@ -2035,6 +2035,40 @@ button.plan-card-trigger {
   font-weight: 500;
 }
 
+.dashboard-asset-graph-card {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.dashboard-asset-graph-tabbar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dashboard-asset-graph-tab {
+  appearance: none;
+  border: 1px solid #b9cfe6;
+  background: #fff;
+  color: #2d4f74;
+  border-radius: 999px;
+  min-height: 42px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 8px 10px;
+}
+
+.dashboard-asset-graph-tab.is-active {
+  border-color: #4f86be;
+  background: linear-gradient(180deg, #5f97cf 0%, #4b81b9 100%);
+  color: #fff;
+}
+
+.dashboard-asset-graph-panel {
+  display: block;
+}
+
 .asset-forecast {
   display: grid;
   gap: 14px;
@@ -3244,6 +3278,16 @@ body.is-keyboard-open .floating-top-button {
 
   .diagnosis-text {
     font-size: 0.9rem;
+  }
+
+  .dashboard-asset-graph-tabbar {
+    gap: 6px;
+  }
+
+  .dashboard-asset-graph-tab {
+    min-height: 40px;
+    font-size: 0.84rem;
+    padding-inline: 8px;
   }
 
   .item {

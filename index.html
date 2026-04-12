@@ -260,6 +260,54 @@
                 収支・定期支出・資産形成を入力すると、家計の偏りや改善ポイントをここに表示します。
               </p>
             </article>
+            <article class="dashboard-asset-graph-card" aria-live="polite">
+              <div class="dashboard-asset-graph-tabbar" role="tablist" aria-label="ダッシュボード資産グラフ切替">
+                <button
+                  type="button"
+                  id="dashboard-asset-graph-tab-current-assets"
+                  class="dashboard-asset-graph-tab is-active"
+                  role="tab"
+                  aria-selected="true"
+                  aria-controls="dashboard-asset-graph-panel-current-assets"
+                  data-dashboard-asset-graph-tab="current-assets"
+                >
+                  現状資産
+                </button>
+                <button
+                  type="button"
+                  id="dashboard-asset-graph-tab-asset-formation"
+                  class="dashboard-asset-graph-tab"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="dashboard-asset-graph-panel-asset-formation"
+                  data-dashboard-asset-graph-tab="asset-formation"
+                  tabindex="-1"
+                >
+                  65歳時資産
+                </button>
+              </div>
+              <div class="dashboard-asset-graph-panels">
+                <section
+                  id="dashboard-asset-graph-panel-current-assets"
+                  class="dashboard-asset-graph-panel is-active"
+                  role="tabpanel"
+                  aria-labelledby="dashboard-asset-graph-tab-current-assets"
+                  data-dashboard-asset-graph-panel="current-assets"
+                >
+                  <div id="dashboard-current-asset-forecast" class="asset-forecast"></div>
+                </section>
+                <section
+                  id="dashboard-asset-graph-panel-asset-formation"
+                  class="dashboard-asset-graph-panel"
+                  role="tabpanel"
+                  aria-labelledby="dashboard-asset-graph-tab-asset-formation"
+                  data-dashboard-asset-graph-panel="asset-formation"
+                  hidden
+                >
+                  <div id="dashboard-age65-asset-forecast" class="asset-forecast"></div>
+                </section>
+              </div>
+            </article>
           </div>
         </div>
       </section>
