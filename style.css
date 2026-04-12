@@ -374,7 +374,7 @@ header p {
 
 .asset-main-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   padding: 4px;
   border-radius: 14px;
@@ -2036,7 +2036,8 @@ button.plan-card-trigger {
 .dashboard-asset-graph-tabbar {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
+  width: 100%;
 }
 
 .dashboard-asset-graph-tab {
@@ -2045,10 +2046,12 @@ button.plan-card-trigger {
   background: #fff;
   color: #2d4f74;
   border-radius: 999px;
-  min-height: 42px;
-  font-size: 0.9rem;
+  min-height: 40px;
+  min-width: 0;
+  font-size: clamp(0.7rem, 2.6vw, 0.86rem);
   font-weight: 700;
-  padding: 8px 10px;
+  padding: 7px 4px;
+  white-space: nowrap;
 }
 
 .dashboard-asset-graph-tab.is-active {
@@ -3277,13 +3280,13 @@ body.is-keyboard-open .floating-top-button {
   }
 
   .dashboard-asset-graph-tabbar {
-    gap: 6px;
+    gap: 4px;
   }
 
   .dashboard-asset-graph-tab {
-    min-height: 40px;
-    font-size: 0.8rem;
-    padding-inline: 6px;
+    min-height: 36px;
+    font-size: 0.74rem;
+    padding-inline: 2px;
   }
 
   .item {
