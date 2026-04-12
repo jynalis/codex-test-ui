@@ -27,6 +27,7 @@ const transactionCancelButton = document.getElementById("transaction-cancel-butt
 const transactionEditStatus = document.getElementById("transaction-edit-status");
 const plannedHistoryBlock = document.getElementById("planned-history-block");
 const historyViewFilterControls = {
+  mode: document.getElementById("history-view-mode"),
   year: document.getElementById("history-year-filter"),
   month: document.getElementById("history-month-filter"),
   picker: document.getElementById("history-year-month-picker"),
@@ -5344,7 +5345,12 @@ function render() {
   const cashflowIncomeSettings = loadCashflowIncomeSettings();
   const cashflowExpenseSettings = loadCashflowExpenseSettings();
   const sharedYearOptions = buildSharedYearOptions(settings, transactions);
-  syncViewFilterOptions(historyViewFilterControls, sharedYearMonthState, sharedYearOptions);
+  syncViewFilterOptions(
+    historyViewFilterControls,
+    { ...sharedYearMonthState, averageMode: sharedAverageViewState.averageMode },
+    sharedYearOptions,
+    { includeAverageMode: true }
+  );
   syncViewFilterOptions(
     dashboardViewFilterControls,
     { ...sharedYearMonthState, averageMode: sharedAverageViewState.averageMode },
@@ -5361,7 +5367,12 @@ function render() {
     year: dashboardViewFilterControls.year?.value || sharedYearMonthState.year,
     month: dashboardViewFilterControls.month?.value || sharedYearMonthState.month,
   };
-  syncViewFilterOptions(historyViewFilterControls, sharedYearMonthState, sharedYearOptions);
+  syncViewFilterOptions(
+    historyViewFilterControls,
+    { ...sharedYearMonthState, averageMode: sharedAverageViewState.averageMode },
+    sharedYearOptions,
+    { includeAverageMode: true }
+  );
   const currentHistoryMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
   const currentDashboardMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
   const currentExpenseMonth = resolveViewMonthFromState(sharedYearMonthState) || fallbackMonth;
@@ -6207,6 +6218,8 @@ function handleExpenseViewFilterChange() {
 
 function handleHistoryViewFilterChange() {
   applyYearMonthPickerValue(historyViewFilterControls);
+  const nextAverageMode = historyViewFilterControls.mode?.value === "average" ? "average" : "month";
+  sharedAverageViewState = { averageMode: nextAverageMode };
   sharedYearMonthState = {
     year: historyViewFilterControls.year?.value || sharedYearMonthState.year,
     month: historyViewFilterControls.month?.value || sharedYearMonthState.month,
@@ -6223,6 +6236,7 @@ function setupSharedViewFilters() {
   expenseViewFilterControls.year?.addEventListener("change", handleExpenseViewFilterChange);
   expenseViewFilterControls.month?.addEventListener("change", handleExpenseViewFilterChange);
   expenseViewFilterControls.picker?.addEventListener("change", handleExpenseViewFilterChange);
+  historyViewFilterControls.mode?.addEventListener("change", handleHistoryViewFilterChange);
   historyViewFilterControls.year?.addEventListener("change", handleHistoryViewFilterChange);
   historyViewFilterControls.month?.addEventListener("change", handleHistoryViewFilterChange);
   historyViewFilterControls.picker?.addEventListener("change", handleHistoryViewFilterChange);
