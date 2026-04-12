@@ -80,6 +80,7 @@ const inputSection = document.getElementById("section-input");
 const basicRegisterPanel = document.getElementById("input-sub-panel-basic-register");
 const recurringRegisterPanel = document.getElementById("input-sub-panel-recurring-register");
 const lifeRegisterPanel = document.getElementById("input-sub-panel-life-register");
+const assetFormationRegisterPanel = document.getElementById("input-sub-panel-asset-formation-register");
 
 const lifeEventForm = document.getElementById("life-event-form");
 const lifeEventMonthInput = document.getElementById("life-event-month");
@@ -183,6 +184,7 @@ let activeCashflowSubTab = "cf";
 let activeMemoDraft = null;
 const activeInputSubTabs = {
   basic: "register",
+  "asset-formation": "register",
   recurring: "register",
   life: "register",
   monthly: "register",
@@ -208,6 +210,10 @@ const INPUT_SUB_SECTION_IDS = {
   basic: {
     register: ["profile-form"],
     registered: ["basic-registered-summary"],
+  },
+  "asset-formation": {
+    register: ["input-sub-panel-asset-formation-register"],
+    registered: ["plan-list"],
   },
   recurring: {
     register: ["recurring-form"],
@@ -1389,6 +1395,8 @@ function resolveInputRegisterTopAnchor(groupName) {
   switch (groupName) {
     case "basic":
       return basicRegisterPanel || profileForm || document.getElementById("section-profile");
+    case "asset-formation":
+      return assetFormationRegisterPanel || assetPlanEditorList || document.getElementById("section-assets");
     case "recurring":
       return recurringRegisterPanel || recurringForm || document.getElementById("section-recurring");
     case "life":
@@ -1962,6 +1970,16 @@ function cancelProfileEdit() {
     isEditing: isBasicEditingMode(),
     resetForm: resetProfileFormFields,
   });
+}
+
+function cancelAssetProfileEdit() {
+  const wasEditing = isBasicEditingMode();
+  resetProfileFormFields();
+  if (!wasEditing) return;
+  setPrimaryMainTab("assets");
+  setAssetMainTab("formation");
+  setInputSubTab("asset-formation", "register");
+  scrollAppToAbsoluteTopAfterCancel();
 }
 
 function setLifeEventError(message = "") {
@@ -5149,10 +5167,10 @@ function startPlanEdit(planId) {
     editorList.appendChild(createPlanBlock(targetPlan));
   });
   setProfileFormMode(true);
-  setPrimaryMainTab("input");
-  setInputMainTab("basic");
-  setInputSubTab("basic", "register", { keepBasicEditingState: true });
-  scrollToEditFormStart(basicEditStatus || profileForm, planEditorList || assetPlanEditorList);
+  setPrimaryMainTab("assets");
+  setAssetMainTab("formation");
+  setInputSubTab("asset-formation", "register", { keepBasicEditingState: true });
+  scrollToEditFormStart(assetBasicEditStatus || assetFormationRegisterPanel, assetPlanEditorList || planEditorList);
 }
 
 function deletePlanById(planId) {
@@ -5326,6 +5344,7 @@ function saveBasicProfileSettings() {
 
 function saveAssetFormationSettings(editorList = planEditorList || assetPlanEditorList) {
   const wasEditing = isBasicEditingMode();
+  const isAssetEditor = Boolean(assetPlanEditorList && editorList === assetPlanEditorList);
   const existingSettings = loadSettings();
   const existingPlans = Array.isArray(existingSettings?.plans) ? existingSettings.plans : [];
   const editedPlans = collectPlansFromForm(editorList);
@@ -5341,7 +5360,7 @@ function saveAssetFormationSettings(editorList = planEditorList || assetPlanEdit
   saveSettings(settings);
   resetProfileRegisterForm();
   handlePostSaveCompletion({
-    groupName: "basic",
+    groupName: isAssetEditor ? "asset-formation" : "basic",
     nextSubTab: wasEditing ? "register" : "registered",
     shouldSwitchSubTab: !wasEditing,
   });
@@ -6281,7 +6300,7 @@ function init() {
   profileSubmitButton?.addEventListener("click", () => saveAssetFormationSettings(planEditorList || assetPlanEditorList));
   profileCancelButton?.addEventListener("click", cancelProfileEdit);
   assetProfileSubmitButton?.addEventListener("click", () => saveAssetFormationSettings(assetPlanEditorList || planEditorList));
-  assetProfileCancelButton?.addEventListener("click", cancelProfileEdit);
+  assetProfileCancelButton?.addEventListener("click", cancelAssetProfileEdit);
   profileBackupExportButton?.addEventListener("click", downloadBackupFile);
   profileBackupImportButton?.addEventListener("click", () => profileBackupFileInput?.click());
   profileBackupFileInput?.addEventListener("change", (event) => {

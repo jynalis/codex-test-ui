@@ -561,13 +561,24 @@
           <div id="asset-main-panel-formation" class="asset-main-panel is-active" role="tabpanel" aria-labelledby="asset-main-tab-formation" data-asset-main-panel="formation">
             <section class="asset-plan-register-section" aria-labelledby="asset-plan-register-heading">
               <h3 id="asset-plan-register-heading" class="profile-form-section-heading">資産形成を登録</h3>
-              <p id="asset-basic-edit-status" class="recurring-edit-status full" aria-live="polite" hidden>
-                資産形成を編集中
-              </p>
-              <div id="asset-plan-editor-list" class="plan-editor-list" data-plan-editor-list></div>
-              <div class="profile-form-actions asset-plan-register-actions">
-                <button type="button" id="asset-profile-submit-button" class="profile-save-settings-button">設定を保存</button>
-                <button type="button" id="asset-profile-cancel-button" class="ghost" hidden>キャンセル</button>
+              <div class="input-sub-switch" role="tablist" aria-label="資産形成タブの切り替え" data-input-sub-switch="asset-formation">
+                <button type="button" id="input-sub-tab-asset-formation-register" class="input-sub-tab is-active" role="tab" aria-selected="true" aria-controls="input-sub-panel-asset-formation-register" data-input-sub-tab="register">登録</button>
+                <button type="button" id="input-sub-tab-asset-formation-registered" class="input-sub-tab" role="tab" aria-selected="false" aria-controls="input-sub-panel-asset-formation-registered" data-input-sub-tab="registered" tabindex="-1">登録済</button>
+              </div>
+              <div class="input-sub-content" data-input-sub-content="asset-formation">
+                <section id="input-sub-panel-asset-formation-register" class="input-sub-panel is-active" role="tabpanel" aria-labelledby="input-sub-tab-asset-formation-register" data-input-sub-panel="register">
+                  <p id="asset-basic-edit-status" class="recurring-edit-status full" aria-live="polite" hidden>
+                    資産形成を編集中
+                  </p>
+                  <div id="asset-plan-editor-list" class="plan-editor-list" data-plan-editor-list></div>
+                  <div class="profile-form-actions asset-plan-register-actions">
+                    <button type="button" id="asset-profile-submit-button" class="profile-save-settings-button">設定を保存</button>
+                    <button type="button" id="asset-profile-cancel-button" class="ghost" hidden>キャンセル</button>
+                  </div>
+                </section>
+                <section id="input-sub-panel-asset-formation-registered" class="input-sub-panel" role="tabpanel" aria-labelledby="input-sub-tab-asset-formation-registered" data-input-sub-panel="registered" hidden>
+                  <div id="plan-list" class="plan-list" aria-live="polite"></div>
+                </section>
               </div>
             </section>
             <div id="asset-forecast" class="asset-forecast asset-main-first-content"></div>
