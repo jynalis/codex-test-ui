@@ -1946,8 +1946,7 @@ function getInitialProfileFormState() {
   };
 }
 
-function resetProfileRegisterForm(options = {}) {
-  const { applySuggestedExpectedReturn = false } = options;
+function resetProfileRegisterForm() {
   const initialState = getInitialProfileFormState();
   basicEditingPlanId = null;
   if (profileForm) {
@@ -1959,14 +1958,11 @@ function resetProfileRegisterForm(options = {}) {
     editorList.innerHTML = "";
   });
   renderPlans(loadSettings());
-  if (applySuggestedExpectedReturn) {
-    planEditorLists.forEach((editorList) => applySuggestedExpectedReturnOnReset(editorList));
-  }
   setProfileFormMode(false);
 }
 
-function resetProfileFormFields(options = {}) {
-  resetProfileRegisterForm(options);
+function resetProfileFormFields() {
+  resetProfileRegisterForm();
 }
 
 function scrollToBasicRegisterStart() {
@@ -1982,13 +1978,13 @@ function scrollToBasicRegisteredTop() {
 function cancelProfileEdit() {
   handleCancelEditFromRegistered("basic", {
     isEditing: isBasicEditingMode(),
-    resetForm: () => resetProfileFormFields({ applySuggestedExpectedReturn: true }),
+    resetForm: () => resetProfileFormFields(),
   });
 }
 
 function cancelAssetProfileEdit() {
   const wasEditing = isBasicEditingMode();
-  resetProfileFormFields({ applySuggestedExpectedReturn: true });
+  resetProfileFormFields();
   if (!wasEditing) return;
   setPrimaryMainTab("assets");
   setAssetMainTab("formation");
@@ -2852,7 +2848,10 @@ function calculateSuggestedExpectedReturn(plan) {
   const baseReturn = 4.0;
   const autoYield = calculateCurrentAutoYield(plan);
   const operationMonths = calculatePlanOperationMonths(plan);
-  const boundedAutoYield = Number.isFinite(autoYield) ? Math.min(Math.max(autoYield, 0), 8.5) : 0;
+  if (!Number.isFinite(autoYield)) {
+    return Number(baseReturn.toFixed(2));
+  }
+  const boundedAutoYield = Math.min(Math.max(autoYield, 0), 8.5);
   const weight = Math.min(operationMonths / 60, 1);
   return Number(((1 - weight) * baseReturn + (weight * boundedAutoYield)).toFixed(2));
 }
@@ -5313,10 +5312,13 @@ function createPlanBlock(plan = {}) {
           <label class="plan-auto-yield-field">
             現在利回り（自動）
             <output class="plan-current-auto-yield" aria-live="polite">--</output>
-            <small>過去の入金履歴と現在評価額から自動計算</small>
-            <small class="plan-auto-yield-short-note" hidden>※参考値（短期のため変動しやすい）</small>
+            <small class="plan-auto-yield-note">過去の入金履歴と現在評価額から自動計算</small>
           </label>
-          <label>想定利回り(年%)<input class="plan-expected-return" type="number" inputmode="decimal" step="0.01" value="${normalizedPlan.expectedReturn ?? ""}" /></label>
+          <label>
+            想定利回り(年%)
+            <input class="plan-expected-return" type="number" inputmode="decimal" step="0.01" value="${normalizedPlan.expectedReturn ?? ""}" />
+            <button type="button" class="small plan-expected-return-suggest">提案値に戻す</button>
+          </label>
           <label>取崩年月<input class="plan-withdraw-month" type="month" value="${normalizedPlan.withdrawMonth || ""}" /></label>
           <p class="plan-withdraw-hint">※取崩年月が未設定の場合は、積立支出を継続します。</p>
           <label>引き落とし日<input class="plan-withdrawal-day" type="number" min="1" max="31" step="1" value="${normalizedPlan.withdrawalDay ?? 1}" /></label>
@@ -5345,7 +5347,9 @@ function createPlanBlock(plan = {}) {
   const planNameField = wrap.querySelector(".plan-name");
   const currentValueField = wrap.querySelector(".plan-current-value");
   const autoYieldField = wrap.querySelector(".plan-current-auto-yield");
-  const autoYieldShortNote = wrap.querySelector(".plan-auto-yield-short-note");
+  const autoYieldNote = wrap.querySelector(".plan-auto-yield-note");
+  const expectedReturnField = wrap.querySelector(".plan-expected-return");
+  const suggestExpectedReturnButton = wrap.querySelector(".plan-expected-return-suggest");
   const withdrawalDayField = wrap.querySelector(".plan-withdrawal-day");
   const title = wrap.querySelector(".plan-card-title");
   const tag = wrap.querySelector(".plan-card-tag");
@@ -5370,8 +5374,10 @@ function createPlanBlock(plan = {}) {
     const autoYield = calculateCurrentAutoYield(draftPlan);
     const operationMonths = calculatePlanOperationMonths(draftPlan);
     autoYieldField.textContent = formatAutoYieldPercent(autoYield);
-    if (autoYieldShortNote) {
-      autoYieldShortNote.hidden = !(Number.isFinite(autoYield) && operationMonths > 0 && operationMonths < 12);
+    if (autoYieldNote) {
+      autoYieldNote.textContent = (Number.isFinite(autoYield) && operationMonths > 0 && operationMonths < 12)
+        ? "過去の入金履歴と現在評価額から自動計算（短期のため参考値）"
+        : "過去の入金履歴と現在評価額から自動計算";
     }
   };
 
@@ -5409,34 +5415,27 @@ function createPlanBlock(plan = {}) {
     monthlyList.appendChild(createHistoryRow({ type: "monthly", onChange: refreshAutoYield }));
     refreshAutoYield();
   });
-
-  return wrap;
-}
-
-function applySuggestedExpectedReturnOnReset(editorList = planEditorList || assetPlanEditorList) {
-  if (!editorList) return;
-  Array.from(editorList.querySelectorAll(".plan-item")).forEach((block) => {
-    const lumpSums = Array.from(block.querySelectorAll(".lump-list .history-row"))
-      .map((row) => ({
-        month: row.querySelector(".lump-month")?.value || "",
-        amount: parseAmountInput(row.querySelector(".lump-amount")?.value || ""),
-      }));
-    const monthlyContributions = Array.from(block.querySelectorAll(".monthly-list .history-row"))
-      .map((row) => ({
-        startMonth: row.querySelector(".monthly-start-month")?.value || "",
-        amount: parseAmountInput(row.querySelector(".monthly-amount")?.value || ""),
-      }));
+  suggestExpectedReturnButton?.addEventListener("click", () => {
     const suggestedExpectedReturn = calculateSuggestedExpectedReturn({
-      withdrawalDay: Number(block.querySelector(".plan-withdrawal-day")?.value),
-      currentValue: parseAmountInput(block.querySelector(".plan-current-value")?.value || ""),
-      lumpSums,
-      monthlyContributions,
+      withdrawalDay: Number(withdrawalDayField?.value),
+      currentValue: parseAmountInput(currentValueField?.value || ""),
+      lumpSums: Array.from(lumpList.querySelectorAll(".history-row"))
+        .map((row) => ({
+          month: row.querySelector(".lump-month")?.value || "",
+          amount: parseAmountInput(row.querySelector(".lump-amount")?.value || ""),
+        })),
+      monthlyContributions: Array.from(monthlyList.querySelectorAll(".history-row"))
+        .map((row) => ({
+          startMonth: row.querySelector(".monthly-start-month")?.value || "",
+          amount: parseAmountInput(row.querySelector(".monthly-amount")?.value || ""),
+        })),
     });
-    const expectedReturnField = block.querySelector(".plan-expected-return");
     if (expectedReturnField) {
       expectedReturnField.value = Number.isFinite(suggestedExpectedReturn) ? suggestedExpectedReturn.toFixed(2) : "4.00";
     }
   });
+
+  return wrap;
 }
 
 function formatPlanAnnualReturn(value) {
