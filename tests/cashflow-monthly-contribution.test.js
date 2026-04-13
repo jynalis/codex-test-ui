@@ -56,7 +56,9 @@ vm.createContext(sandbox);
 vm.runInContext(source, sandbox);
 
 const calculateAnnualAssetFormationExpense = sandbox.calculateAnnualAssetFormationExpense;
+const formatAmountInputValue = sandbox.formatAmountInputValue;
 assert.strictEqual(typeof calculateAnnualAssetFormationExpense, 'function');
+assert.strictEqual(typeof formatAmountInputValue, 'function');
 
 (function testHistorySwitchTo1000() {
   const settings = {
@@ -115,6 +117,13 @@ assert.strictEqual(typeof calculateAnnualAssetFormationExpense, 'function');
   };
   const total2034 = calculateAnnualAssetFormationExpense(settings, 2034, '2034-01', '2034-12');
   assert.strictEqual(total2034, 80000);
+})();
+
+(function testFormatAmountInputValueDistinguishesZeroFromBlank() {
+  assert.strictEqual(formatAmountInputValue('', { allowZero: true }), '');
+  assert.strictEqual(formatAmountInputValue('0', { allowZero: true }), '0');
+  assert.strictEqual(formatAmountInputValue('0', { allowZero: false }), '');
+  assert.strictEqual(formatAmountInputValue('35000', { allowZero: true }), '35,000');
 })();
 
 console.log('cashflow monthly contribution tests passed');

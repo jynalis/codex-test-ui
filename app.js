@@ -603,9 +603,11 @@ function parseAmountInput(value) {
   return normalized ? Number(normalized) : 0;
 }
 
-function formatAmountInputValue(value) {
+function formatAmountInputValue(value, { allowZero = false } = {}) {
   const amount = parseAmountInput(value);
-  return amount > 0 ? numberWithComma.format(amount) : "";
+  if (amount > 0) return numberWithComma.format(amount);
+  if (allowZero && amount === 0 && String(value ?? "").trim() !== "") return "0";
+  return "";
 }
 
 function normalizeLegacyExpenseCategory(category) {
@@ -3823,18 +3825,34 @@ function createPieChartElements(entries, total, options = {}) {
   return { pieWrap, legend };
 }
 
-function setupFormattedAmountInput(input) {
+function setupFormattedAmountInput(input, { allowZero = false } = {}) {
   if (!input) return;
   input.addEventListener("input", () => {
     const amount = parseAmountInput(input.value);
-    input.dataset.rawValue = amount > 0 ? String(amount) : "";
+    if (amount > 0) {
+      input.dataset.rawValue = String(amount);
+      return;
+    }
+    if (allowZero && amount === 0 && String(input.value ?? "").trim() !== "") {
+      input.dataset.rawValue = "0";
+      return;
+    }
+    input.dataset.rawValue = "";
   });
   input.addEventListener("blur", () => {
-    input.value = formatAmountInputValue(input.value);
+    input.value = formatAmountInputValue(input.value, { allowZero });
   });
   input.addEventListener("focus", () => {
     const amount = parseAmountInput(input.value);
-    input.value = amount > 0 ? String(amount) : "";
+    if (amount > 0) {
+      input.value = String(amount);
+      return;
+    }
+    if (allowZero && amount === 0 && String(input.value ?? "").trim() !== "") {
+      input.value = "0";
+      return;
+    }
+    input.value = "";
   });
 }
 
@@ -5285,14 +5303,15 @@ function createHistoryRow({ type, month = "", amount = "", onChange = null } = {
   const amountClass = type === "lump" ? "lump-amount" : "monthly-amount";
   const monthLabel = type === "lump" ? "年月" : "開始年月";
   const amountLabel = type === "lump" ? "一括入金額(円)" : "月額(円)";
+  const hasAmount = amount !== "" && amount !== null && amount !== undefined;
 
   row.innerHTML = `
     <label>${monthLabel}<input type="month" class="${monthClass}" value="${month}" /></label>
-    <label>${amountLabel}<input type="text" inputmode="numeric" class="${amountClass} js-amount-field" value="${amount ? numberWithComma.format(amount) : ""}" /></label>
+    <label>${amountLabel}<input type="text" inputmode="numeric" class="${amountClass} js-amount-field" value="${hasAmount ? numberWithComma.format(Number(amount) || 0) : ""}" /></label>
     <button type="button" class="small danger remove-history">削除</button>
   `;
   const amountField = row.querySelector(`.${amountClass}`);
-  setupFormattedAmountInput(amountField);
+  setupFormattedAmountInput(amountField, { allowZero: type === "monthly" });
   const monthField = row.querySelector(`.${monthClass}`);
   const notifyChange = () => {
     if (typeof onChange === "function") onChange();
