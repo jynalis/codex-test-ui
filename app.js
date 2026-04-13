@@ -6366,6 +6366,8 @@ function resetDashboardTabState() {
 
 function resetAssetsTabState() {
   setAssetMainTab("formation");
+  resetProfileFormFields();
+  setInputSubTab("asset-formation", "register");
 }
 
 function resetPrimaryMainTabState(tabName) {
