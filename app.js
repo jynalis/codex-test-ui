@@ -2869,7 +2869,13 @@ function monthsBetweenInclusive(startMonth, endMonth) {
 }
 
 function findActiveMonthlyContribution(plan, month) {
-  const histories = Array.isArray(plan.monthlyContributions) ? plan.monthlyContributions : [];
+  const histories = (Array.isArray(plan?.monthlyContributions) ? plan.monthlyContributions : [])
+    .filter((history) => parseMonth(history?.startMonth))
+    .filter((history) => history?.amount !== "" && history?.amount !== null && history?.amount !== undefined)
+    .map((history) => ({
+      startMonth: history.startMonth,
+      amount: Math.max(Number(history.amount) || 0, 0),
+    }));
   const active = histories
     .filter((history) => history.startMonth && isMonthOnOrAfter(month, history.startMonth))
     .sort((a, b) => compareMonth(a.startMonth, b.startMonth));
@@ -3963,16 +3969,23 @@ function countPlanContributionMonthsInYear(plan, birthDate, year) {
   return months;
 }
 
-function calculateAnnualAssetFormationExpense(settings, year) {
-  const nowMonth = todayISO().slice(0, 7);
-  if (!Array.isArray(settings.plans) || settings.plans.length === 0 || !parseMonth(nowMonth)) return 0;
+function calculateAnnualAssetFormationExpense(settings, year, yearStartMonth = formatMonth(year, 0), yearEndMonth = formatMonth(year, 11)) {
+  if (!Array.isArray(settings?.plans) || settings.plans.length === 0) return 0;
+  if (!Number.isInteger(year) || !parseMonth(yearStartMonth) || !parseMonth(yearEndMonth)) return 0;
+  if (compareMonth(yearStartMonth, yearEndMonth) > 0) return 0;
 
-  return settings.plans.reduce((sum, plan) => {
-    const monthlyContribution = findActiveMonthlyContribution(plan, nowMonth);
-    if (monthlyContribution <= 0) return sum;
-    const activeMonths = countPlanContributionMonthsInYear(plan, settings.birthDate, year);
-    return sum + (monthlyContribution * activeMonths);
-  }, 0);
+  let total = 0;
+  for (let monthIndex = 0; monthIndex < 12; monthIndex += 1) {
+    const month = formatMonth(year, monthIndex);
+    if (compareMonth(month, yearStartMonth) < 0 || compareMonth(month, yearEndMonth) > 0) continue;
+
+    const monthTotal = settings.plans.reduce((sum, plan) => {
+      if (!shouldApplyPlanContributionForMonth(plan, settings.birthDate, month)) return sum;
+      return sum + findActiveMonthlyContribution(plan, month);
+    }, 0);
+    total += monthTotal;
+  }
+  return total;
 }
 
 function buildLifeEventTotalsByMonth(lifeEvents, birthDate) {
@@ -4244,9 +4257,12 @@ function buildCashflowRowsUntilAge({
       ), 0))
       : Math.round(safeMonthlyRegularExpense * activeMonthsInYear * ((1 + inflationRate) ** yearOffset));
 
-    const annualAssetFormationExpense = isReferenceYear
-      ? Math.round(calculateAnnualAssetFormationExpense(settings, year) * yearProgressRate)
-      : calculateAnnualAssetFormationExpense(settings, year);
+    const annualAssetFormationExpense = calculateAnnualAssetFormationExpense(
+      settings,
+      year,
+      yearStartMonth,
+      yearEndMonth
+    );
     const annualRecurringExpense = Math.round(
       calculateAnnualRecurringExpenseForYear(recurringExpenses, year, yearStartMonth, yearEndMonth)
     );
