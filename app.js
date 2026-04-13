@@ -962,11 +962,16 @@ function normalizeLumpSumHistory(plan) {
 
 function normalizePlan(rawPlan) {
   const plan = rawPlan ?? {};
+  const normalizedCurrentValue = Number(plan.currentValue);
+  const currentValue = Number.isFinite(normalizedCurrentValue) ? normalizedCurrentValue : null;
+  const normalizedCurrentAutoYield = Number(plan.currentAutoYield);
   return {
     id: plan.id || crypto.randomUUID(),
     type: PLAN_TYPES.includes(plan.type) ? plan.type : "NISA",
     name: typeof plan.name === "string" ? plan.name : "",
     expectedReturn: parseRateInput(plan.expectedReturn),
+    currentValue,
+    currentAutoYield: Number.isFinite(normalizedCurrentAutoYield) ? normalizedCurrentAutoYield : null,
     withdrawalDay: Math.max(Number(plan.withdrawalDay) || 1, 1),
     withdrawMonth: parseMonth(plan.withdrawMonth) ? plan.withdrawMonth : "",
     lumpSums: normalizeLumpSumHistory(plan),
@@ -2727,6 +2732,105 @@ function getMonthRangeInclusive(startMonth, endMonth) {
     cursor = addOneMonth(cursor);
   }
   return months;
+}
+
+function resolvePlanExecutionDate(month, withdrawalDay) {
+  const parsed = parseMonth(month);
+  if (!parsed) return null;
+  const day = clampDay(parsed.year, parsed.monthIndex + 1, Number(withdrawalDay) || 1);
+  return new Date(parsed.year, parsed.monthIndex, day);
+}
+
+function calculateXnpv(rate, cashflows) {
+  if (!Number.isFinite(rate) || rate <= -1 || !Array.isArray(cashflows) || cashflows.length === 0) return null;
+  const baseTime = cashflows[0].date.getTime();
+  return cashflows.reduce((sum, flow) => {
+    const years = (flow.date.getTime() - baseTime) / (365 * 24 * 60 * 60 * 1000);
+    return sum + (flow.amount / ((1 + rate) ** years));
+  }, 0);
+}
+
+function solveXirr(cashflows) {
+  if (!Array.isArray(cashflows) || cashflows.length < 2) return null;
+  const sortedFlows = cashflows
+    .filter((flow) => flow?.date instanceof Date && Number.isFinite(flow.amount) && flow.amount !== 0)
+    .sort((a, b) => a.date - b.date);
+  if (sortedFlows.length < 2) return null;
+  const hasPositive = sortedFlows.some((flow) => flow.amount > 0);
+  const hasNegative = sortedFlows.some((flow) => flow.amount < 0);
+  if (!hasPositive || !hasNegative) return null;
+
+  const candidates = [-0.9999, -0.9, -0.75, -0.5, -0.25, -0.1, 0, 0.1, 0.25, 0.5, 1, 2, 5, 10];
+  let low = null;
+  let high = null;
+  for (let index = 0; index < candidates.length - 1; index += 1) {
+    const left = candidates[index];
+    const right = candidates[index + 1];
+    const fLeft = calculateXnpv(left, sortedFlows);
+    const fRight = calculateXnpv(right, sortedFlows);
+    if (!Number.isFinite(fLeft) || !Number.isFinite(fRight)) continue;
+    if (fLeft === 0) return left;
+    if (fRight === 0) return right;
+    if (fLeft * fRight < 0) {
+      low = left;
+      high = right;
+      break;
+    }
+  }
+  if (!Number.isFinite(low) || !Number.isFinite(high)) return null;
+
+  for (let iteration = 0; iteration < 80; iteration += 1) {
+    const mid = (low + high) / 2;
+    const fLow = calculateXnpv(low, sortedFlows);
+    const fMid = calculateXnpv(mid, sortedFlows);
+    if (!Number.isFinite(fLow) || !Number.isFinite(fMid)) return null;
+    if (Math.abs(fMid) < 1e-7) return mid;
+    if (fLow * fMid < 0) {
+      high = mid;
+    } else {
+      low = mid;
+    }
+  }
+  return (low + high) / 2;
+}
+
+function calculateCurrentAutoYield(plan) {
+  const normalizedPlan = normalizePlan(plan);
+  if (!Number.isFinite(normalizedPlan.currentValue) || normalizedPlan.currentValue <= 0) return null;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const currentMonth = formatMonth(now.getFullYear(), now.getMonth());
+  const cashflows = [];
+
+  normalizedPlan.lumpSums.forEach((history) => {
+    const amount = Number(history.amount) || 0;
+    if (!parseMonth(history.month) || amount <= 0) return;
+    const executionDate = resolvePlanExecutionDate(history.month, normalizedPlan.withdrawalDay);
+    if (!(executionDate instanceof Date) || Number.isNaN(executionDate.getTime()) || executionDate > today) return;
+    cashflows.push({ date: executionDate, amount: -amount });
+  });
+
+  normalizedPlan.monthlyContributions.forEach((history) => {
+    const amount = Number(history.amount) || 0;
+    if (!parseMonth(history.startMonth) || amount <= 0) return;
+    const months = getMonthRangeInclusive(history.startMonth, currentMonth);
+    months.forEach((month) => {
+      const executionDate = resolvePlanExecutionDate(month, normalizedPlan.withdrawalDay);
+      if (!(executionDate instanceof Date) || Number.isNaN(executionDate.getTime()) || executionDate > today) return;
+      cashflows.push({ date: executionDate, amount: -amount });
+    });
+  });
+
+  if (cashflows.length === 0) return null;
+  cashflows.push({ date: today, amount: normalizedPlan.currentValue });
+  const solved = solveXirr(cashflows);
+  return Number.isFinite(solved) ? solved * 100 : null;
+}
+
+function formatAutoYieldPercent(value) {
+  if (!Number.isFinite(value)) return "--";
+  const rounded = Math.abs(value) >= 100 ? value.toFixed(1) : value.toFixed(2);
+  return `${rounded}%`;
 }
 
 function monthsBetweenInclusive(startMonth, endMonth) {
@@ -5130,7 +5234,7 @@ function setupInputMainTabs() {
   setInputMainTab(activeInputMainTab);
 }
 
-function createHistoryRow({ type, month = "", amount = "" } = {}) {
+function createHistoryRow({ type, month = "", amount = "", onChange = null } = {}) {
   const row = document.createElement("div");
   row.className = "history-row";
   const monthClass = type === "lump" ? "lump-month" : "monthly-start-month";
@@ -5145,7 +5249,16 @@ function createHistoryRow({ type, month = "", amount = "" } = {}) {
   `;
   const amountField = row.querySelector(`.${amountClass}`);
   setupFormattedAmountInput(amountField);
-  row.querySelector(".remove-history").addEventListener("click", () => row.remove());
+  const monthField = row.querySelector(`.${monthClass}`);
+  const notifyChange = () => {
+    if (typeof onChange === "function") onChange();
+  };
+  amountField?.addEventListener("input", notifyChange);
+  monthField?.addEventListener("change", notifyChange);
+  row.querySelector(".remove-history").addEventListener("click", () => {
+    row.remove();
+    notifyChange();
+  });
   return row;
 }
 
@@ -5167,6 +5280,12 @@ function createPlanBlock(plan = {}) {
         <div class="plan-grid">
           <label>種類<select class="plan-type">${typeOptions}</select></label>
           <label>識別名<input class="plan-name" type="text" maxlength="30" placeholder="例: つみたて枠" value="${normalizedPlan.name || ""}" /></label>
+          <label>現在評価額<input class="plan-current-value js-amount-field" type="text" inputmode="numeric" value="${Number.isFinite(normalizedPlan.currentValue) && normalizedPlan.currentValue >= 0 ? numberWithComma.format(normalizedPlan.currentValue) : ""}" /></label>
+          <label class="plan-auto-yield-field">
+            現在利回り（自動）
+            <output class="plan-current-auto-yield" aria-live="polite">--</output>
+            <small>過去の入金履歴と現在評価額から自動計算</small>
+          </label>
           <label>想定利回り(年%)<input class="plan-expected-return" type="number" inputmode="decimal" step="0.01" value="${normalizedPlan.expectedReturn ?? ""}" /></label>
           <label>取崩年月<input class="plan-withdraw-month" type="month" value="${normalizedPlan.withdrawMonth || ""}" /></label>
           <p class="plan-withdraw-hint">※取崩年月が未設定の場合は、積立支出を継続します。</p>
@@ -5194,12 +5313,47 @@ function createPlanBlock(plan = {}) {
   const monthlyList = wrap.querySelector(".monthly-list");
   const planTypeField = wrap.querySelector(".plan-type");
   const planNameField = wrap.querySelector(".plan-name");
+  const currentValueField = wrap.querySelector(".plan-current-value");
+  const autoYieldField = wrap.querySelector(".plan-current-auto-yield");
+  const expectedReturnField = wrap.querySelector(".plan-expected-return");
+  const withdrawalDayField = wrap.querySelector(".plan-withdrawal-day");
   const title = wrap.querySelector(".plan-card-title");
   const tag = wrap.querySelector(".plan-card-tag");
+  setupFormattedAmountInput(currentValueField);
+  const initialExpectedReturn = expectedReturnField.value;
+  let expectedReturnTouched = false;
+  let expectedReturnAutoFilled = false;
 
-  normalizedPlan.lumpSums.forEach((history) => lumpList.appendChild(createHistoryRow({ type: "lump", month: history.month, amount: history.amount })));
+  const refreshAutoYield = () => {
+    const draftPlan = {
+      ...normalizedPlan,
+      currentValue: parseAmountInput(currentValueField?.value),
+      expectedReturn: parseRateInput(expectedReturnField?.value),
+      withdrawalDay: Number(withdrawalDayField?.value),
+      lumpSums: Array.from(lumpList.querySelectorAll(".history-row"))
+        .map((row) => ({
+          month: row.querySelector(".lump-month")?.value || "",
+          amount: parseAmountInput(row.querySelector(".lump-amount")?.value || ""),
+        })),
+      monthlyContributions: Array.from(monthlyList.querySelectorAll(".history-row"))
+        .map((row) => ({
+          startMonth: row.querySelector(".monthly-start-month")?.value || "",
+          amount: parseAmountInput(row.querySelector(".monthly-amount")?.value || ""),
+        })),
+    };
+    const autoYield = calculateCurrentAutoYield(draftPlan);
+    autoYieldField.textContent = formatAutoYieldPercent(autoYield);
+    if (!expectedReturnTouched && !expectedReturnAutoFilled && (initialExpectedReturn ?? "") === "" && Number.isFinite(autoYield)) {
+      expectedReturnField.value = autoYield.toFixed(2);
+      expectedReturnAutoFilled = true;
+    }
+  };
+
+  normalizedPlan.lumpSums.forEach((history) => {
+    lumpList.appendChild(createHistoryRow({ type: "lump", month: history.month, amount: history.amount, onChange: refreshAutoYield }));
+  });
   normalizedPlan.monthlyContributions.forEach((history) =>
-    monthlyList.appendChild(createHistoryRow({ type: "monthly", month: history.startMonth, amount: history.amount }))
+    monthlyList.appendChild(createHistoryRow({ type: "monthly", month: history.startMonth, amount: history.amount, onChange: refreshAutoYield }))
   );
 
   const refreshPlanVisual = () => {
@@ -5213,16 +5367,24 @@ function createPlanBlock(plan = {}) {
 
   planTypeField.addEventListener("change", refreshPlanVisual);
   planNameField.addEventListener("input", refreshPlanVisual);
+  currentValueField?.addEventListener("input", refreshAutoYield);
+  expectedReturnField?.addEventListener("input", () => {
+    expectedReturnTouched = true;
+  });
+  withdrawalDayField?.addEventListener("input", refreshAutoYield);
   wrap.dataset.planExpanded = "true";
   wrap.classList.add("is-expanded");
   refreshPlanVisual();
+  refreshAutoYield();
 
   wrap.querySelector(".add-lump").addEventListener("click", () => {
-    lumpList.appendChild(createHistoryRow({ type: "lump" }));
+    lumpList.appendChild(createHistoryRow({ type: "lump", onChange: refreshAutoYield }));
+    refreshAutoYield();
   });
 
   wrap.querySelector(".add-monthly").addEventListener("click", () => {
-    monthlyList.appendChild(createHistoryRow({ type: "monthly" }));
+    monthlyList.appendChild(createHistoryRow({ type: "monthly", onChange: refreshAutoYield }));
+    refreshAutoYield();
   });
 
   return wrap;
@@ -5276,6 +5438,7 @@ function renderRegisteredPlans(settings) {
 
   plans.forEach((plan) => {
     const normalizedPlan = normalizePlan(plan);
+    const currentAutoYield = calculateCurrentAutoYield(normalizedPlan);
     const monthlyContribution = findActiveMonthlyContribution(normalizedPlan, todayISO().slice(0, 7));
     const lumpTotal = normalizedPlan.lumpSums.reduce((sum, history) => sum + (Number(history.amount) || 0), 0);
     const card = document.createElement("article");
@@ -5287,6 +5450,8 @@ function renderRegisteredPlans(settings) {
       <ul class="plan-registered-meta-list">
         <li><span>種類</span><strong>${normalizedPlan.type}</strong></li>
         <li><span>識別名</span><strong>${normalizedPlan.name || "未設定"}</strong></li>
+        <li><span>現在評価額</span><strong>${Number.isFinite(normalizedPlan.currentValue) && normalizedPlan.currentValue >= 0 ? yen.format(normalizedPlan.currentValue) : "--"}</strong></li>
+        <li><span>現在利回り（自動）</span><strong>${formatAutoYieldPercent(currentAutoYield)}</strong></li>
         <li><span>想定利回り</span><strong>${formatPlanAnnualReturn(normalizedPlan.expectedReturn)}</strong></li>
         <li><span>取崩年月</span><strong>${normalizedPlan.withdrawMonth ? formatWithdrawMonthLabelWithAge(normalizedPlan.withdrawMonth, settings?.birthDate) : "未設定"}</strong></li>
         <li><span>積立額（月額）</span><strong>${monthlyContribution > 0 ? yen.format(monthlyContribution) : "未設定"}</strong></li>
@@ -5342,6 +5507,13 @@ function collectPlansFromForm(editorList = planEditorList || assetPlanEditorList
         id: block.querySelector(".plan-id").value,
         type: block.querySelector(".plan-type").value,
         name: block.querySelector(".plan-name").value.trim(),
+        currentValue: parseAmountInput(block.querySelector(".plan-current-value").value) || null,
+        currentAutoYield: calculateCurrentAutoYield({
+          withdrawalDay: Number(block.querySelector(".plan-withdrawal-day").value),
+          currentValue: parseAmountInput(block.querySelector(".plan-current-value").value),
+          lumpSums,
+          monthlyContributions,
+        }),
         expectedReturn: parseRateInput(block.querySelector(".plan-expected-return").value),
         withdrawMonth: block.querySelector(".plan-withdraw-month").value,
         withdrawalDay: Number(block.querySelector(".plan-withdrawal-day").value),
