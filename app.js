@@ -3815,8 +3815,10 @@ function createPieChartElements(entries, total, options = {}) {
     item.innerHTML = `
       <span class="dot" style="background:${chartColors[index % chartColors.length]}"></span>
       <span class="category">${formattedName}</span>
-      <span class="value">${yen.format(amount)}</span>
-      <strong class="ratio">${ratio.toFixed(1)}%</strong>
+      <div class="pie-legend-item-metrics">
+        <span class="value">${yen.format(amount)}</span>
+        <strong class="ratio">${ratio.toFixed(1)}%</strong>
+      </div>
     `;
 
     legend.appendChild(item);
