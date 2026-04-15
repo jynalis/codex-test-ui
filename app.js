@@ -3870,17 +3870,27 @@ function calculateAge(birthDate) {
   return Math.max(age, 0);
 }
 
-function formatAssetCompositionCategoryLabel(name) {
-  if (typeof name !== "string") return "";
-  const parenStart = name.indexOf("（");
-  const parenEnd = name.lastIndexOf("）");
-  if (parenStart <= 0 || parenEnd <= parenStart) {
-    return name;
+function splitAssetCategoryLabel(name) {
+  const rawLabel = typeof name === "string" ? name.trim() : "";
+  if (!rawLabel) return { kind: "", identifier: "" };
+  const matched = rawLabel.match(/^(?<kind>[^（(]+?)(?<identifier>（.+）|\(.+\))$/);
+  if (!matched?.groups) {
+    return { kind: rawLabel, identifier: "" };
   }
 
-  const main = name.slice(0, parenStart);
-  const note = name.slice(parenStart);
-  return `<span class="category-main">${main}</span><span class="category-note">${note}</span>`;
+  const kind = matched.groups.kind.trim();
+  const identifier = matched.groups.identifier.trim();
+  if (!kind || !identifier) {
+    return { kind: rawLabel, identifier: "" };
+  }
+  return { kind, identifier };
+}
+
+function formatAssetCompositionCategoryLabel(name) {
+  const { kind, identifier } = splitAssetCategoryLabel(name);
+  if (!kind) return "";
+  if (!identifier) return `<span class="category-main">${kind}</span>`;
+  return `<span class="category-main">${kind}</span><span class="category-note">${identifier}</span>`;
 }
 
 function calculateAverageMonthlyAmount(transactions, {

@@ -2728,9 +2728,16 @@ button.ghost {
 }
 
 .asset-forecast .pie-legend-item .category {
+  display: grid;
+  gap: 2px;
   align-self: start;
   overflow-wrap: break-word;
   word-break: normal;
+}
+
+.asset-forecast .pie-legend-item .category-note {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .asset-forecast .pie-legend-item-metrics {
