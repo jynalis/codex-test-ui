@@ -613,7 +613,7 @@
         <div class="asset-main-tabbar">
           <div class="asset-main-tabs" role="tablist" aria-label="資産シミュレーションの表示切替">
             <button type="button" id="asset-main-tab-formation" class="asset-main-tab is-active" role="tab" aria-selected="true" aria-controls="asset-main-panel-formation" data-asset-main-tab="formation">資産形成</button>
-            <button type="button" id="asset-main-tab-cashflow" class="asset-main-tab" role="tab" aria-selected="false" aria-controls="asset-main-panel-cashflow" data-asset-main-tab="cashflow" tabindex="-1">CF</button>
+            <button type="button" id="asset-main-tab-cashflow" class="asset-main-tab" role="tab" aria-selected="false" aria-controls="asset-main-panel-cashflow" data-asset-main-tab="cashflow" tabindex="-1">形成CF</button>
           </div>
         </div>
         <div class="asset-main-content">
@@ -646,12 +646,12 @@
             <div class="asset-main-panel-body cashflow-panel-body">
               <div class="cashflow-sub-tabbar">
                 <div class="cashflow-sub-tabs" role="tablist" aria-label="キャッシュフロー内の表示切替">
-                  <button type="button" id="cashflow-sub-tab-income-settings" class="cashflow-sub-tab" role="tab" aria-selected="false" aria-controls="cashflow-sub-panel-income-settings" data-cashflow-sub-tab="income-settings" tabindex="-1">収入設定</button>
+                  <button type="button" id="cashflow-sub-tab-income-settings" class="cashflow-sub-tab is-active" role="tab" aria-selected="true" aria-controls="cashflow-sub-panel-income-settings" data-cashflow-sub-tab="income-settings">収入設定</button>
                   <button type="button" id="cashflow-sub-tab-expense-settings" class="cashflow-sub-tab" role="tab" aria-selected="false" aria-controls="cashflow-sub-panel-expense-settings" data-cashflow-sub-tab="expense-settings" tabindex="-1">支出設定</button>
-                  <button type="button" id="cashflow-sub-tab-cf" class="cashflow-sub-tab is-active" role="tab" aria-selected="true" aria-controls="cashflow-sub-panel-cf" data-cashflow-sub-tab="cf">CF表</button>
+                  <button type="button" id="cashflow-sub-tab-cf" class="cashflow-sub-tab" role="tab" aria-selected="false" aria-controls="cashflow-sub-panel-cf" data-cashflow-sub-tab="cf" tabindex="-1">CF表</button>
                 </div>
               </div>
-              <section id="cashflow-sub-panel-income-settings" class="cashflow-sub-panel" role="tabpanel" aria-labelledby="cashflow-sub-tab-income-settings" data-cashflow-sub-panel="income-settings" hidden>
+              <section id="cashflow-sub-panel-income-settings" class="cashflow-sub-panel is-active" role="tabpanel" aria-labelledby="cashflow-sub-tab-income-settings" data-cashflow-sub-panel="income-settings">
                 <div class="cashflow-income-settings asset-main-first-content">
                   <form id="cashflow-income-settings-form" class="cashflow-income-settings-form" autocomplete="off">
                     <div class="cashflow-income-core-grid">
@@ -695,7 +695,7 @@
                   </form>
                 </div>
               </section>
-              <section id="cashflow-sub-panel-cf" class="cashflow-sub-panel is-active" role="tabpanel" aria-labelledby="cashflow-sub-tab-cf" data-cashflow-sub-panel="cf">
+              <section id="cashflow-sub-panel-cf" class="cashflow-sub-panel" role="tabpanel" aria-labelledby="cashflow-sub-tab-cf" data-cashflow-sub-panel="cf" hidden>
                 <div class="cashflow-table-wrap" id="cashflow-table-wrap"></div>
                 <div class="cashflow-actions">
                   <button type="button" id="cashflow-download-pdf-button">PDF保存</button>

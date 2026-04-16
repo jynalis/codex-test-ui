@@ -189,7 +189,7 @@ let activeAssetMainTab = "formation";
 let activeIncomeMainTab = "expense-balance";
 let activeInputMainTab = "monthly";
 let activePrimaryMainTab = "dashboard";
-let activeCashflowSubTab = "cf";
+let activeCashflowSubTab = "income-settings";
 let activeMemoDraft = null;
 const activeInputSubTabs = {
   basic: "register",
@@ -5036,6 +5036,7 @@ function setDashboardAssetGraphTab(tabName = "current-assets") {
 
 function setAssetMainTab(tabName = "formation") {
   if (assetMainTabs.length === 0 || assetMainPanels.length === 0) return;
+  const previousTab = activeAssetMainTab;
   const requestedTab = tabName || "formation";
   const hasRequestedTab = assetMainTabs.some((button) => button.dataset.assetMainTab === requestedTab);
   const nextTab = hasRequestedTab ? requestedTab : "formation";
@@ -5054,13 +5055,17 @@ function setAssetMainTab(tabName = "formation") {
     panel.hidden = !isActive;
     panel.classList.toggle("is-active", isActive);
   });
+
+  if (previousTab === "cashflow" && nextTab !== "cashflow") {
+    setCashflowSubTab("income-settings");
+  }
 }
 
-function setCashflowSubTab(tabName = "cf") {
+function setCashflowSubTab(tabName = "income-settings") {
   if (cashflowSubTabs.length === 0 || cashflowSubPanels.length === 0) return;
-  const requestedTab = tabName || "cf";
+  const requestedTab = tabName || "income-settings";
   const hasRequestedTab = cashflowSubTabs.some((button) => button.dataset.cashflowSubTab === requestedTab);
-  const nextTab = hasRequestedTab ? requestedTab : "cf";
+  const nextTab = hasRequestedTab ? requestedTab : "income-settings";
   activeCashflowSubTab = nextTab;
 
   cashflowSubTabs.forEach((button) => {
@@ -5154,6 +5159,10 @@ function setPrimaryMainTab(tabName = "dashboard") {
 
   if (nextTab === "assets") {
     queueAssetForecastRender(true);
+  }
+
+  if (previousTab === "assets" && nextTab !== "assets") {
+    setCashflowSubTab("income-settings");
   }
 
   if (nextTab !== "dashboard") {
@@ -5291,7 +5300,7 @@ function setupCashflowSubTabs() {
   if (cashflowSubTabs.length === 0) return;
   cashflowSubTabs.forEach((button) => {
     button.addEventListener("click", () => {
-      setCashflowSubTab(button.dataset.cashflowSubTab || "cf");
+      setCashflowSubTab(button.dataset.cashflowSubTab || "income-settings");
     });
   });
   setCashflowSubTab(activeCashflowSubTab);
