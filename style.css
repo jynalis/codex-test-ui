@@ -2191,8 +2191,15 @@ button.plan-card-trigger {
 }
 
 .asset-withdraw-contract {
+  display: grid;
+  gap: 2px;
   font-weight: 700;
   color: #173b61;
+}
+
+.asset-withdraw-contract .category-note {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .asset-withdraw-age {

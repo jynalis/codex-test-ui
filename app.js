@@ -3893,6 +3893,11 @@ function formatAssetCompositionCategoryLabel(name) {
   return `<span class="category-main">${kind}</span><span class="category-note">${identifier}</span>`;
 }
 
+function formatAssetContractLabel(type, name) {
+  const contractLabel = `${type}${name ? `（${name}）` : ""}`;
+  return formatAssetCompositionCategoryLabel(contractLabel);
+}
+
 function calculateAverageMonthlyAmount(transactions, {
   startMonth,
   endMonth,
@@ -4886,7 +4891,7 @@ function renderAssetForecast(settings) {
       return `
         <li>
           <div class="asset-withdraw-item-main">
-            <span class="asset-withdraw-contract">${plan.type}${plan.name ? `（${plan.name}）` : ""}</span>
+            <span class="asset-withdraw-contract">${formatAssetContractLabel(plan.type, plan.name)}</span>
             <span class="asset-withdraw-age">取崩し: ${withdrawLabel}</span>
           </div>
           <strong>${yen.format(plan.displayProjectedAmount)}</strong>
