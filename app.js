@@ -110,6 +110,10 @@ const dashboardAssetGraphPanels = Array.from(document.querySelectorAll("[data-da
 const dashboardCurrentAssetForecast = document.getElementById("dashboard-current-asset-forecast");
 const dashboardAge65AssetForecast = document.getElementById("dashboard-age65-asset-forecast");
 const dashboardWithdrawAssetForecast = document.getElementById("dashboard-withdraw-asset-forecast");
+const dashboardRetirementCard = document.getElementById("dashboard-retirement-card");
+const dashboardAge65AssetsTab = document.getElementById("dashboard-tab-age65-assets");
+const dashboardAge65AssetsPanel = document.getElementById("dashboard-panel-age65-assets");
+const dashboardAssetGraphTabbar = document.querySelector(".dashboard-asset-graph-tabbar");
 const dashboardAssetFormationChart = document.getElementById("dashboard-asset-formation-chart");
 const assetGrowthMonthlyChip = document.getElementById("asset-growth-monthly-chip");
 const assetGrowthMetricToggle = document.getElementById("asset-growth-metric-toggle");
@@ -6383,6 +6387,25 @@ function scrollPrimaryMainTabToTop(tabName, { behavior = "auto" } = {}) {
   scrollToElementWithOffset(topAnchor, { behavior });
 }
 
+function openDashboardSubTab(tabName, { behavior = "smooth" } = {}) {
+  const dashboardSubTabMap = {
+    age65Assets: "asset-formation",
+  };
+  const nextDashboardSubTab = dashboardSubTabMap[tabName];
+  if (!nextDashboardSubTab) return;
+
+  setPrimaryMainTab("dashboard");
+  setDashboardAssetGraphTab(nextDashboardSubTab);
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      const scrollTarget = dashboardAssetGraphTabbar || dashboardAge65AssetsTab || dashboardAge65AssetsPanel;
+      if (!scrollTarget) return;
+      scrollToElementWithOffset(scrollTarget, { behavior });
+    });
+  });
+}
+
 function switchPrimaryMainTabAndScrollTop(tabName) {
   const nextTab = tabName || "dashboard";
   const previousTab = activePrimaryMainTab;
@@ -6535,10 +6558,6 @@ function scrollToSection(
 }
 
 function setupDashboardCardNavigation() {
-  const isAssetsJumpCard = (card) =>
-    card?.dataset?.dashboardJumpSection === "section-assets"
-    && card.querySelector("#dashboard-age65-total");
-
   const handleDashboardCardAction = (card) => {
     const sectionId = card?.dataset?.dashboardJumpSection;
     if (!sectionId) return;
@@ -6558,21 +6577,11 @@ function setupDashboardCardNavigation() {
       event.preventDefault();
       const pressedCard = event.currentTarget;
       if (!(pressedCard instanceof HTMLElement)) return;
-      if (isAssetsJumpCard(pressedCard)) {
-        pressedCard.dataset.suppressNextClickUntil = String(Date.now() + 500);
-      }
       handleDashboardCardAction(pressedCard);
     });
     card.addEventListener("click", (event) => {
       const pressedCard = event.currentTarget;
       if (!(pressedCard instanceof HTMLElement)) return;
-      if (isAssetsJumpCard(pressedCard)) {
-        const suppressNextClickUntil = Number.parseInt(pressedCard.dataset.suppressNextClickUntil || "0", 10);
-        if (Date.now() < suppressNextClickUntil) {
-          pressedCard.dataset.suppressNextClickUntil = "0";
-          return;
-        }
-      }
       handleDashboardCardAction(pressedCard);
     });
     card.addEventListener("keydown", (event) => {
@@ -6582,6 +6591,30 @@ function setupDashboardCardNavigation() {
       if (!(pressedCard instanceof HTMLElement)) return;
       handleDashboardCardAction(pressedCard);
     });
+  });
+
+  if (!dashboardRetirementCard) return;
+  const openAge65AssetsFromDashboard = () => {
+    openDashboardSubTab("age65Assets", { behavior: "smooth" });
+  };
+  dashboardRetirementCard.addEventListener("pointerup", (event) => {
+    if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
+    event.preventDefault();
+    dashboardRetirementCard.dataset.suppressNextClickUntil = String(Date.now() + 500);
+    openAge65AssetsFromDashboard();
+  });
+  dashboardRetirementCard.addEventListener("click", () => {
+    const suppressNextClickUntil = Number.parseInt(dashboardRetirementCard.dataset.suppressNextClickUntil || "0", 10);
+    if (Date.now() < suppressNextClickUntil) {
+      dashboardRetirementCard.dataset.suppressNextClickUntil = "0";
+      return;
+    }
+    openAge65AssetsFromDashboard();
+  });
+  dashboardRetirementCard.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    openAge65AssetsFromDashboard();
   });
 }
 
