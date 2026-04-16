@@ -199,9 +199,9 @@
                 class="dashboard-card dashboard-card-jump dashboard-card-future"
                 role="button"
                 tabindex="0"
-                data-dashboard-jump-section="section-assets"
-                data-dashboard-jump-asset-tab="formation"
-                aria-label="将来資産シミュレーションへ移動"
+                id="dashboard-retirement-card"
+                data-action="open-dashboard-age65-assets"
+                aria-label="ダッシュボード内の65歳時資産へ移動"
               >
                 <span>65歳時資産形成額</span>
                 <strong id="dashboard-age65-total">¥0</strong>
@@ -275,11 +275,11 @@
                 </button>
                 <button
                   type="button"
-                  id="dashboard-asset-graph-tab-asset-formation"
+                  id="dashboard-tab-age65-assets"
                   class="dashboard-asset-graph-tab"
                   role="tab"
                   aria-selected="false"
-                  aria-controls="dashboard-asset-graph-panel-asset-formation"
+                  aria-controls="dashboard-panel-age65-assets"
                   data-dashboard-asset-graph-tab="asset-formation"
                   tabindex="-1"
                 >
@@ -309,10 +309,10 @@
                   <div id="dashboard-current-asset-forecast" class="asset-forecast"></div>
                 </section>
                 <section
-                  id="dashboard-asset-graph-panel-asset-formation"
+                  id="dashboard-panel-age65-assets"
                   class="dashboard-asset-graph-panel"
                   role="tabpanel"
-                  aria-labelledby="dashboard-asset-graph-tab-asset-formation"
+                  aria-labelledby="dashboard-tab-age65-assets"
                   data-dashboard-asset-graph-panel="asset-formation"
                   hidden
                 >
